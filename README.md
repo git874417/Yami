@@ -14,8 +14,8 @@ En este repositorio vamos a almacenar todo el codigo fuente relacionado al siste
 Yami es una aplicacion web de servicios alimentarios a domicilio. El objetivo de este repositorio es tener todo el codigo fuente y material de las entregas almacenado en Github y a su vez permitir a todos los integrantes del equipo acceder y modificar de forma rapida, sencilla y eficaz el codigo fuente.
 ## Contenido
 
-El contenido del repositorio ira evolucionando a lo largo del cuatrimestre. En el repositorio podremos encontrar una carpeta de *Entregas* en la que se podran encontrar carpetas con el nombre *Practica**i***, donde **i** se corresponde al numero de la practica, en la que se podra ver el contenido que ha sido entregado para la practica de la semana **i**.
+El contenido del repositorio irá evolucionando a lo largo del cuatrimestre. En el repositorio podremos encontrar una carpeta de *Entregas* en la que se podran encontrar carpetas con el nombre *Práctica **i***, donde **i** se corresponde al número de la practica, en la que se podrá ver el contenido que ha sido entregado para la práctica de la semana **i**.
 
-A su vez Podremos encontrar multiples carpetas relacionadas con el codigo fuente de nuestra aplicacion web. 
+A su vez Podremos encontrar múltiples carpetas relacionadas con el código fuente de nuestra aplicación web. 
 
 <pre lang="markdown">  El nombre y contenido de estas carpetas es variable puesto que aún estamos en desarrollo. </pre>
