@@ -18,4 +18,4 @@ El contenido del repositorio ira evolucionando a lo largo del cuatrimestre. En e
 
 A su vez Podremos encontrar multiples carpetas relacionadas con el codigo fuente de nuestra aplicacion web. 
 
-<pre lang="markdown">  El nombre y contenido de estas carpetas es variable puesto que aun estamos en desarrollo. </pre>
+<pre lang="markdown">  El nombre y contenido de estas carpetas es variable puesto que aún estamos en desarrollo. </pre>
