@@ -19,3 +19,13 @@ El contenido del repositorio irá evolucionando a lo largo del cuatrimestre. En 
 A su vez Podremos encontrar múltiples carpetas relacionadas con el código fuente de nuestra aplicación web. 
 
 <pre lang="markdown">  El nombre y contenido de estas carpetas es variable puesto que aún estamos en desarrollo. </pre>
+
+## Ejecutar venv python
+
+Para trabajar con Python vamos a usar un *Virtual environment* que nos permitira tener controladas todas las versiones de las librerias que usamos. Para poder usar el entorno virtual tenemos que crearlo en primer lugar (En visual studio, abajo a la derecha, donde sale la version de python hacer click y nos dara la opcion de crear un entorno virtual). Una vez creado el entorno virtual, en la terminal nos situamos en el directorio */.venv/Scripts* y ejecutamos en la terminal *activate*. Si se han seguido los pasos al principio de cada linea de la terminal se vera (.venv).
+
+Para tener la ultima version de las librerias que usamos basta ejecutar:
+<pre lang="markdown">  pip install -r requirements.txt </pre>
+
+Si utilizamos alguna libreria nueva habra que ejecuatr en la terminal:
+<pre lang="markdown">  pip freeze -> requirements.txt </pre>
