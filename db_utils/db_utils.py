@@ -1,6 +1,7 @@
 import os
 from supabase import create_client, Client
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 
 # --- VO (Value Object) ---
 @dataclass(frozen=True)
@@ -171,13 +172,34 @@ class clientDAO:
     
     def update_credits(self, user_id: int):
 
-        ##Actualizar con los planes y sus creditos
-        if sub_plan == "free":
-            credits = 5
-        elif sub_plan == "basic":
-            credits = 15
+        client = self.supabase.table("Clients").select("*").eq("user_id", user_id).single().execute()
+        sub_plan = client.data["sub_plan"]
+        time_stamp = client.data["subscription_renewal_date"]
+
+        # Convertir el timestamp a datetime si es string
+        if isinstance(time_stamp, str):
+            created_date = datetime.fromisoformat(time_stamp)
         else:
-            credits = 0
+            created_date = time_stamp
         
-        res = self.supabase.table("Clients").update({"available_credits": credits}).eq("id", user_id).execute()
+        # Obtener fecha actual
+        current_date = datetime.now()
+        
+        # Calcular si ha pasado un mes
+        # Manejar el cambio de mes y año correctamente
+        if created_date.month == 12:
+            one_month_later = created_date.replace(year=created_date.year + 1, month=1)
+        else:
+            one_month_later = created_date.replace(month=created_date.month + 1)
+        
+        # Si ha pasado un mes, actualizar la fecha
+        if current_date >= one_month_later:
+            updated_timestamp = one_month_later.strftime('%Y-%m-%d %H:%M:%S.%f')
+        else:
+            updated_timestamp = time_stamp
+
+        # Obtener los créditos del plan de suscripción
+        credits = self.supabase.table("SubscriptionPlans").select("credits").eq("name", sub_plan).single().execute().data["credits"]
+
+        res = self.supabase.table("Clients").update({"available_credits": credits, "created_at": updated_timestamp}).eq("id", user_id).execute()
         return res.data 
