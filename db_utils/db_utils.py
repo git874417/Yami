@@ -340,4 +340,225 @@ class dishDAO:
 
     def get_by_id(self, dish_id: int):
         res = self.supabase.table("Dishes").select("*").eq("id", dish_id).single().execute()
-        return dishVO(**res.data) if res.data else None 
+        return dishVO(**res.data) if res.data else None
+
+@dataclass(frozen=True)
+class subscriptionPlanVO:
+    credits: int
+    name: str
+
+    def __init__(self, credits: int, name: str):
+        if not credits or not name:
+            raise ValueError("credits and name are required fields")
+        
+        self.credits = credits
+        self.name = name
+
+class subscriptionPlanDAO:
+    def __init__(self):
+        url = os.environ.get("SUPABASE_URL")
+        key = os.environ.get("SUPABASE_KEY")
+        self.supabase: Client = create_client(url, key)
+
+    def insert(self, vo: subscriptionPlanVO):
+        res = self.supabase.table("SubscriptionPlans").insert({
+            "credits": vo.credits,
+            "name": vo.name
+        }).execute()
+        return res.data, res.data[0]["id"]
+
+    def update(self, plan_id: int, new_credits: int = None, new_name: str = None):
+        update_data = {}
+        
+        if new_credits is not None:
+            update_data["credits"] = new_credits
+        if new_name is not None:
+            update_data["name"] = new_name
+        
+        if not update_data:
+            return None  # No fields to update
+            
+        res = self.supabase.table("SubscriptionPlans").update(update_data).eq("id", plan_id).execute()
+        return res.data, res.data[0]["id"]
+
+    def delete(self, plan_id: int):
+        res = self.supabase.table("SubscriptionPlans").delete().eq("id", plan_id).execute()
+        return res.data
+
+    def get_all(self):
+        res = self.supabase.table("SubscriptionPlans").select("*").execute()
+        return [subscriptionPlanVO(**row) for row in res.data]
+
+    def get_by_id(self, plan_id: int):
+        res = self.supabase.table("SubscriptionPlans").select("*").eq("id", plan_id).single().execute()
+        return subscriptionPlanVO(**res.data) if res.data else None
+
+@dataclass(frozen=True)
+class orderVO:
+    client_id: int
+    restaurant_id: int
+    order_credits: int
+
+    def __init__(self, client_id: int, restaurant_id: int, order_credits: int):
+        if not client_id or not restaurant_id or order_credits is None:
+            raise ValueError("client_id, restaurant_id, and order_credits are required fields")
+        
+        self.client_id = client_id
+        self.restaurant_id = restaurant_id
+        self.order_credits = order_credits
+
+class orderDAO:
+    def __init__(self):
+        url = os.environ.get("SUPABASE_URL")
+        key = os.environ.get("SUPABASE_KEY")
+        self.supabase: Client = create_client(url, key)
+
+    def insert(self, vo: orderVO):
+        res = self.supabase.table("Orders").insert({
+            "client_id": vo.client_id,
+            "restaurant_id": vo.restaurant_id,
+            "order_credits": vo.order_credits
+        }).execute()
+        return res.data, res.data[0]["id"]
+
+    def update(self, order_id: int, new_client_id: int = None, new_restaurant_id: int = None, new_order_credits: int = None):
+        update_data = {}
+        
+        if new_client_id is not None:
+            update_data["client_id"] = new_client_id
+        if new_restaurant_id is not None:
+            update_data["restaurant_id"] = new_restaurant_id
+        if new_order_credits is not None:
+            update_data["order_credits"] = new_order_credits
+        
+        if not update_data:
+            return None  # No fields to update
+            
+        res = self.supabase.table("Orders").update(update_data).eq("id", order_id).execute()
+        return res.data, res.data[0]["id"]
+
+    def delete(self, order_id: int):
+        res = self.supabase.table("Orders").delete().eq("id", order_id).execute()
+        return res.data
+
+    def get_all(self):
+        res = self.supabase.table("Orders").select("*").execute()
+        return [orderVO(**row) for row in res.data]
+
+    def get_by_id(self, order_id: int):
+        res = self.supabase.table("Orders").select("*").eq("id", order_id).single().execute()
+        return orderVO(**res.data) if res.data else None
+
+@dataclass(frozen=True)
+class orderedDishVO:
+    order_id: int
+    dish_id: int
+    dish_name: str
+    instructions: str
+
+    def __init__(self, order_id: int, dish_id: int, dish_name: str, instructions: str = ""):
+        if not order_id or not dish_id or not dish_name:
+            raise ValueError("order_id, dish_id, and dish_name are required fields")
+        
+        self.order_id = order_id
+        self.dish_id = dish_id
+        self.dish_name = dish_name
+        self.instructions = instructions
+
+class orderedDishDAO:
+    def __init__(self):
+        url = os.environ.get("SUPABASE_URL")
+        key = os.environ.get("SUPABASE_KEY")
+        self.supabase: Client = create_client(url, key)
+
+    def insert(self, vo: orderedDishVO):
+        res = self.supabase.table("OrderedDishes").insert({
+            "order_id": vo.order_id,
+            "dish_id": vo.dish_id,
+            "dish_name": vo.dish_name,
+            "instructions": vo.instructions
+        }).execute()
+        return res.data, res.data[0]["id"]
+
+    def update(self, ordered_dish_id: int, new_dish_name: str = None, new_instructions: str = None):
+        update_data = {}
+        
+        if new_dish_name is not None:
+            update_data["dish_name"] = new_dish_name
+        if new_instructions is not None:
+            update_data["instructions"] = new_instructions
+        
+        if not update_data:
+            return None  # No fields to update
+            
+        res = self.supabase.table("OrderedDishes").update(update_data).eq("id", ordered_dish_id).execute()
+        return res.data, res.data[0]["id"]
+
+    def delete(self, ordered_dish_id: int):
+        res = self.supabase.table("OrderedDishes").delete().eq("id", ordered_dish_id).execute()
+        return res.data
+
+    def get_all(self):
+        res = self.supabase.table("OrderedDishes").select("*").execute()
+        return [orderedDishVO(**row) for row in res.data]
+
+    def get_by_id(self, ordered_dish_id: int):
+        res = self.supabase.table("OrderedDishes").select("*").eq("id", ordered_dish_id).single().execute()
+        return orderedDishVO(**res.data) if res.data else None
+
+@dataclass(frozen=True)
+class ratingVO:
+    client_id: int
+    restaurant_id: int
+    rating: int
+
+    def __init__(self, client_id: int, restaurant_id: int, rating: int):
+        if not client_id or not restaurant_id or rating is None:
+            raise ValueError("client_id, restaurant_id, and rating are required fields")
+        
+        if rating < 1 or rating > 5:
+            raise ValueError("rating must be between 1 and 5")
+        
+        self.client_id = client_id
+        self.restaurant_id = restaurant_id
+        self.rating = rating
+
+class ratingDAO:
+    def __init__(self):
+        url = os.environ.get("SUPABASE_URL")
+        key = os.environ.get("SUPABASE_KEY")
+        self.supabase: Client = create_client(url, key)
+
+    def insert(self, vo: ratingVO):
+        res = self.supabase.table("Ratings").insert({
+            "client_id": vo.client_id,
+            "restaurant_id": vo.restaurant_id,
+            "rating": vo.rating
+        }).execute()
+        return res.data, res.data[0]["id"]
+
+    def update(self, rating_id: int, new_rating: int = None):
+        update_data = {}
+        
+        if new_rating is not None:
+            if new_rating < 1 or new_rating > 5:
+                raise ValueError("rating must be between 1 and 5")
+            update_data["rating"] = new_rating
+        
+        if not update_data:
+            return None  # No fields to update
+            
+        res = self.supabase.table("Ratings").update(update_data).eq("id", rating_id).execute()
+        return res.data, res.data[0]["id"]
+
+    def delete(self, rating_id: int):
+        res = self.supabase.table("Ratings").delete().eq("id", rating_id).execute()
+        return res.data
+
+    def get_all(self):
+        res = self.supabase.table("Ratings").select("*").execute()
+        return [ratingVO(**row) for row in res.data]
+
+    def get_by_id(self, rating_id: int):
+        res = self.supabase.table("Ratings").select("*").eq("id", rating_id).single().execute()
+        return ratingVO(**res.data) if res.data else None 
