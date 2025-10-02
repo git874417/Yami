@@ -17,18 +17,10 @@ class clientVO:
     phone_number: str
     available_credits: int
 
-    def __init__(self, user_id: int, sub_plan: str, name: int, surname: int, address: str, city: str, postal_code: str, dni: str, phone_number: str):
+    def __init__(self, user_id: int, sub_plan: str, name: int, surname: int, address: str, city: str, postal_code: str, dni: str, phone_number: str, credits: int = None):
         
         if not user_id or not sub_plan:
             raise ValueError("user_id and sub_plan are required fields")
-        
-        ##Actualizar con los planes y sus creditos
-        if sub_plan == "free":
-            credits = 5
-        elif sub_plan == "basic":
-            credits = 15
-        else:
-            credits = 0
         
         self.user_id = user_id
         self.sub_plan = sub_plan
