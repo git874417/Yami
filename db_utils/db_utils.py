@@ -168,7 +168,7 @@ def create_order(client_id: int, restaurant_id: int, credits: int, dishes: list[
         _, order_id = order_dao.insert(order_vo)
 
         for item in dishes:           
-            dish = dish_dao.get_by_name(item['dish_name'])
+            dish = dish_dao.get_by_name(item['dish_name'], restaurant_id)
             ordered_dish_vo = orderedDishVO(
                 order_id=order_id,
                 dish_id=dish.id,

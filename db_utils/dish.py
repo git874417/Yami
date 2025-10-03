@@ -65,7 +65,7 @@ class dishDAO:
     def get_by_id(self, dish_id: int):
         res = self.supabase.table("Dishes").select("*").eq("id", dish_id).single().execute()
         return dishVO(**res.data) if res.data else None
-    
-    def get_by_name(self, dish_name: str):
-        res = self.supabase.table("Dishes").select("*").eq("name", dish_name).single().execute()
+
+    def get_by_name(self, dish_name: str, restaurant_id: int):
+        res = self.supabase.table("Dishes").select("*").eq("name", dish_name).eq("restaurant_id", restaurant_id).single().execute()
         return dishVO(**res.data) if res.data else None
