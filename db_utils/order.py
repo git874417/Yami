@@ -1,8 +1,11 @@
 import os
-from supabase import create_client, Client
+from supabase import create_client, Client, ClientOptions
 from dataclasses import dataclass
+from dotenv import load_dotenv
 
-@dataclass(frozen=True)
+load_dotenv()
+
+@dataclass
 class orderVO:
     client_id: int
     restaurant_id: int
@@ -20,7 +23,9 @@ class orderDAO:
     def __init__(self):
         url = os.environ.get("SUPABASE_URL")
         key = os.environ.get("SUPABASE_KEY")
-        self.supabase: Client = create_client(url, key)
+        self.supabase: Client = create_client(url, key, options=ClientOptions(
+            schema="sisinf_p3",
+        ))
 
     def insert(self, vo: orderVO):
         res = self.supabase.table("Orders").insert({

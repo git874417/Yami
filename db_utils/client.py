@@ -1,15 +1,18 @@
 import os
-from supabase import create_client, Client
+from supabase import create_client, Client, ClientOptions
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from user import *
+from dotenv import load_dotenv
 
-@dataclass(frozen=True)
+load_dotenv()
+
+@dataclass
 class clientVO:
     user_id: int
     sub_plan: str
-    name: int
-    surname: int
+    name: str
+    surname: str
     address: str
     city: str
     postal_code: str
@@ -17,7 +20,8 @@ class clientVO:
     phone_number: str
     available_credits: int
 
-    def __init__(self, user_id: int, sub_plan: str, name: int, surname: int, address: str, city: str, postal_code: str, dni: str, phone_number: str, credits: int = None):
+    def __init__(self, user_id: int, sub_plan: str, name: int, surname: int, address: str, city: str, postal_code: str, dni: str, phone_number: str, 
+                available_credits: int = None):
         
         if not user_id or not sub_plan:
             raise ValueError("user_id and sub_plan are required fields")
@@ -31,13 +35,15 @@ class clientVO:
         self.postal_code = postal_code
         self.dni = dni
         self.phone_number = phone_number
-        self.available_credits = credits
+        self.available_credits = available_credits
 
 class clientDAO:
     def __init__(self):
         url = os.environ.get("SUPABASE_URL")
         key = os.environ.get("SUPABASE_KEY")
-        self.supabase: Client = create_client(url, key)
+        self.supabase: Client = create_client(url, key, options=ClientOptions(
+            schema="sisinf_p3",
+        ))
 
     def insert(self, vo: clientVO):
         res = self.supabase.table("Clients").insert({
@@ -93,6 +99,15 @@ class clientDAO:
     def get_by_id(self, user_id: int):
         res = self.supabase.table("Clients").select("*").eq("id", user_id).single().execute()
         return userVO(**res.data) if res.data else None
+    
+    def update_credits_after_order(self, client_id: int, credits: int):
+        client = self.supabase.table("Clients").select("available_credits").eq("id", client_id).single().execute()
+        current_credits = client.data["available_credits"]
+        new_credits = current_credits - credits if current_credits is not None else 0
+        if new_credits < 0:
+            raise ValueError("Insufficient credits")
+        res = self.supabase.table("Clients").update({"available_credits": new_credits}).eq("id", client_id).execute()
+        return res.data
     
     def update_credits(self, user_id: int):
 

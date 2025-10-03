@@ -7,7 +7,7 @@ from restaurant import *
 from user import *
 from subscriptionPlan import *
 
-def create_client(email: str, password: str, role: int, sub_plan: str, name: int, surname: int, 
+def create_client(email: str, password: str, sub_plan: str, name: str, surname: str, 
                   address: str, city: str, postal_code: str, dni: str, phone_number: str):
     
     try:    
@@ -16,11 +16,11 @@ def create_client(email: str, password: str, role: int, sub_plan: str, name: int
         subscription_plans = subscriptionPlanDAO()
         
         # Create user
-        user_vo = userVO(email=email, password=password, role=role)
+        user_vo = userVO(email=email, password=password, role="Client")
         _, user_id = user_dao.insert(user_vo)
 
         # Get subscription plan details
-        available_credits = subscription_plans.get_by_id(sub_plan).credits
+        available_credits = subscription_plans.get_by_plan_credits(sub_plan)
 
         # Create client profile
         client_vo = clientVO(
@@ -75,14 +75,14 @@ def update_client_information(email: str, new_sub_plan: str = None, new_name: st
         print(f"Error updating client information: {e}")
     return
 
-def create_restaurant(email: str, password: str, role: int, name: str, description: str, city: str, 
+def create_restaurant(email: str, password: str, name: str, description: str, city: str, 
                       address: str, phone_number: str, category: str):
     try:
         user_dao = userDAO()
         restaurant_dao = restaurantDAO()
         
         # Create user
-        user_vo = userVO(email=email, password=password, role=role)
+        user_vo = userVO(email=email, password=password, role="Restaurant")
         _, user_id = user_dao.insert(user_vo)
 
         # Create restaurant profile
@@ -119,7 +119,7 @@ def update_restaurant_information(email: str, new_name: str = None, new_descript
     except Exception as e:
         print(f"Error updating restaurant information: {e}")
 
-def create_dish(restaurant_id: int, name: str, description: str, price: float, image_url: str):
+def create_dish(restaurant_id: int, name: str, description: str, allergens: str, dish_type: str):
     try:
         dish_dao = dishDAO()
         
@@ -128,8 +128,8 @@ def create_dish(restaurant_id: int, name: str, description: str, price: float, i
             restaurant_id=restaurant_id,
             name=name,
             description=description,
-            price=price,
-            image_url=image_url
+            allergens=allergens,
+            dish_type=dish_type
         )
         _ = dish_dao.insert(dish_vo)
     except Exception as e:
@@ -153,17 +153,20 @@ def update_dish_information(old_dish_name: str, restaurant_id: int, new_name: st
         print(f"Error updating dish information: {e}")
     return
 
-def create_order(client_id: int, restaurant_id: int, credits: int, dishes: list[dict]):
+def create_order(client_id: int, restaurant_id: int, order_credits: int, dishes: list[dict]):
     try:
         order_dao = orderDAO()
         dish_dao = dishDAO()
         ordered_dish_dao = orderedDishDAO()
+        client_dao = clientDAO()
         
+        client_dao.update_credits_after_order(client_id, order_credits)
+
         # Create order
         order_vo = orderVO(
             client_id=client_id,
             restaurant_id=restaurant_id,
-            credits=credits
+            order_credits=order_credits
         )
         _, order_id = order_dao.insert(order_vo)
 
@@ -176,6 +179,7 @@ def create_order(client_id: int, restaurant_id: int, credits: int, dishes: list[
                 instructions=item['instructions'],
             )
             _ = ordered_dish_dao.insert(ordered_dish_vo)
+        
     except Exception as e:
         print(f"Error creating order: {e}")
     return
