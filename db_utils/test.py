@@ -14,7 +14,7 @@ def test_db():
     db_utils.create_dish(2, "Beef Taco", "Taco with seasoned beef", "Gluten", "Principal")
 
     db_utils.create_order(10, 1, 20, [{"dish_name": "Margherita", "instructions": "Extra cheese"}, {"dish_name": "Pepperoni", "instructions": ""}])
-    db_utils.create_order(11, 2, 70, [{"dish_name": "Beef Taco", "instructions": "No onions"}])
+    db_utils.create_order(11, 2, 10, [{"dish_name": "Beef Taco", "instructions": "No onions"}])
     db_utils.create_order(12, 1, 10, [{"dish_name": "Margherita", "instructions": "Gluten-free crust"}])
 
 test_db()
