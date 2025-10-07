@@ -7,6 +7,7 @@ load_dotenv()
 
 @dataclass
 class restaurantVO:
+    _id: int 
     user_id: int
     name: str
     description: str

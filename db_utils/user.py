@@ -7,6 +7,7 @@ load_dotenv()
 
 @dataclass
 class userVO:
+    _id: int
     email: str
     password: str
     role: int

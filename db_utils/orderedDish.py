@@ -7,6 +7,7 @@ load_dotenv()
 
 @dataclass
 class orderedDishVO:
+    _id: int
     order_id: int
     dish_id: int
     dish_name: str

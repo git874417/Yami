@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 @dataclass
-class subscriptionPlanVO:
+class dishTypeVO:
     _id: int
     credits: int
     name: str
@@ -18,7 +18,7 @@ class subscriptionPlanVO:
         self.credits = credits
         self.name = name
 
-class subscriptionPlanDAO:
+class dishTypeDAO:
     def __init__(self):
         url = os.environ.get("SUPABASE_URL")
         key = os.environ.get("SUPABASE_KEY")
@@ -26,8 +26,8 @@ class subscriptionPlanDAO:
             schema="sisinf_p3",
         ))
 
-    def insert(self, vo: subscriptionPlanVO):
-        res = self.supabase.table("SubscriptionPlans").insert({
+    def insert(self, vo: dishTypeVO):
+        res = self.supabase.table("DishTypes").insert({
             "credits": vo.credits,
             "name": vo.name
         }).execute()
@@ -43,22 +43,14 @@ class subscriptionPlanDAO:
         
         if not update_data:
             return None  # No fields to update
-            
-        res = self.supabase.table("SubscriptionPlans").update(update_data).eq("id", plan_id).execute()
+
+        res = self.supabase.table("DishTypes").update(update_data).eq("id", plan_id).execute()
         return res.data, res.data[0]["id"]
 
-    def delete(self, plan_id: int):
-        res = self.supabase.table("SubscriptionPlans").delete().eq("id", plan_id).execute()
+    def delete(self, dishType_id: int):
+        res = self.supabase.table("DishTypes").delete().eq("id", dishType_id).execute()
         return res.data
 
     def get_all(self):
-        res = self.supabase.table("SubscriptionPlans").select("*").execute()
-        return [subscriptionPlanVO(**row) for row in res.data]
-
-    def get_by_id(self, plan_id: int):
-        res = self.supabase.table("SubscriptionPlans").select("*").eq("id", plan_id).single().execute()
-        return subscriptionPlanVO(**res.data) if res.data else None
-    
-    def get_by_plan_credits(self, plan: str):
-        credits = self.supabase.table("SubscriptionPlans").select("credits").eq("name", plan).single().execute()
-        return credits.data["credits"] if credits.data else None
+        res = self.supabase.table("DishTypes").select("name, credits").execute()
+        return [dishTypeVO(**row) for row in res.data]

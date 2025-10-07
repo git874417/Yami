@@ -7,6 +7,7 @@ load_dotenv()
 
 @dataclass
 class orderVO:
+    _id: int
     client_id: int
     restaurant_id: int
     order_credits: int

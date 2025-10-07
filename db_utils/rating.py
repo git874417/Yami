@@ -7,6 +7,7 @@ load_dotenv()
 
 @dataclass
 class ratingVO:
+    _id: int
     client_id: int
     restaurant_id: int
     rating: int

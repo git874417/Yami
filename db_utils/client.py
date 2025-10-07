@@ -9,6 +9,7 @@ load_dotenv()
 
 @dataclass
 class clientVO:
+    _id : int
     user_id: int
     sub_plan: str
     name: str
