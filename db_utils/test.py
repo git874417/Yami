@@ -17,4 +17,13 @@ def test_db():
     order_id2 = db_utils.create_order(id_bob, id_restaurant2, 10, [{"dish_name": "Beef Taco", "instructions": "No onions"}])
     order_id3 = db_utils.create_order(id_carol, id_restaurant1, 10, [{"dish_name": "Margherita", "instructions": "Gluten-free crust"}])
 
-test_db()
+    db_utils.create_rating(id_alice, id_restaurant1, 5, "Amazing pizza and great service!")
+    db_utils.create_rating(id_bob, id_restaurant2, 4, "Tasty tacos but a bit spicy for me.")
+    db_utils.create_rating(id_carol, id_restaurant1, 3, "Good pizza but the crust was too thick.")
+
+def clean_db():
+
+    db_utils.clean_db()
+
+clean_db()
+#test_db()

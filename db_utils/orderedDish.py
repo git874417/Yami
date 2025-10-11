@@ -54,6 +54,10 @@ class orderedDishDAO:
     def delete(self, ordered_dish_id: int):
         res = self.supabase.table("OrderedDishes").delete().eq("id", ordered_dish_id).execute()
         return res.data
+    
+    def delete_all(self):
+        res = self.supabase.table("OrderedDishes").delete().neq("id", 0).execute()
+        return res.data
 
     def get_all(self):
         res = self.supabase.table("OrderedDishes").select("*").execute()
@@ -62,3 +66,7 @@ class orderedDishDAO:
     def get_by_id(self, ordered_dish_id: int):
         res = self.supabase.table("OrderedDishes").select("*").eq("id", ordered_dish_id).single().execute()
         return orderedDishVO(**res.data) if res.data else None
+    
+    def delete_all(self):
+        res = self.supabase.table("OrderedDishes").delete().neq("id", 0).execute()
+        return res.data

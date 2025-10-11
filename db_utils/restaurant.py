@@ -69,6 +69,10 @@ class restaurantDAO:
     def delete(self, restaurant_id: int):
         res = self.supabase.table("Restaurants").delete().eq("id", restaurant_id).execute()
         return res.data
+    
+    def delete_all(self):
+        res = self.supabase.table("Restaurants").delete().neq("id", 0).execute()
+        return res.data
 
     def get_all(self):
         res = self.supabase.table("Restaurants").select("*").execute()

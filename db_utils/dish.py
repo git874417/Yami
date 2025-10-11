@@ -62,6 +62,10 @@ class dishDAO:
         res = self.supabase.table("Dishes").delete().eq("id", dish_id).execute()
         return res.data
 
+    def delete_all(self):
+        res = self.supabase.table("Dishes").delete().neq("id", 0).execute()
+        return res.data
+    
     def get_all(self):
         res = self.supabase.table("Dishes").select("*").execute()
         return [dishVO(**row) for row in res.data]

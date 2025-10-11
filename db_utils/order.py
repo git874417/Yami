@@ -65,6 +65,10 @@ class orderDAO:
     def delete(self, order_id: int):
         res = self.supabase.table("Orders").delete().eq("id", order_id).execute()
         return res.data
+    
+    def delete_all(self):
+        res = self.supabase.table("Orders").delete().neq("id", 0).execute()
+        return res.data
 
     def get_all(self):
         res = self.supabase.table("Orders").select("*").execute()

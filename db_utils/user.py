@@ -52,7 +52,15 @@ class userDAO:
     def delete(self, user_id: int):
         res = self.supabase.table("Users").delete().eq("id", user_id).execute()
         return res.data
+    
+    def delete_all_clients(self):
+        res = self.supabase.table("Users").delete().eq("role", "Client").execute()
+        return res.data
 
+    def delete_all_restaurants(self):
+        res = self.supabase.table("Users").delete().eq("role", "Restaurant").execute()
+        return res.data
+            
     def get_all(self):
         res = self.supabase.table("Users").select("*").execute()
         return [userVO(**row) for row in res.data]
@@ -60,17 +68,17 @@ class userDAO:
     def get_by_id(self, user_id: int):
         res = self.supabase.table("Users").select("*").eq("id", user_id).single().execute()
         return userVO(**res.data) if res.data else None
-    
+
     def get_clients(self):
-        res = self.supabase.table("Users").select("*").eq("role", "client").execute()
+        res = self.supabase.table("Users").select("*").eq("role", "Client").execute()
         return [userVO(**row) for row in res.data]
-    
+
     def get_restaurants(self):
-        res = self.supabase.table("Users").select("*").eq("role", "restaurant").execute()
+        res = self.supabase.table("Users").select("*").eq("role", "Restaurant").execute()
         return [userVO(**row) for row in res.data]
-    
+
     def get_admin(self):
-        res = self.supabase.table("Users").select("*").eq("role", "admin").execute()
+        res = self.supabase.table("Users").select("*").eq("role", "Admin").execute()
         return [userVO(**row) for row in res.data]
 
     def get_by_email(self, email: str):

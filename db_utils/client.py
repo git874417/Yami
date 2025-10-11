@@ -83,7 +83,11 @@ class clientDAO:
     def delete(self, client_id: int):
         res = self.supabase.table("Clients").delete().eq("id", client_id).execute()
         return res.data
-
+    
+    def delete_all(self):
+        res = self.supabase.table("Clients").delete().neq("id", 0).execute()
+        return res.data
+    
     def get_all(self):
         res = self.supabase.table("Clients").select("*").execute()
         return [userVO(**row) for row in res.data]

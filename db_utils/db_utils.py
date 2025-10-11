@@ -36,9 +36,9 @@ def create_client(email: str, password: str, sub_plan: str, name: str, surname: 
             available_credits=available_credits
         )
         _, client_id = client_dao.insert(client_vo)
+        return client_id
     except Exception as e:
         print(f"Error creating client: {e}")
-    return client_id
 
 def update_client_credits(email: str):
     try:
@@ -96,9 +96,10 @@ def create_restaurant(email: str, password: str, name: str, description: str, ci
             category=category
         )
         _, restaurant_id = restaurant_dao.insert(restaurant_vo)
+        return restaurant_id
     except Exception as e:
         print(f"Error creating restaurant: {e}")
-    return restaurant_id
+    return
 
 def update_restaurant_information(email: str, new_name: str = None, new_description: str = None, new_city: str = None, new_address: str = None, new_phone_number: str = None, new_category: str = None):
     try:        
@@ -132,9 +133,10 @@ def create_dish(restaurant_id: int, name: str, description: str, allergens: str,
             dish_type=dish_type
         )
         _, dish_id = dish_dao.insert(dish_vo)
+        return dish_id
     except Exception as e:
         print(f"Error creating dish: {e}")
-    return dish_id
+    return
 
 def update_dish_information(old_dish_name: str, restaurant_id: int, new_name: str, new_description: str, new_allergens: str, new_dish_type: str):
     try:        
@@ -178,8 +180,61 @@ def create_order(client_id: int, restaurant_id: int, order_credits: int, dishes:
                 dish_name=item['dish_name'],
                 instructions=item['instructions'],
             )
-            _, order_id = ordered_dish_dao.insert(ordered_dish_vo)
-        
+            _, _ = ordered_dish_dao.insert(ordered_dish_vo)
+        return order_id
     except Exception as e:
         print(f"Error creating order: {e}")
-    return order_id
+    return
+
+def clean_db():
+    """
+    Limpia toda la base de datos eliminando todos los registros
+    excepto los planes de suscripción.
+    Orden de eliminación: OrderedDishes -> Orders -> Ratings -> Dishes -> Restaurants -> Clients -> Users
+    """
+    try:
+        print("Iniciando limpieza de la base de datos...")
+        
+        # 1. Eliminar platos pedidos (OrderedDishes)
+        ordered_dish_dao = orderedDishDAO()
+        ordered_dish_dao.delete_all()
+        print("✓ OrderedDishes eliminados")
+        
+        # 2. Eliminar pedidos (Orders)
+        order_dao = orderDAO()
+        order_dao.delete_all()
+        print("✓ Orders eliminados")
+        
+        # 3. Eliminar valoraciones (Ratings)
+        rating_dao = ratingDAO()
+        rating_dao.delete_all()
+        print("✓ Ratings eliminados")
+        
+        # 4. Eliminar platos (Dishes)
+        dish_dao = dishDAO()
+        dish_dao.delete_all()
+        print("✓ Dishes eliminados")
+        
+        # 5. Eliminar restaurantes (Restaurants)
+        restaurant_dao = restaurantDAO()
+        restaurant_dao.delete_all()
+        print("✓ Restaurants eliminados")
+        
+        # 6. Eliminar clientes (Clients)
+        client_dao = clientDAO()
+        client_dao.delete_all()
+        print("✓ Clients eliminados")
+        
+        # 7. Eliminar usuarios (Users)
+        user_dao = userDAO()
+        user_dao.delete_all_clients()
+        user_dao.delete_all_restaurants()
+        print("✓ Users eliminados")
+        
+        print("\n✅ Base de datos limpiada exitosamente (SubscriptionPlans y Admins preservados)")
+        
+    except Exception as e:
+        print(f"✗ Error limpiando la base de datos: {e}")
+        return False
+    
+    return True
