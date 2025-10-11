@@ -52,7 +52,7 @@ class clientDAO:
         }).execute()
         return res.data, res.data[0]["id"]
 
-    def update(self, user_id: int, new_sub_plan: str = None, new_name: str = None, new_surname: str = None, new_address: str = None, new_city: str = None, new_postal_code: str = None, new_dni: str = None, new_phone_number: str = None, new_available_credits: int = None):
+    def update(self, client_id: int, new_sub_plan: str = None, new_name: str = None, new_surname: str = None, new_address: str = None, new_city: str = None, new_postal_code: str = None, new_dni: str = None, new_phone_number: str = None, new_available_credits: int = None):
         update_data = {}
         
         if new_sub_plan is not None:
@@ -75,9 +75,10 @@ class clientDAO:
             update_data["available_credits"] = new_available_credits
         
         if not update_data:
+            print("No fields to update.")
             return None  # No fields to update
             
-        res = self.supabase.table("Clients").update(update_data).eq("id", user_id).execute()
+        res = self.supabase.table("Clients").update(update_data).eq("id", client_id).execute()
         return res.data
 
     def delete(self, client_id: int):
@@ -105,9 +106,9 @@ class clientDAO:
         res = self.supabase.table("Clients").update({"available_credits": new_credits}).eq("id", client_id).execute()
         return res.data
     
-    def update_credits(self, user_id: int):
+    def update_credits(self, client_id: int, force_update: bool = False):
 
-        client = self.supabase.table("Clients").select("*").eq("user_id", user_id).single().execute()
+        client = self.supabase.table("Clients").select("*").eq("id", client_id).single().execute()
         sub_plan = client.data["sub_plan"]
         time_stamp = client.data["subscription_renewal_date"]
 
@@ -128,7 +129,7 @@ class clientDAO:
             one_month_later = created_date.replace(month=created_date.month + 1)
         
         # Si ha pasado un mes, actualizar la fecha
-        if current_date >= one_month_later:
+        if current_date >= one_month_later or force_update:
             updated_timestamp = one_month_later.strftime('%Y-%m-%d %H:%M:%S.%f')
         else:
             updated_timestamp = time_stamp
@@ -136,5 +137,5 @@ class clientDAO:
         # Obtener los créditos del plan de suscripción
         credits = self.supabase.table("SubscriptionPlans").select("credits").eq("name", sub_plan).single().execute().data["credits"]
 
-        res = self.supabase.table("Clients").update({"available_credits": credits, "created_at": updated_timestamp}).eq("id", user_id).execute()
+        res = self.supabase.table("Clients").update({"available_credits": credits, "subscription_renewal_date": updated_timestamp}).eq("id", client_id).execute()
         return res.data

@@ -55,3 +55,7 @@ class dishTypeDAO:
     def get_all(self):
         res = self.supabase.table("DishTypes").select("name, credits").execute()
         return [dishTypeVO(**row) for row in res.data]
+    
+    def get_credits_by_name(self, name: str):
+        res = self.supabase.table("DishTypes").select("credits").eq("name", name).single().execute()
+        return res.data["credits"] if res.data else None

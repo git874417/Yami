@@ -1,12 +1,10 @@
 import os
 from supabase import create_client, Client, ClientOptions
-from dotenv import load_dotenv
+from dotenv import load_dotenv 
 
 load_dotenv()
 
 class dishVO:
-
-
     def __init__(self, restaurant_id: int, name: str, description: str, allergens: str, dish_type: str, id: int = None):
         if not restaurant_id or not name or not dish_type:
             raise ValueError("restaurant_id, name, and dish_type are required fields")
@@ -72,8 +70,9 @@ class dishDAO:
 
     def get_by_id(self, dish_id: int):
         res = self.supabase.table("Dishes").select("*").eq("id", dish_id).single().execute()
-        return res.data 
+        return dishVO(**res.data) if res.data else None 
 
     def get_by_name(self, dish_name: str, restaurant_id: int):
         res = self.supabase.table("Dishes").select("*").eq("name", dish_name).eq("restaurant_id", restaurant_id).single().execute()
-        return res.data 
+        return dishVO(**res.data) if res.data else None 
+    
