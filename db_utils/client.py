@@ -1,32 +1,19 @@
 import os
 from supabase import create_client, Client, ClientOptions
-from dataclasses import dataclass
 from datetime import datetime, timedelta
 from user import *
 from dotenv import load_dotenv
 
 load_dotenv()
 
-@dataclass
 class clientVO:
-    _id : int
-    user_id: int
-    sub_plan: str
-    name: str
-    surname: str
-    address: str
-    city: str
-    postal_code: str
-    dni: str
-    phone_number: str
-    available_credits: int
-
     def __init__(self, user_id: int, sub_plan: str, name: int, surname: int, address: str, city: str, postal_code: str, dni: str, phone_number: str, 
-                available_credits: int = None):
-        
+                available_credits: int = None, id: int = None):
+
         if not user_id or not sub_plan:
             raise ValueError("user_id and sub_plan are required fields")
         
+        self.__id = id
         self.user_id = user_id
         self.sub_plan = sub_plan
         self.name = name
@@ -37,6 +24,10 @@ class clientVO:
         self.dni = dni
         self.phone_number = phone_number
         self.available_credits = available_credits
+
+    @property
+    def id(self):
+        return self.__id
 
 class clientDAO:
     def __init__(self):
@@ -59,7 +50,7 @@ class clientDAO:
             "phone_number": vo.phone_number,
             "available_credits": vo.available_credits
         }).execute()
-        return res.data
+        return res.data, res.data[0]["id"]
 
     def update(self, user_id: int, new_sub_plan: str = None, new_name: str = None, new_surname: str = None, new_address: str = None, new_city: str = None, new_postal_code: str = None, new_dni: str = None, new_phone_number: str = None, new_available_credits: int = None):
         update_data = {}

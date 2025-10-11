@@ -1,19 +1,11 @@
 import os
 from supabase import create_client, Client, ClientOptions
-from dataclasses import dataclass
 from dotenv import load_dotenv
 
 load_dotenv()
 
-@dataclass
 class orderVO:
-    _id: int
-    client_id: int
-    restaurant_id: int
-    order_credits: int
-    order_status: str
-
-    def __init__(self, client_id: int, restaurant_id: int, order_credits: int, _id: int = None, order_status: str = "Encargado"):
+    def __init__(self, client_id: int, restaurant_id: int, order_credits: int, id: int = None, order_status: str = "Encargado"):
         if not client_id or not restaurant_id or order_credits is None:
             raise ValueError("client_id, restaurant_id, and order_credits are required fields")
         if client_id < 0 or restaurant_id < 0 or order_credits < 0:
@@ -22,19 +14,12 @@ class orderVO:
         self.client_id = client_id
         self.restaurant_id = restaurant_id
         self.order_credits = order_credits
-        self._id = _id 
+        self.__id = id  # Cambiar a privado para que sea realmente de solo lectura
         self.order_status = order_status 
 
-    def __init__(self, client_id: int, restaurant_id: int, order_credits: int, order_status: str = "Encargado"):
-        if not client_id or not restaurant_id or order_credits is None:
-            raise ValueError("client_id, restaurant_id, and order_credits are required fields")
-        if client_id < 0 or restaurant_id < 0 or order_credits < 0:
-            raise ValueError("client_id, restaurant_id, and order_credits must be non-negative")
-        
-        self.client_id = client_id
-        self.restaurant_id = restaurant_id
-        self.order_credits = order_credits
-        self.order_status = order_status
+    @property
+    def id(self):
+        return self.__id
 
 class orderDAO:
     def __init__(self):

@@ -35,10 +35,10 @@ def create_client(email: str, password: str, sub_plan: str, name: str, surname: 
             phone_number=phone_number,
             available_credits=available_credits
         )
-        _ = client_dao.insert(client_vo)
+        _, client_id = client_dao.insert(client_vo)
     except Exception as e:
         print(f"Error creating client: {e}")
-    return 
+    return client_id
 
 def update_client_credits(email: str):
     try:
@@ -95,10 +95,10 @@ def create_restaurant(email: str, password: str, name: str, description: str, ci
             phone_number=phone_number,
             category=category
         )
-        _ = restaurant_dao.insert(restaurant_vo)
+        _, restaurant_id = restaurant_dao.insert(restaurant_vo)
     except Exception as e:
         print(f"Error creating restaurant: {e}")
-    return
+    return restaurant_id
 
 def update_restaurant_information(email: str, new_name: str = None, new_description: str = None, new_city: str = None, new_address: str = None, new_phone_number: str = None, new_category: str = None):
     try:        
@@ -131,10 +131,10 @@ def create_dish(restaurant_id: int, name: str, description: str, allergens: str,
             allergens=allergens,
             dish_type=dish_type
         )
-        _ = dish_dao.insert(dish_vo)
+        _, dish_id = dish_dao.insert(dish_vo)
     except Exception as e:
         print(f"Error creating dish: {e}")
-    return
+    return dish_id
 
 def update_dish_information(old_dish_name: str, restaurant_id: int, new_name: str, new_description: str, new_allergens: str, new_dish_type: str):
     try:        
@@ -178,8 +178,8 @@ def create_order(client_id: int, restaurant_id: int, order_credits: int, dishes:
                 dish_name=item['dish_name'],
                 instructions=item['instructions'],
             )
-            _ = ordered_dish_dao.insert(ordered_dish_vo)
+            _, order_id = ordered_dish_dao.insert(ordered_dish_vo)
         
     except Exception as e:
         print(f"Error creating order: {e}")
-    return
+    return order_id
