@@ -41,3 +41,5 @@ def clean_db():
 
 clean_db()
 test_db()
+
+#Basta con comentar clean_db() para comprobar que al crear datos duplicados saltan errores.
