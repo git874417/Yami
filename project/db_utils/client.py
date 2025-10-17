@@ -1,7 +1,6 @@
 import os
 from supabase import create_client, Client, ClientOptions
 from datetime import datetime, timedelta
-from user import *
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -91,11 +90,11 @@ class clientDAO:
     
     def get_all(self):
         res = self.supabase.table("Clients").select("*").execute()
-        return [userVO(**row) for row in res.data]
+        return [clientVO(**row) for row in res.data]
 
     def get_by_id(self, user_id: int):
         res = self.supabase.table("Clients").select("*").eq("id", user_id).single().execute()
-        return userVO(**res.data) if res.data else None
+        return clientVO(**res.data) if res.data else None
     
     def update_credits_after_order(self, client_id: int, credits: int):
         client = self.supabase.table("Clients").select("available_credits").eq("id", client_id).single().execute()

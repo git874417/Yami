@@ -1,12 +1,12 @@
-from client import *
-from dish import *
-from orderedDish import *
-from order import *
-from rating import *
-from restaurant import *
-from user import *
-from subscriptionPlan import *
-from dishType import *  
+from .client import *
+from .dish import *
+from .orderedDish import *
+from .order import *
+from .rating import *
+from .restaurant import *
+from .user import *
+from .subscriptionPlan import *
+from .dishType import *  
 
 def create_client(email: str, password: str, sub_plan: str, name: str, surname: str, 
                   address: str, city: str, postal_code: str, dni: str, phone_number: str):
