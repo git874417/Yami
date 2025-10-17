@@ -18,6 +18,12 @@ CREATE TABLE sisinf_p3.Clients (
   CONSTRAINT Clients_user_id_fkey FOREIGN KEY (user_id) REFERENCES sisinf_p3.Users(id),
   CONSTRAINT clients_sub_plan_fkey FOREIGN KEY (sub_plan) REFERENCES sisinf_p3.SubscriptionPlans(name)
 );
+CREATE TABLE sisinf_p3.DishTypes (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  name USER-DEFINED NOT NULL UNIQUE,
+  credits bigint NOT NULL,
+  CONSTRAINT DishTypes_pkey PRIMARY KEY (id)
+);
 CREATE TABLE sisinf_p3.Dishes (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   restaurant_id bigint NOT NULL,
@@ -26,7 +32,8 @@ CREATE TABLE sisinf_p3.Dishes (
   allergens character varying,
   dish_type USER-DEFINED NOT NULL,
   CONSTRAINT Dishes_pkey PRIMARY KEY (id),
-  CONSTRAINT Dishes_restaurant_id_fkey FOREIGN KEY (restaurant_id) REFERENCES sisinf_p3.Restaurants(id)
+  CONSTRAINT Dishes_restaurant_id_fkey FOREIGN KEY (restaurant_id) REFERENCES sisinf_p3.Restaurants(id),
+  CONSTRAINT dishes_dish_type_fkey FOREIGN KEY (dish_type) REFERENCES sisinf_p3.DishTypes(name)
 );
 CREATE TABLE sisinf_p3.OrderedDishes (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
@@ -44,6 +51,7 @@ CREATE TABLE sisinf_p3.Orders (
   restaurant_id bigint NOT NULL,
   order_credits bigint CHECK (order_credits >= 0),
   order_date timestamp without time zone NOT NULL DEFAULT (now() AT TIME ZONE 'utc'::text),
+  order_status USER-DEFINED NOT NULL DEFAULT 'Encargado'::sisinf_p3.order_status,
   CONSTRAINT Orders_pkey PRIMARY KEY (id),
   CONSTRAINT Orders_client_id_fkey FOREIGN KEY (client_id) REFERENCES sisinf_p3.Clients(id),
   CONSTRAINT Orders_restaurant_id_fkey FOREIGN KEY (restaurant_id) REFERENCES sisinf_p3.Restaurants(id)
@@ -51,7 +59,7 @@ CREATE TABLE sisinf_p3.Orders (
 CREATE TABLE sisinf_p3.Ratings (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   client_id bigint NOT NULL,
-  restaurant_id bigint NOT NULL UNIQUE,
+  restaurant_id bigint NOT NULL,
   rating bigint CHECK (rating >= 0 AND rating <= 5),
   CONSTRAINT Ratings_pkey PRIMARY KEY (id),
   CONSTRAINT Ratings_client_id_fkey FOREIGN KEY (client_id) REFERENCES sisinf_p3.Clients(id),
@@ -64,7 +72,7 @@ CREATE TABLE sisinf_p3.Restaurants (
   description character varying,
   phone_number character varying NOT NULL CHECK (length(phone_number::text) < 10),
   address character varying NOT NULL UNIQUE,
-  category character varying NOT NULL,
+  category USER-DEFINED NOT NULL,
   city character varying NOT NULL,
   CONSTRAINT Restaurants_pkey PRIMARY KEY (id),
   CONSTRAINT Restaurants_user_id_fkey FOREIGN KEY (user_id) REFERENCES sisinf_p3.Users(id)
@@ -73,6 +81,7 @@ CREATE TABLE sisinf_p3.SubscriptionPlans (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   credits bigint CHECK (credits > 0),
   name USER-DEFINED NOT NULL UNIQUE,
+  price double precision NOT NULL,
   CONSTRAINT SubscriptionPlans_pkey PRIMARY KEY (id)
 );
 CREATE TABLE sisinf_p3.Users (
