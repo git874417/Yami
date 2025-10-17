@@ -45,7 +45,7 @@ class ClientCreate(BaseModel):
 
 @app.get("/")
 def read_root():
-    return {"message": "Bienvenido a la API de Foodflix"}
+    return {"message": "Bienvenido a la API de Yami"}
 
 @app.post("/api/clients", status_code=201)
 def create_client_endpoint(client: ClientCreate):
