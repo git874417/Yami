@@ -27,5 +27,5 @@ Para trabajar con Python vamos a usar un *Virtual environment* que nos permitira
 Para tener la ultima version de las librerias que usamos basta ejecutar:
 <pre lang="markdown">  pip install -r requirements.txt </pre>
 
-Si utilizamos alguna libreria nueva habra que ejecuatr en la terminal:
+Si utilizamos alguna libreria nueva habra que ejecutar en la terminal:
 <pre lang="markdown">  pip freeze -> requirements.txt </pre>
