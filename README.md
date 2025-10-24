@@ -29,3 +29,10 @@ Para tener la ultima version de las librerias que usamos basta ejecutar:
 
 Si utilizamos alguna libreria nueva habra que ejecutar en la terminal:
 <pre lang="markdown">  pip freeze -> requirements.txt </pre>
+
+## Lanzar API Backend
+
+Para lanzar la api en el backend situarse en el directorio raiz del repositorio y ejecutar el siguiente comando:
+<pre lang="markdown">  uvicorn project.src.Backend.application:app --reload </pre>
+
+La api se levantara en local en **http://127.0.0.1:8000/**. La documentacion de la API se encuentra en el endpoint **http://127.0.0.1:8000/docs/**
