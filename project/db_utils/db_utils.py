@@ -1,12 +1,22 @@
-from .client import *
-from .dish import *
-from .orderedDish import *
-from .order import *
-from .rating import *
-from .restaurant import *
-from .user import *
-from .subscriptionPlan import *
-from .dishType import *  
+from .clientVO import *
+from .clientDAO import *
+from .dishVO import *
+from .dishDAO import *
+from .orderedDishVO import *
+from .orderedDishDAO import *
+from .orderVO import *
+from .orderDAO import *
+from .ratingVO import *
+from .ratingDAO import *
+from .restaurantVO import *
+from .restaurantDAO import *    
+from .userVO import *
+from .userDAO import *
+from .subscriptionPlanVO import *
+from .subscriptionPlanDAO import *
+from .dishTypeVO import *  
+from .dishTypeDAO import *
+
 
 def create_client(email: str, password: str, sub_plan: str, name: str, surname: str, 
                   address: str, city: str, postal_code: str, dni: str, phone_number: str):

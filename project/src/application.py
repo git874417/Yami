@@ -3,13 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import sys
 import os
+from db_utils import db_utils
+from project.db_utils.userDAO import userDAO
 
 # Añadir el directorio 'project' al path para poder importar 'db_utils'
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, project_root)
 
-from db_utils import db_utils
-from db_utils.user import userDAO
 
 app = FastAPI(
     title="Yami API",
