@@ -29,34 +29,25 @@ class clientDAO:
         }).execute()
         return res.data, res.data[0]["id"]
 
-    def update(self, client_id: int, new_sub_plan: str = None, new_name: str = None, new_surname: str = None, new_address: str = None, new_city: str = None, new_postal_code: str = None, new_dni: str = None, new_phone_number: str = None, new_available_credits: int = None):
-        update_data = {}
-        
-        if new_sub_plan is not None:
-            update_data["sub_plan"] = new_sub_plan
-        if new_name is not None:
-            update_data["name"] = new_name
-        if new_surname is not None:
-            update_data["surname"] = new_surname
-        if new_address is not None:
-            update_data["address"] = new_address
-        if new_city is not None:
-            update_data["city"] = new_city
-        if new_postal_code is not None:
-            update_data["postal_code"] = new_postal_code
-        if new_dni is not None:     
-            update_data["dni"] = new_dni
-        if new_phone_number is not None:
-            update_data["phone_number"] = new_phone_number
-        if new_available_credits is not None:
-            update_data["available_credits"] = new_available_credits
-        
-        if not update_data:
+    def update(self, client_id: int, data_to_update: dict):
+        """
+        Actualiza los campos de un cliente en la base de datos usando un diccionario.
+        """
+        if not data_to_update:
             print("No fields to update.")
-            return None  # No fields to update
+            return client_id  # No hay campos para actualizar, retorna el ID sin cambios.
             
-        res = self.supabase.table("Clients").update(update_data).eq("id", client_id).execute()
-        return res.data
+        try:
+            res = self.supabase.table("Clients").update(data_to_update).eq("id", client_id).execute()
+            
+            if not res.data:
+                raise Exception(f"Client with id {client_id} not found or no changes made.")
+            
+            # Retorna el ID del cliente actualizado
+            return res.data[0]['id']
+        except Exception as e:
+            print(f"Error in clientDAO.update: {e}")
+            raise
 
     def delete(self, client_id: int):
         res = self.supabase.table("Clients").delete().eq("id", client_id).execute()

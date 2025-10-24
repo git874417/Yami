@@ -1,1 +1,0 @@
-# Este archivo convierte el directorio 'project' en un paquete de Python.

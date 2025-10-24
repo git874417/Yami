@@ -1,0 +1,49 @@
+from project.db_utils import db_utils
+from .model import *
+
+def create_new_client(client_data: ClientCreate) -> int:
+    """
+    Orquesta la creación de un nuevo cliente.
+    Aquí puedes añadir más lógica en el futuro (ej. enviar un email de bienvenida).
+    """
+    try:
+        client_id = db_utils.create_client(
+            email=client_data.email,
+            password=client_data.password,
+            sub_plan=client_data.sub_plan,
+            name=client_data.name,
+            surname=client_data.surname,
+            address=client_data.address,
+            city=client_data.city,
+            postal_code=client_data.postal_code,
+            dni=client_data.dni,
+            phone_number=client_data.phone_number
+        )
+        # Futura lógica: enviar_email_bienvenida(client_data.email)
+        return client_id
+    except Exception as e:
+        # Puedes manejar o registrar el error aquí antes de relanzarlo
+        raise e
+
+def update_existing_client(id: int, client_data: ClientUpdate) -> int:
+    """
+    Orquesta la actualización de un cliente existente.
+    """
+    # Convierte el modelo Pydantic a un diccionario.
+    # exclude_unset=True asegura que solo se incluyan los campos que el cliente envió.
+    update_data = client_data.model_dump(exclude_unset=True)
+
+    # Si no se envió ningún dato para actualizar, no hacemos nada.
+    if not update_data:
+        return id # O podrías lanzar un error si lo prefieres
+
+    try:
+        # Pasamos el ID y el diccionario de datos a la función de la base de datos.
+        client_id = db_utils.update_client_information(
+            id=id,
+            data_to_update=update_data
+        )
+        return client_id
+    except Exception as e:
+        # Puedes manejar o registrar el error aquí antes de relanzarlo
+        raise e

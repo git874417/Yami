@@ -1,10 +1,11 @@
+from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class clientVO:
     def __init__(self, user_id: int, sub_plan: str, name: int, surname: int, address: str, city: str, postal_code: str, dni: str, phone_number: str, 
-                available_credits: int = None, id: int = None):
+                available_credits: int = None, id: int = None, subscription_renewal_date: datetime | str = None):
 
         if not user_id or not sub_plan:
             raise ValueError("user_id and sub_plan are required fields")
@@ -20,6 +21,7 @@ class clientVO:
         self.dni = dni
         self.phone_number = phone_number
         self.available_credits = available_credits
+        self.subscription_renewal_date = subscription_renewal_date
 
     @property
     def id(self):

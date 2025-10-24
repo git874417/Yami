@@ -1,1 +1,0 @@
-# Este archivo convierte el directorio 'src' en un sub-paquete de Python.

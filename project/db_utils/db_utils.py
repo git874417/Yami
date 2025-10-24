@@ -62,27 +62,25 @@ def update_client_credits(id: int, force_update: bool = False):
         print(f"Error updating client credits: {e}")
     return
 
-def update_client_information(id: int, new_sub_plan: str = None, new_name: str = None, new_surname: str = None,
-                              new_address: str = None, new_city: str = None, new_postal_code: str = None, new_dni: str = None, new_phone_number: str = None):
+def update_client_information(id: int, data_to_update: dict):
+    """
+    Actualiza la información de un cliente en la base de datos.
+    """
+    if not data_to_update:
+        # No hay nada que actualizar, simplemente retornamos el ID.
+        print(f"No data provided to update for client ID: {id}")
+        return id
+
     try:
         client_dao = clientDAO()
-        updated_client = client_dao.update(
-            id,
-            new_sub_plan=new_sub_plan,
-            new_name=new_name,
-            new_surname=new_surname,
-            new_address=new_address,
-            new_city=new_city,
-            new_postal_code=new_postal_code,
-            new_dni=new_dni,
-            new_phone_number=new_phone_number
-        )
+        # Asumimos que el método update del DAO ahora acepta un diccionario.
+        updated_client = client_dao.update(id, data_to_update)
         
         print(f"Client information updated: {updated_client}")      
         return updated_client
     except Exception as e:
         print(f"Error updating client information: {e}")
-    return
+        raise
 
 def create_restaurant(email: str, password: str, name: str, description: str, city: str, 
                       address: str, phone_number: str, category: str):
