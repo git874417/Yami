@@ -22,3 +22,21 @@ class ClientUpdate(BaseModel):
     postal_code: str | None = None
     dni: str | None = None
     phone_number: str | None = None
+
+class RestaurantCreate(BaseModel):
+    email: str
+    password: str
+    name: str
+    description: str
+    address: str
+    city: str
+    category: str
+    phone_number: str
+
+class RestaurantUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    city: str | None = None
+    address: str | None = None
+    phone_number: str | None = None
+    category: str | None = None

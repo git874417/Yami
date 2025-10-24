@@ -47,3 +47,48 @@ def update_existing_client(id: int, client_data: ClientUpdate) -> int:
     except Exception as e:
         # Puedes manejar o registrar el error aquí antes de relanzarlo
         raise e
+
+def create_new_restaurant(restaurant_data: RestaurantCreate) -> int:
+    """
+    Orquesta la creación de un nuevo restaurante.
+    Aquí puedes añadir más lógica en el futuro (ej. enviar un email de bienvenida).
+    """
+    try:
+        restaurant_id = db_utils.create_restaurant(
+            email=restaurant_data.email,
+            password=restaurant_data.password,
+            name=restaurant_data.name,
+            description=restaurant_data.description,
+            address=restaurant_data.address,
+            city=restaurant_data.city,
+            phone_number=restaurant_data.phone_number,
+            category=restaurant_data.category
+        )
+        # Futura lógica: enviar_email_bienvenida(restaurant_data.email)
+        return restaurant_id
+    except Exception as e:
+        # Puedes manejar o registrar el error aquí antes de relanzarlo
+        raise e
+
+def update_existing_restaurant(id: int, restaurant_data: RestaurantUpdate) -> int:
+    """
+    Orquesta la actualización de un restaurante existente.
+    """
+    # Convierte el modelo Pydantic a un diccionario.
+    # exclude_unset=True asegura que solo se incluyan los campos que el restaurante envió.
+    update_data = restaurant_data.model_dump(exclude_unset=True)
+
+    # Si no se envió ningún dato para actualizar, no hacemos nada.
+    if not update_data:
+        return id # O podrías lanzar un error si lo prefieres
+
+    try:
+        # Pasamos el ID y el diccionario de datos a la función de la base de datos.
+        restaurant_id = db_utils.update_restaurant_information(
+            id=id,
+            data_to_update=update_data
+        )
+        return restaurant_id
+    except Exception as e:
+        # Puedes manejar o registrar el error aquí antes de relanzarlo
+        raise e

@@ -25,27 +25,25 @@ class restaurantDAO:
         }).execute()
         return res.data, res.data[0]["id"]
 
-    def update(self, restaurant_id: int, new_name: str = None, new_description: str = None, new_city: str = None, new_address: str = None, new_phone_number: str = None, new_category: str = None):
-        update_data = {}
-        
-        if new_name is not None:
-            update_data["name"] = new_name
-        if new_description is not None:
-            update_data["description"] = new_description
-        if new_city is not None:
-            update_data["city"] = new_city
-        if new_address is not None:
-            update_data["address"] = new_address
-        if new_phone_number is not None:
-            update_data["phone_number"] = new_phone_number
-        if new_category is not None:
-            update_data["category"] = new_category
-        
-        if not update_data:
-            return None  # No fields to update
+    def update(self, restaurant_id: int, data_to_update: dict):
+        """
+        Actualiza los campos de un restaurante en la base de datos usando un diccionario.
+        """
+        if not data_to_update:
+            print("No fields to update.")
+            return restaurant_id  # No hay campos para actualizar, retorna el ID sin cambios.
             
-        res = self.supabase.table("Restaurants").update(update_data).eq("id", restaurant_id).execute()
-        return res.data, res.data[0]["id"]
+        try:
+            res = self.supabase.table("Restaurants").update(data_to_update).eq("id", restaurant_id).execute()
+            
+            if not res.data:
+                raise Exception(f"Restaurant with id {restaurant_id} not found or no changes made.")
+            
+            # Retorna el ID del restaurante actualizado
+            return res.data[0]['id']
+        except Exception as e:
+            print(f"Error in restaurantDAO.update: {e}")
+            raise
 
     def delete(self, restaurant_id: int):
         res = self.supabase.table("Restaurants").delete().eq("id", restaurant_id).execute()

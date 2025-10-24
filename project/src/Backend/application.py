@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from Entregas.Practica3.sources.scripts.restaurant import restaurantDAO
 from project.db_utils.userDAO import userDAO
 from project.db_utils.clientDAO import clientDAO
 from project.src.Backend import services
@@ -57,6 +58,37 @@ def update_client_endpoint(id: int, client: ClientUpdate):
         # Captura cualquier otra excepción y devuelve un error 500
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
+@app.post("/api/create_restaurant", status_code=201)
+def create_restaurant_endpoint(restaurant: RestaurantCreate):
+    """
+    Crea un nuevo restaurante en la base de datos.
+    """
+    try:
+        restaurant_id = services.create_new_restaurant(restaurant)
+        if restaurant_id is None:
+            raise HTTPException(status_code=400, detail="No se pudo crear el restaurante.")
+            
+        return {"message": "restaurante creado exitosamente", "restaurant_id": restaurant_id}
+    except Exception as e:
+        # Captura cualquier otra excepción y devuelve un error 500
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+    
+@app.post("/api/update_restaurant/{id}", status_code=200)
+def update_restaurant_endpoint(id: int, restaurant: RestaurantUpdate):
+    """
+    Actualiza un restaurante en la base de datos.
+    """
+    try:
+        restaurant_id = services.update_existing_restaurant(id, restaurant)
+        if restaurant_id is None:
+            raise HTTPException(status_code=400, detail="No se pudo actualizar el restaurante.")
+
+        return {"message": "restaurante actualizado exitosamente", "restaurant_id": restaurant_id}
+    except Exception as e:
+        # Captura cualquier otra excepción y devuelve un error 500
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
+
 @app.get("/api/users")
 def get_all_users():
     """
@@ -83,17 +115,48 @@ def get_all_clients():
         clients_list = [
             {
             "id": client.id,
-            "name": client.name,
-            "last_name": client.surname,
-            "phone": client.phone_number,
-            "address": client.address,
             "user_id": client.user_id,
+            "sub_plan": client.sub_plan,
+            "name": client.name,
+            "surname": client.surname,
+            "address": client.address,
+            "city": client.city,
+            "postal_code": client.postal_code,
+            "dni": client.dni,
+            "phone_number": client.phone_number,
             "available_credits": client.available_credits
             } for client in clients
         ]
         return {"clients": clients_list}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+    
+@app.get("/api/restaurants")
+def get_all_restaurants():
+    """
+    Obtiene una lista de todos los restaurantes.
+    """
+    try:
+        dao = restaurantDAO()
+        restaurants = dao.get_all()
+        # Convertir los VOs a diccionarios para la respuesta JSON
+        restaurants_list = [
+            {
+            "id": restaurant.id,
+            "user_id": restaurant.user_id,
+            "name": restaurant.name,
+            "description": restaurant.description,
+            "city": restaurant.city,
+            "address": restaurant.address,
+            "phone_number": restaurant.phone_number,
+            "category": restaurant.category
+            } for restaurant in restaurants
+        ]
+        return {"restaurants": restaurants_list}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
+
 
 # Para ejecutar la app, usa el comando:
 # uvicorn project.src.Backend.application:app --reload

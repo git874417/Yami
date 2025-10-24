@@ -109,23 +109,23 @@ def create_restaurant(email: str, password: str, name: str, description: str, ci
         print(f"Error creating restaurant: {e}")
     return
 
-def update_restaurant_information(id:int, email: str = None, new_name: str = None, new_description: str = None, new_city: str = None, new_address: str = None, new_phone_number: str = None, new_category: str = None):
-    try:        
-        restaurant_dao = restaurantDAO()
+def update_restaurant_information(id: int, data_to_update: dict):
+    """
+    Actualiza la información de un restaurante en la base de datos.
+    """
+    if not data_to_update:
+        print(f"No data provided to update for restaurant ID: {id}")
+        return id
 
-        updated_restaurant = restaurant_dao.update(
-            id,
-            new_name=new_name,
-            new_description=new_description,
-            new_city=new_city,
-            new_address=new_address,
-            new_phone_number=new_phone_number,
-            new_category=new_category
-        )
+    try:
+        restaurant_dao = restaurantDAO()
+        updated_restaurant = restaurant_dao.update(id, data_to_update)
+        
         print(f"Restaurant information updated: {updated_restaurant}")
         return updated_restaurant
     except Exception as e:
         print(f"Error updating restaurant information: {e}")
+        raise
 
 def create_dish(restaurant_id: int, name: str, description: str, allergens: str, dish_type: str):
     try:
