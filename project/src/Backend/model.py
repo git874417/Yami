@@ -52,3 +52,13 @@ class DishUpdate(BaseModel):
     description: str | None = None
     allergens: str | None = None
     dish_type: str | None = None
+
+class DishOrder(BaseModel):
+    dish_name: str
+    dish_type: str
+    instructions: str = ""
+
+class OrderCreate(BaseModel):
+    client_id: int
+    restaurant_id: int
+    dishes: list[DishOrder]    
