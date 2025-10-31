@@ -52,6 +52,37 @@ def create_client(email: str, password: str, sub_plan: str, name: str, surname: 
     except Exception as e:
         print(f"Error creating client: {e}")
 
+def delete_client(client_id: int):
+    """
+    Elimina un cliente y su usuario asociado de la base de datos.
+    Primero elimina el cliente, luego el usuario.
+    """
+    try:
+        client_dao = clientDAO()
+        user_dao = userDAO()
+        
+        # Obtener el cliente para conseguir su user_id
+        client = client_dao.get_by_id(client_id)
+        if not client:
+            print(f"Client with ID {client_id} not found")
+            return False
+        
+        user_id = client.user_id
+        
+        #Eliminamos el cliente
+        client_dao.delete(client_id)
+        print(f"Client {client_id} deleted")
+        
+        #Eliminamos el usuario
+        user_dao.delete(user_id)
+        print(f"User {user_id} deleted")
+        
+        return True
+        
+    except Exception as e:
+        print(f"Error deleting client: {e}")
+        return False
+    
 def update_client_credits(id: int, force_update: bool = False):
     try:
         client_dao = clientDAO()
@@ -127,6 +158,69 @@ def update_restaurant_information(id: int, data_to_update: dict):
         print(f"Error updating restaurant information: {e}")
         raise
 
+def delete_restaurant(restaurant_id: int):
+    """
+    Elimina un restaurante y todos sus datos asociados (platos, pedidos, ratings, etc.)
+    Elimina en orden correcto respetando las foreign keys.
+    """
+    try:
+        restaurant_dao = restaurantDAO()
+        user_dao = userDAO()
+        dish_dao = dishDAO()
+        order_dao = orderDAO()
+        ordered_dish_dao = orderedDishDAO()
+        rating_dao = ratingDAO()
+        
+        # Obtener el restaurante
+        restaurant = restaurant_dao.get_by_id(restaurant_id)
+        if not restaurant:
+            print(f"Restaurant with ID {restaurant_id} not found")
+            return False
+        
+        user_id = restaurant.user_id
+        
+        # Obtener todos los pedidos del restaurante
+        orders = order_dao.get_all()
+        restaurant_orders = [o for o in orders if o.restaurant_id == restaurant_id]
+        
+        #Eliminar platos pedidos (OrderedDishes) de los pedidos del restaurante
+        for order in restaurant_orders:
+            ordered_dishes = ordered_dish_dao.get_all()
+            for od in ordered_dishes:
+                if od.order_id == order.id:
+                    ordered_dish_dao.delete(od.id)
+        
+        # Eliminar pedidos del restaurante
+        for order in restaurant_orders:
+            order_dao.delete(order.id)
+        
+        # Eliminar valoraciones del restaurante
+        ratings = rating_dao.get_all()
+        restaurant_ratings = [r for r in ratings if r.restaurant_id == restaurant_id]
+        for rating in restaurant_ratings:
+            rating_dao.delete(rating.id)
+        
+        # Eliminar platos del restaurante
+        dishes = dish_dao.get_all()
+        restaurant_dishes = [d for d in dishes if d.restaurant_id == restaurant_id]
+        for dish in restaurant_dishes:
+            dish_dao.delete(dish.id)
+        
+        # Eliminar el restaurante
+        restaurant_dao.delete(restaurant_id)
+        print(f"Restaurant {restaurant_id} deleted")
+        
+        # Eliminar el usuario asociado
+        user_dao.delete(user_id)
+        print(f"User {user_id} deleted")
+        
+        print(f"Restaurant {restaurant_id} and all associated data deleted successfully")
+        return True
+        
+    except Exception as e:
+        print(f"Error deleting restaurant: {e}")
+        return False
+    
 def create_dish(restaurant_id: int, name: str, description: str, allergens: str, dish_type: str):
     try:
         dish_dao = dishDAO()

@@ -48,6 +48,21 @@ def update_existing_client(id: int, client_data: ClientUpdate) -> int:
         # Puedes manejar o registrar el error aquí antes de relanzarlo
         raise e
 
+def delete_existing_client(client_id: int) -> bool:
+    """
+    Orquesta la eliminación de un cliente existente.
+    Aquí puedes añadir más lógica en el futuro (ej. enviar email de despedida).
+    """
+    try:
+        success = db_utils.delete_client(client_id)
+        if success:
+            # Futura lógica: enviar_email_despedida(client_email)
+            return True
+        return False
+    except Exception as e:
+        # Puedes manejar o registrar el error aquí antes de relanzarlo
+        raise e
+    
 def create_new_restaurant(restaurant_data: RestaurantCreate) -> int:
     """
     Orquesta la creación de un nuevo restaurante.
@@ -92,3 +107,17 @@ def update_existing_restaurant(id: int, restaurant_data: RestaurantUpdate) -> in
     except Exception as e:
         # Puedes manejar o registrar el error aquí antes de relanzarlo
         raise e
+    
+def delete_existing_restaurant(restaurant_id: int) -> bool:
+    """
+    Orquesta la eliminación de un restaurante existente.
+    """
+    try:
+        success = db_utils.delete_restaurant(restaurant_id)
+        if success:
+            # Futura lógica: enviar_email_despedida(restaurant_email)
+            # Futura lógica: notificar_clientes_con_pedidos_pendientes()
+            return True
+        return False
+    except Exception as e:
+        raise e    

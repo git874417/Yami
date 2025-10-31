@@ -52,6 +52,10 @@ class dishDAO:
     def get_all(self):
         res = self.supabase.table("Dishes").select("*").execute()
         return [dishVO(**row) for row in res.data]
+    
+    def get_all_from_restaurant(self, restaurant_id: int):
+        res = self.supabase.table("Dishes").select("*").eq("restaurant_id", restaurant_id).execute()
+        return [dishVO(**row) for row in res.data]
 
     def get_by_id(self, dish_id: int):
         res = self.supabase.table("Dishes").select("*").eq("id", dish_id).single().execute()

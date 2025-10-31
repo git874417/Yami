@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from Entregas.Practica3.sources.scripts.restaurant import restaurantDAO
 from project.db_utils.userDAO import userDAO
 from project.db_utils.clientDAO import clientDAO
+from project.db_utils.dishDAO import dishDAO
 from project.src.Backend import services
 from project.src.Backend.model import *
 
@@ -58,6 +59,24 @@ def update_client_endpoint(id: int, client: ClientUpdate):
         # Captura cualquier otra excepción y devuelve un error 500
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
+@app.delete("/api/delete_client/{id}", status_code=200)
+def delete_client_endpoint(id: int):
+    """
+    Elimina un cliente de la base de datos.
+    """
+    try:
+        success = services.delete_existing_client(id)
+        if not success:
+            raise HTTPException(status_code=404, detail="No se pudo eliminar el cliente. Cliente no encontrado.")
+            
+        return {"message": "Cliente eliminado exitosamente", "client_id": id}
+    except HTTPException:
+        # Re-lanza las HTTPException tal cual
+        raise
+    except Exception as e:
+        # Captura cualquier otra excepción y devuelve un error 500
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+    
 @app.post("/api/create_restaurant", status_code=201)
 def create_restaurant_endpoint(restaurant: RestaurantCreate):
     """
@@ -88,6 +107,28 @@ def update_restaurant_endpoint(id: int, restaurant: RestaurantUpdate):
         # Captura cualquier otra excepción y devuelve un error 500
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
+@app.delete("/api/delete_restaurant/{id}", status_code=200)
+def delete_restaurant_endpoint(id: int):
+    """
+    Elimina un restaurante y todos sus datos asociados de la base de datos.
+    Esto incluye: platos, pedidos, platos pedidos y valoraciones.
+    """
+    try:
+        success = services.delete_existing_restaurant(id)
+        if not success:
+            raise HTTPException(
+                status_code=404,
+                detail="No se pudo eliminar el restaurante. Restaurante no encontrado."
+            )
+            
+        return {
+            "message": "Restaurante y todos sus datos asociados eliminados exitosamente",
+            "restaurant_id": id
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
 @app.get("/api/users")
 def get_all_users():
@@ -156,7 +197,28 @@ def get_all_restaurants():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
-
+@app.get("/api/restaurants/{restaurant_id}")
+def get_all_restaurants(restaurant_id: int):
+    """
+    Obtiene una lista de todos los platos de un restaurante.
+    """
+    try:
+        dao = dishDAO()
+        dishes = dao.get_all_from_restaurant(restaurant_id)
+        # Convertir los VOs a diccionarios para la respuesta JSON
+        dish_list = [
+            {
+            "id": dish.id,
+            "restaurant_id": dish.restaurant_id,
+            "name": dish.name,
+            "description": dish.description,
+            "allergens": dish.allergens,
+            "dish_type": dish.dish_type
+            } for dish in dishes
+        ]
+        return {"restaurants": dish_list}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
 # Para ejecutar la app, usa el comando:
 # uvicorn project.src.Backend.application:app --reload
