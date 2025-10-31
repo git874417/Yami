@@ -40,3 +40,13 @@ class RestaurantUpdate(BaseModel):
     address: str | None = None
     phone_number: str | None = None
     category: str | None = None
+
+class DishOrder(BaseModel):
+    dish_name: str
+    dish_type: str
+    instructions: str = ""
+
+class OrderCreate(BaseModel):
+    client_id: int
+    restaurant_id: int
+    dishes: list[DishOrder]    

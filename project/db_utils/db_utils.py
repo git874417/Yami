@@ -162,10 +162,6 @@ def delete_restaurant(restaurant_id: int):
     try:
         restaurant_dao = restaurantDAO()
         user_dao = userDAO()
-        dish_dao = dishDAO()
-        order_dao = orderDAO()
-        ordered_dish_dao = orderedDishDAO()
-        rating_dao = ratingDAO()
         
         # Obtener el restaurante
         restaurant = restaurant_dao.get_by_id(restaurant_id)

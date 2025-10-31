@@ -220,5 +220,134 @@ def get_all_restaurants(restaurant_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
+@app.post("/api/create_order", status_code=201)
+def create_order_endpoint(order: OrderCreate):
+    """
+    Crea un nuevo pedido en la base de datos.
+    
+    Validaciones:
+    - El cliente debe existir
+    - El restaurante debe existir
+    - Todos los platos deben existir en ese restaurante
+    - El cliente debe tener suficientes créditos
+    
+    Los créditos se calculan automáticamente según el tipo de plato:
+    - Entrante: X créditos
+    - Principal: Y créditos
+    - Postre: Z créditos
+    """
+    try:
+        # Validar que la lista de platos no esté vacía
+        if not order.dishes or len(order.dishes) == 0:
+            raise HTTPException(
+                status_code=400,
+                detail="El pedido debe contener al menos un plato"
+            )
+        
+        # Crear el pedido
+        order_id = services.create_new_order(order)
+        
+        return {
+            "message": "Pedido creado exitosamente",
+            "order_id": order_id
+        }
+        
+    except ValueError as ve:
+        # Errores de validación (ej. créditos insuficientes)
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        # Otros errores
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error interno del servidor: {e}"
+        )
+
+
+@app.get("/api/orders/{client_id}", status_code=200)
+def get_client_orders(client_id: int):
+    """
+    Obtiene todos los pedidos de un cliente específico.
+    """
+    try:
+        from project.db_utils.orderDAO import orderDAO
+        
+        order_dao = orderDAO()
+        orders = order_dao.get_all()
+        
+        # Filtrar pedidos del cliente
+        client_orders = [o for o in orders if o.client_id == client_id]
+        
+        # Convertir a diccionarios para la respuesta JSON
+        orders_list = []
+        for order in client_orders:
+            orders_list.append({
+                "id": order.id,
+                "client_id": order.client_id,
+                "restaurant_id": order.restaurant_id,
+                "order_credits": order.order_credits
+            })
+        
+        return {
+            "client_id": client_id,
+            "total_orders": len(orders_list),
+            "orders": orders_list
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error obteniendo pedidos: {e}"
+        )
+
+
+@app.get("/api/order/{order_id}/details", status_code=200)
+def get_order_details(order_id: int):
+    """
+    Obtiene los detalles completos de un pedido incluyendo los platos.
+    """
+    try:
+        from project.db_utils.orderDAO import orderDAO
+        from project.db_utils.orderedDishDAO import orderedDishDAO
+        
+        order_dao = orderDAO()
+        ordered_dish_dao = orderedDishDAO()
+        
+        # Obtener el pedido
+        order = order_dao.get_by_id(order_id)
+        if not order:
+            raise HTTPException(status_code=404, detail="Pedido no encontrado")
+        
+        # Obtener los platos del pedido
+        all_ordered_dishes = ordered_dish_dao.get_all()
+        order_dishes = [
+            od for od in all_ordered_dishes 
+            if od.order_id == order_id
+        ]
+        
+        # Convertir platos a diccionarios
+        dishes_list = []
+        for dish in order_dishes:
+            dishes_list.append({
+                "dish_id": dish.dish_id,
+                "dish_name": dish.dish_name,
+                "instructions": dish.instructions
+            })
+        
+        return {
+            "order_id": order.id,
+            "client_id": order.client_id,
+            "restaurant_id": order.restaurant_id,
+            "order_credits": order.order_credits,
+            "dishes": dishes_list
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error obteniendo detalles del pedido: {e}"
+        )
+    
 # Para ejecutar la app, usa el comando:
 # uvicorn project.src.Backend.application:app --reload

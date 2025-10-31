@@ -119,3 +119,35 @@ def delete_existing_restaurant(restaurant_id: int) -> bool:
         return False
     except Exception as e:
         raise e    
+    
+def create_new_order(order_data: OrderCreate) -> int:
+    """
+    Crea un nuevo pedido en la base de datos.
+    Calcula automáticamente los créditos según los tipos de platos.
+    Valida que el cliente tenga suficientes créditos.
+    """
+    try:
+        # Convertir los objetos DishOrder a diccionarios
+        dishes_dict = [
+            {
+                "dish_name": dish.dish_name,
+                "dish_type": dish.dish_type,
+                "instructions": dish.instructions
+            }
+            for dish in order_data.dishes
+        ]
+        
+        # Crear el pedido usando db_utils
+        order_id = db_utils.create_order(
+            client_id=order_data.client_id,
+            restaurant_id=order_data.restaurant_id,
+            dishes=dishes_dict
+        )
+        
+        if order_id is None:
+            raise ValueError("No se pudo crear el pedido. Verifica los datos.")
+        
+        return order_id
+        
+    except Exception as e:
+        raise e    
