@@ -220,8 +220,8 @@ def get_all_restaurants(restaurant_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
-@app.post("/api/create_order", status_code=201)
-def create_order_endpoint(order: OrderCreate):
+@app.post("/api/create_order/{client_id}/{restaurant_id}", status_code=201)
+def create_order_endpoint(client_id: int, restaurant_id: int,order: OrderCreate):
     """
     Crea un nuevo pedido en la base de datos.
     
@@ -243,6 +243,9 @@ def create_order_endpoint(order: OrderCreate):
                 status_code=400,
                 detail="El pedido debe contener al menos un plato"
             )
+        
+        order.client_id = client_id
+        order.restaurant_id = restaurant_id
         
         # Crear el pedido
         order_id = services.create_new_order(order)
