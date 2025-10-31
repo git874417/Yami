@@ -23,23 +23,22 @@ class dishDAO:
         }).execute()
         return res.data, res.data[0]["id"]
 
-    def update(self, dish_id: int, new_name: str = None, new_description: str = None, new_allergens: str = None, new_dish_type: str = None):
-        update_data = {}
-        
-        if new_name is not None:
-            update_data["name"] = new_name
-        if new_description is not None:
-            update_data["description"] = new_description
-        if new_allergens is not None:
-            update_data["allergens"] = new_allergens
-        if new_dish_type is not None:
-            update_data["dish_type"] = new_dish_type
-        
-        if not update_data:
-            return None  # No fields to update
-            
-        res = self.supabase.table("Dishes").update(update_data).eq("id", dish_id).execute()
-        return res.data, res.data[0]["id"]
+    def update(self, dish_id: int, data_to_update: dict):
+        if not data_to_update:
+            print("No fields to update.")
+            return dish_id  # No hay campos para actualizar, retorna el ID sin cambios.
+
+        try:
+            res = self.supabase.table("Dishes").update(data_to_update).eq("id", dish_id).execute()
+
+            if not res.data:
+                raise Exception(f"Dish with id {dish_id} not found or no changes made.")
+
+            # Retorna el ID del plato actualizado
+            return res.data[0]['id']
+        except Exception as e:
+            print(f"Error in dishDAO.update: {e}")
+            raise
 
     def delete(self, dish_id: int):
         res = self.supabase.table("Dishes").delete().eq("id", dish_id).execute()

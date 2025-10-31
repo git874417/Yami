@@ -130,6 +130,58 @@ def delete_restaurant_endpoint(id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
+@app.post("/api/create_dish/{restaurant_id}", status_code=201)
+def create_dish_endpoint(restaurant_id: int, dish: DishCreate):
+    """
+    Crea un nuevo plato en la base de datos.
+    """
+    try:
+        dish_id = services.create_new_dish(restaurant_id, dish)
+        if dish_id is None:
+            raise HTTPException(status_code=400, detail="No se pudo crear el plato.")
+            
+        return {"message": "plato creado exitosamente", "dish_id": dish_id}
+    except Exception as e:
+        # Captura cualquier otra excepción y devuelve un error 500
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
+@app.post("/api/update_dish/{dish_id}", status_code=200)
+def update_dish_endpoint(dish_id: int, dish: DishUpdate):
+    """
+    Actualiza un plato en la base de datos.
+    """
+    try:
+        dish_id = services.update_existing_dish(dish_id, dish)
+        if dish_id is None:
+            raise HTTPException(status_code=400, detail="No se pudo actualizar el plato.")
+
+        return {"message": "plato actualizado exitosamente", "dish_id": dish_id}
+    except Exception as e:
+        # Captura cualquier otra excepción y devuelve un error 500
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
+@app.delete("/api/delete_dish/{id}", status_code=200)
+def delete_dish_endpoint(id: int):
+    """
+    Elimina un plato de la base de datos.
+    """
+    try:
+        success = services.delete_existing_dish(id)
+        if not success:
+            raise HTTPException(
+                status_code=404,
+                detail="No se pudo eliminar el plato. Plato no encontrado."
+            )
+            
+        return {
+            "message": "Plato eliminado exitosamente",
+            "dish_id": id
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
 @app.get("/api/users")
 def get_all_users():
     """
@@ -197,8 +249,8 @@ def get_all_restaurants():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
-@app.get("/api/restaurants/{restaurant_id}")
-def get_all_restaurants(restaurant_id: int):
+@app.get("/api/dish/{restaurant_id}")
+def get_all_dishes(restaurant_id: int):
     """
     Obtiene una lista de todos los platos de un restaurante.
     """

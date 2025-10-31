@@ -240,23 +240,33 @@ def create_dish(restaurant_id: int, name: str, description: str, allergens: str,
         print(f"Error creating dish: {e}")
     return
 
-def update_dish_information(old_dish_name: str, restaurant_id: int, new_name: str = None, new_description: str= None, new_allergens: str= None, new_dish_type: str= None):
+def update_dish_information(dish_id: int, data_to_update: dict):
     try:        
         dish_dao = dishDAO()
 
-        dish = dish_dao.get_by_name(old_dish_name, restaurant_id)
-        updated_dish = dish_dao.update(
-            dish.id,
-            new_name=new_name,
-            new_description=new_description,
-            new_allergens=new_allergens,
-            new_dish_type=new_dish_type
-        )
+        updated_dish = dish_dao.update(dish_id, data_to_update)
         print(f"Dish information updated: {updated_dish}")
         return updated_dish
     except Exception as e:
         print(f"Error updating dish information: {e}")
     return
+
+def delete_existing_dish(dish_id: int):
+    """
+    Elimina un plato existente de la base de datos.
+    """
+    try:
+        dish_dao = dishDAO()
+        dish = dish_dao.get_by_id(dish_id)
+        if not dish:
+            print(f"Dish with ID {dish_id} not found")
+            return False
+        
+        dish_dao.delete(dish_id)
+        return True
+    except Exception as e:
+        print(f"Error deleting dish: {e}")
+        return False
 
 def create_order(client_id: int, restaurant_id: int, dishes: list[dict]):
     try:

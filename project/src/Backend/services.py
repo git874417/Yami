@@ -120,4 +120,52 @@ def delete_existing_restaurant(restaurant_id: int) -> bool:
             return True
         return False
     except Exception as e:
-        raise e    
+        raise e
+
+def create_new_dish(restaurant_id: int, dish_data: DishCreate) -> int:
+    """
+    Orquesta la creación de un nuevo plato.
+    """
+    try:
+        dish_id = db_utils.create_dish(
+            restaurant_id=restaurant_id,
+            name=dish_data.name,
+            description=dish_data.description,
+            allergens=dish_data.allergens,
+            dish_type=dish_data.dish_type
+        )
+        return dish_id
+    except Exception as e:
+        raise e 
+
+def update_existing_dish(dish_id: int, dish_data: DishUpdate) -> int:
+    """
+    Orquesta la actualización de un plato existente.
+    """
+    # Convierte el modelo Pydantic a un diccionario.
+    update_data = dish_data.model_dump(exclude_unset=True)
+
+    # Si no se envió ningún dato para actualizar, no hacemos nada.
+    if not update_data:
+        return id
+
+    try:
+        # Pasamos el ID y el diccionario de datos a la función de la base de datos.
+        dish_id = db_utils.update_dish_information(
+            dish_id=dish_id,
+            data_to_update=update_data
+        )
+        return dish_id
+    except Exception as e:
+        # Puedes manejar o registrar el error aquí antes de relanzarlo
+        raise e
+    
+def delete_existing_dish(dish_id: int) -> bool:
+    """
+    Orquesta la eliminación de un plato existente.
+    """
+    try:
+        success = db_utils.delete_existing_dish(dish_id)
+        return success
+    except Exception as e:
+        raise e
