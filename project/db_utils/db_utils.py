@@ -69,10 +69,6 @@ def delete_client(client_id: int):
         
         user_id = client.user_id
         
-        #Eliminamos el cliente
-        client_dao.delete(client_id)
-        print(f"Client {client_id} deleted")
-        
         #Eliminamos el usuario
         user_dao.delete(user_id)
         print(f"User {user_id} deleted")
@@ -178,37 +174,6 @@ def delete_restaurant(restaurant_id: int):
             return False
         
         user_id = restaurant.user_id
-        
-        # Obtener todos los pedidos del restaurante
-        orders = order_dao.get_all()
-        restaurant_orders = [o for o in orders if o.restaurant_id == restaurant_id]
-        
-        #Eliminar platos pedidos (OrderedDishes) de los pedidos del restaurante
-        for order in restaurant_orders:
-            ordered_dishes = ordered_dish_dao.get_all()
-            for od in ordered_dishes:
-                if od.order_id == order.id:
-                    ordered_dish_dao.delete(od.id)
-        
-        # Eliminar pedidos del restaurante
-        for order in restaurant_orders:
-            order_dao.delete(order.id)
-        
-        # Eliminar valoraciones del restaurante
-        ratings = rating_dao.get_all()
-        restaurant_ratings = [r for r in ratings if r.restaurant_id == restaurant_id]
-        for rating in restaurant_ratings:
-            rating_dao.delete(rating.id)
-        
-        # Eliminar platos del restaurante
-        dishes = dish_dao.get_all()
-        restaurant_dishes = [d for d in dishes if d.restaurant_id == restaurant_id]
-        for dish in restaurant_dishes:
-            dish_dao.delete(dish.id)
-        
-        # Eliminar el restaurante
-        restaurant_dao.delete(restaurant_id)
-        print(f"Restaurant {restaurant_id} deleted")
         
         # Eliminar el usuario asociado
         user_dao.delete(user_id)

@@ -115,8 +115,6 @@ def delete_existing_restaurant(restaurant_id: int) -> bool:
     try:
         success = db_utils.delete_restaurant(restaurant_id)
         if success:
-            # Futura lógica: enviar_email_despedida(restaurant_email)
-            # Futura lógica: notificar_clientes_con_pedidos_pendientes()
             return True
         return False
     except Exception as e:
