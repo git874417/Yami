@@ -267,7 +267,57 @@ def create_order(client_id: int, restaurant_id: int, dishes: list[dict]):
         return order_id
     except Exception as e:
         print(f"Error creating order: {e}")
-    return          
+    return     
+
+def update_order_status(order_id: int):
+    try:
+        order_dao = orderDAO()
+
+        order = order_dao.get_by_id(order_id)
+        if not order:
+            print(f"Order with ID {order_id} not found")
+            return False
+        
+        match order.order_status:
+            case "Encargado":
+                new_status = "En preparacion"
+            case "En preparacion":
+                new_status = "En reparto"
+            case "En reparto":
+                new_status = "Entregado"
+            case "Cancelado" | "Entregado":
+                print(f"Order with ID {order_id} is already in final status: {order.order_status}")
+                return order.order_status
+
+        updated_order = order_dao.updateOrderStatus(new_status, order_id)
+        return updated_order
+    except Exception as e:
+        print(f"Error updating order status: {e}")
+    return     
+
+def cancel_order(order_id: int):
+    try:
+        order_dao = orderDAO()
+        client_dao = clientDAO()
+
+        order = order_dao.get_by_id(order_id)
+        if not order:
+            print(f"Order with ID {order_id} not found")
+            return order_id
+        
+        if order.order_status == "Cancelado":
+            print(f"Order with ID {order_id} is already cancelled")
+            return order_id
+
+        # Refund credits to client
+        client_dao.update_credits_after_cancellation(order.client_id, order.order_credits)
+
+        # Update order status to "Cancelado"
+        updated_order = order_dao.updateOrderStatus("Cancelado", order_id)
+        return updated_order
+    except Exception as e:
+        print(f"Error cancelling order: {e}")
+    return
 
 def create_rating(client_id: int, restaurant_id: int, rating: int):
     try:
@@ -284,6 +334,16 @@ def create_rating(client_id: int, restaurant_id: int, rating: int):
         return rating_id
     except Exception as e:
         print(f"Error creating rating: {e}")
+    return
+
+def update_rating_information(rating_id: int, data_to_update: dict | None = None):
+    try:
+        rating_dao = ratingDAO()
+
+        updated_rating = rating_dao.update(rating_id, data_to_update)
+        return updated_rating
+    except Exception as e:
+        print(f"Error updating rating: {e}")
     return
 
 def clean_db():

@@ -61,3 +61,11 @@ class orderDAO:
     def get_by_id(self, order_id: int):
         res = self.supabase.table("Orders").select("*").eq("id", order_id).single().execute()
         return orderVO(**res.data) if res.data else None
+
+    def get_by_client_id(self, client_id: int):
+        res = self.supabase.table("Orders").select("*").eq("client_id", client_id).execute()
+        return [orderVO(**row) for row in res.data] if res.data else []
+
+    def get_by_restaurant_id(self, restaurant_id: int):
+        res = self.supabase.table("Orders").select("*").eq("restaurant_id", restaurant_id).execute()
+        return [orderVO(**row) for row in res.data] if res.data else []

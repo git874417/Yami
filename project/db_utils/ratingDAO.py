@@ -20,18 +20,16 @@ class ratingDAO:
         }).execute()
         return res.data, res.data[0]["id"]
 
-    def update(self, rating_id: int, new_rating: int = None):
-        update_data = {}
-        
-        if new_rating is not None:
-            if new_rating < 1 or new_rating > 5:
-                raise ValueError("rating must be between 1 and 5")
-            update_data["rating"] = new_rating
-        
-        if not update_data:
+    def update(self, rating_id: int, data_to_update: dict | None = None):
+        if data_to_update is None:
             return None  # No fields to update
-            
-        res = self.supabase.table("Ratings").update(update_data).eq("id", rating_id).execute()
+        
+        if 'rating' in data_to_update:
+            rating_value = data_to_update['rating']
+            if not isinstance(rating_value, int) or not (1 <= rating_value <= 5):
+                raise ValueError("El rating debe ser un número entero entre 1 y 5.")
+
+        res = self.supabase.table("Ratings").update(data_to_update).eq("id", rating_id).execute()
         return res.data, res.data[0]["id"]
 
     def delete(self, rating_id: int):

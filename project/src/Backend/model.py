@@ -59,6 +59,10 @@ class DishOrder(BaseModel):
     instructions: str = ""
 
 class OrderCreate(BaseModel):
-    client_id: int
-    restaurant_id: int
     dishes: list[DishOrder]    
+
+class RatingCreate(BaseModel):
+    rating: int 
+
+class RatingUpdate(BaseModel):
+    rating: int | None = None

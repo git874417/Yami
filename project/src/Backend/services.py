@@ -168,7 +168,7 @@ def delete_existing_dish(dish_id: int) -> bool:
     except Exception as e:
         raise e
     
-def create_new_order(order_data: OrderCreate) -> int:
+def create_new_order(client_id: int, restaurant_id:int, order_data: OrderCreate) -> int:
     """
     Crea un nuevo pedido en la base de datos.
     Calcula automáticamente los créditos según los tipos de platos.
@@ -187,8 +187,8 @@ def create_new_order(order_data: OrderCreate) -> int:
         
         # Crear el pedido usando db_utils
         order_id = db_utils.create_order(
-            client_id=order_data.client_id,
-            restaurant_id=order_data.restaurant_id,
+            client_id=client_id,
+            restaurant_id=restaurant_id,
             dishes=dishes_dict
         )
         
@@ -198,4 +198,64 @@ def create_new_order(order_data: OrderCreate) -> int:
         return order_id
         
     except Exception as e:
-        raise e    
+        raise e
+
+def update_existing_order_status(order_id: int) -> int:
+    """
+    Actualiza el estado de un pedido existente.
+    """
+    try:
+        # Pasamos el ID y el diccionario de datos a la función de la base de datos.
+        order_id = db_utils.update_order_status(
+            order_id=order_id
+        )
+        return order_id
+    except Exception as e:
+        # Puedes manejar o registrar el error aquí antes de relanzarlo
+        raise e
+    
+def cancel_existing_order(order_id: int) -> bool:
+    """
+    Orquesta la cancelacion de un pedido existente.
+    """
+    try:
+        order_id = db_utils.cancel_order(order_id)
+        return order_id
+    except Exception as e:
+        raise e
+
+def create_new_rating(client_id: int, restaurant_id: int, rating_data: RatingCreate) -> int:
+    """
+    Orquesta la creación de una nueva valoración.
+    """
+    try:
+        rating_id = db_utils.create_rating(
+            client_id=client_id,
+            restaurant_id=restaurant_id,
+            rating=rating_data.rating
+        )
+        return rating_id
+    except Exception as e:
+        raise e
+    
+def update_existing_rating(rating_id: int, rating_data: RatingUpdate) -> int:
+    """
+    Orquesta la actualización de una valoración existente.
+    """
+    # Convierte el modelo Pydantic a un diccionario.
+    update_data = rating_data.model_dump(exclude_unset=True)
+
+    # Si no se envió ningún dato para actualizar, no hacemos nada.
+    if not update_data:
+        return rating_id # O podrías lanzar un error si lo prefieres
+
+    try:
+        # Pasamos el ID y el diccionario de datos a la función de la base de datos.
+        rating_id = db_utils.update_rating_information(
+            rating_id=rating_id,
+            data_to_update=update_data
+        )
+        return rating_id
+    except Exception as e:
+        # Puedes manejar o registrar el error aquí antes de relanzarlo
+        raise e
