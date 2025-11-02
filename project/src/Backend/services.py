@@ -2,6 +2,11 @@ from project.db_utils import db_utils
 from .model import *
 from passlib.context import CryptContext
 import bcrypt
+import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from datetime import datetime
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -30,6 +35,68 @@ def get_password_hash(password: str) -> str:
     # Decodificar el hash para guardarlo como string en la base de datos
     return hashed_bytes.decode('utf-8')
 
+def send_welcome_email(recipient_email: str, recipient_name: str):
+    """
+    Envía un correo de bienvenida formateado con HTML a un nuevo usuario.
+    """
+    try:
+        # Cargar credenciales desde el archivo .env
+        sender_email = os.getenv("MAIL_USERNAME")
+        password = os.getenv("MAIL_PASSWORD")
+        
+        if not sender_email or not password:
+            print("Advertencia: Credenciales de correo no configuradas en .env. No se enviará el correo.")
+            return
+        # Crear el cuerpo del correo en HTML
+        html_body = f"""
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; }}
+                .container {{ max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }}
+                .header {{ font-size: 24px; color: #d9534f; text-align: center; }}
+                .content {{ margin-top: 20px; }}
+                .footer {{ margin-top: 30px; font-size: 12px; text-align: center; color: #888; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1 class="header">¡Bienvenido a Yami, {recipient_name}!</h1>
+                <div class="content">
+                    <p>Hola {recipient_name},</p>
+                    <p>Gracias por registrarte en Yami. Estamos encantados de tenerte con nosotros.</p>
+                    <p>¡Explora los mejores restaurantes y disfruta de tus platos favoritos!</p>
+                    <p>El equipo de Yami</p>
+                </div>
+                <div class="footer">
+                    <p>&copy; {datetime.now().year} Yami. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        # Crear el objeto del mensaje
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = "¡Bienvenido a Yami!"
+        msg['From'] = sender_email
+        msg['To'] = recipient_email
+        
+        # Adjuntar la parte HTML
+        msg.attach(MIMEText(html_body, 'html'))
+
+        # Conectar al servidor SMTP y enviar el correo
+        with smtplib.SMTP(os.getenv("MAIL_SERVER"), int(os.getenv("MAIL_PORT"))) as server:
+            server.starttls()  # Iniciar conexión segura
+            server.login(sender_email, password)
+            server.send_message(msg)
+            print(f"Correo de bienvenida enviado exitosamente a {recipient_email}")
+
+    except Exception as e:
+        # Si el correo falla, no debe detener el proceso de registro.
+        # Solo se imprime un error en la consola del servidor.
+        print(f"Error al enviar correo de bienvenida a {recipient_email}: {e}")
+
 def create_new_client(client_data: ClientCreate) -> int:
     """
     Orquesta la creación de un nuevo cliente.
@@ -52,6 +119,7 @@ def create_new_client(client_data: ClientCreate) -> int:
             phone_number=client_data.phone_number
         )
         # Futura lógica: enviar_email_bienvenida(client_data.email)
+        send_welcome_email(recipient_email=client_data.email, recipient_name=client_data.name)
         return client_id
     except Exception as e:
         # Puedes manejar o registrar el error aquí antes de relanzarlo

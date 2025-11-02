@@ -411,7 +411,7 @@ def get_all_dishes(restaurant_id: int):
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
 
-@app.get("/api/orders/{client_id}", status_code=200)
+@app.get("/api/client_orders/{client_id}", status_code=200)
 def get_client_orders(client_id: int):
     """
     Obtiene todos los pedidos de un cliente específico.
@@ -443,7 +443,7 @@ def get_client_orders(client_id: int):
             detail=f"Error obteniendo pedidos: {e}"
         )
 
-@app.get("/api/orders/{restaurant_id}", status_code=200)
+@app.get("/api/restaurant_orders/{restaurant_id}", status_code=200)
 def get_restaurant_orders(restaurant_id: int):
     """
     Obtiene todos los pedidos de un restaurante específico.
