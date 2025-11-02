@@ -409,16 +409,16 @@ def upload_dish_image(dish_id: int, file, content_type: str) -> str:
     
     return public_url
 
-def upload_client_profile_picture(user_id: int, file, content_type: str) -> str:
+def upload_user_profile_picture(user_id: int, file, content_type: str) -> str:
     """
-    Sube la foto de perfil de un cliente y actualiza la BD.
+    Sube la foto de perfil de un usuario y actualiza la BD.
     """
     bucket_name = "profile-picture-images"
-    file_path = f"public/client_{user_id}.{content_type.split('/')[1]}"
+    file_path = f"public/user_{user_id}.{content_type.split('/')[1]}"
     
     public_url = _upload_file_to_supabase(bucket_name, file_path, file, content_type)
     
-    # Actualizar la columna 'image_url' en la tabla de clientes
+    # Actualizar la columna 'image_url' en la tabla de usuarios
     user_dao = db_utils.userDAO()
     user_dao.update(user_id, {"image_url": public_url})
 

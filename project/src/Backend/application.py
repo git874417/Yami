@@ -63,14 +63,14 @@ def login_endpoint(form_data: UserLogin):
     #    y devolverlo al cliente.
     return {"message": "Login exitoso", "user_id": user.id, "role": user.role}
 
-@app.post("/api/upload/profile_picture/{user_id}", status_code=200)
+@app.put("/api/upload/profile_picture/{user_id}", status_code=200)
 async def upload_profile_picture_endpoint(user_id: int, file: UploadFile = File(...)):
     if file.content_type not in ["image/jpeg", "image/png"]:
         raise HTTPException(status_code=400, detail="Tipo de archivo no válido. Solo .jpg o .png")
     
     try:
         file_content = await file.read()
-        image_url = services.upload_client_profile_picture(user_id, file_content, file.content_type)
+        image_url = services.upload_user_profile_picture(user_id, file_content, file.content_type)
         return {"message": "Foto de perfil subida exitosamente", "image_url": image_url}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
@@ -106,7 +106,7 @@ def create_restaurant_endpoint(restaurant: RestaurantCreate):
         # Captura cualquier otra excepción y devuelve un error 500
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}") 
 
-@app.post("/api/upload/restaurant_image/{restaurant_id}", status_code=200)
+@app.put("/api/upload/restaurant_image/{restaurant_id}", status_code=200)
 async def upload_restaurant_image(restaurant_id: int, file: UploadFile = File(...)):
     """
     Sube o actualiza la imagen de un restaurante.
@@ -148,7 +148,7 @@ def create_dish_endpoint(restaurant_id: int, dish: DishCreate):
         # Captura cualquier otra excepción y devuelve un error 500
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
     
-@app.post("/api/upload/dish_image/{dish_id}", status_code=200)
+@app.put("/api/upload/dish_image/{dish_id}", status_code=200)
 async def upload_dish_image_endpoint(dish_id: int, file: UploadFile = File(...)):
     if file.content_type not in ["image/jpeg", "image/png"]:
         raise HTTPException(status_code=400, detail="Tipo de archivo no válido. Solo .jpg o .png")
