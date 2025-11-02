@@ -1,3 +1,4 @@
+from supabase import Client, create_client
 from project.db_utils import db_utils
 from .model import *
 from passlib.context import CryptContext
@@ -359,3 +360,66 @@ def update_existing_rating(rating_id: int, rating_data: RatingUpdate) -> int:
     except Exception as e:
         # Puedes manejar o registrar el error aquí antes de relanzarlo
         raise e
+    
+def _upload_file_to_supabase(bucket_name: str, file_path: str, file, content_type: str) -> str:
+    """
+    Función genérica interna para subir un archivo a un bucket específico de Supabase.
+    """
+    url = os.environ.get("SUPABASE_URL")
+    key = os.environ.get("SUPABASE_KEY")
+    supabase: Client = create_client(url, key)
+
+    # Sube el archivo. upsert=True sobrescribe si ya existe.
+    supabase.storage.from_(bucket_name).upload(
+        file=file,
+        path=file_path,
+        file_options={"content-type": content_type, "upsert": "true"}
+    )
+
+    # Devuelve la URL pública del archivo.
+    return supabase.storage.from_(bucket_name).get_public_url(file_path)
+    
+def upload_restaurant_logo(restaurant_id: int, file, content_type: str) -> str:
+    """
+    Sube el logo de un restaurante y actualiza la BD.
+    """
+    bucket_name = "restaurant-logo-images"
+    file_path = f"public/logo_{restaurant_id}.{content_type.split('/')[1]}"
+    
+    public_url = _upload_file_to_supabase(bucket_name, file_path, file, content_type)
+    
+    # Actualizar la columna 'logo_url' en la tabla de restaurantes
+    restaurant_dao = db_utils.restaurantDAO()
+    restaurant_dao.update(restaurant_id, {"logo_url": public_url})
+    
+    return public_url
+
+def upload_dish_image(dish_id: int, file, content_type: str) -> str:
+    """
+    Sube la imagen de un plato y actualiza la BD.
+    """
+    bucket_name = "dish-images"
+    file_path = f"public/dish_{dish_id}.{content_type.split('/')[1]}"
+    
+    public_url = _upload_file_to_supabase(bucket_name, file_path, file, content_type)
+    
+    # Actualizar la columna 'image_url' en la tabla de platos
+    dish_dao = db_utils.dishDAO()
+    dish_dao.update(dish_id, {"image_url": public_url})
+    
+    return public_url
+
+def upload_client_profile_picture(user_id: int, file, content_type: str) -> str:
+    """
+    Sube la foto de perfil de un cliente y actualiza la BD.
+    """
+    bucket_name = "profile-picture-images"
+    file_path = f"public/client_{user_id}.{content_type.split('/')[1]}"
+    
+    public_url = _upload_file_to_supabase(bucket_name, file_path, file, content_type)
+    
+    # Actualizar la columna 'image_url' en la tabla de clientes
+    user_dao = db_utils.userDAO()
+    user_dao.update(user_id, {"image_url": public_url})
+
+    return public_url
