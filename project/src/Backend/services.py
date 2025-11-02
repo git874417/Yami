@@ -1,3 +1,4 @@
+from email.utils import make_msgid
 from supabase import Client, create_client
 from project.db_utils import db_utils
 from .model import *
@@ -8,6 +9,11 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
+from project.db_utils.clientDAO import clientDAO
+from project.db_utils.userDAO import userDAO
+from project.db_utils.restaurantDAO import restaurantDAO
+from project.db_utils.dishDAO import dishDAO
+from project.db_utils.orderDAO import orderDAO
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -97,6 +103,212 @@ def send_welcome_email(recipient_email: str, recipient_name: str):
         # Si el correo falla, no debe detener el proceso de registro.
         # Solo se imprime un error en la consola del servidor.
         print(f"Error al enviar correo de bienvenida a {recipient_email}: {e}")
+
+def send_order_confirmation_email(recipient_email: str, recipient_name: str, restaurant_name: str, dishes: list, total_credits: int, order_id: int):
+    """
+    Envía un correo de confirmación de pedido formateado con HTML, incluyendo desglose de créditos.
+    """
+    try:
+        sender_email = os.getenv("MAIL_USERNAME")
+        password = os.getenv("MAIL_PASSWORD")
+        
+        if not sender_email or not password:
+            print("Advertencia: Credenciales de correo no configuradas. No se enviará el correo de confirmación.")
+            return
+
+        # --- Construir la lista de platos en HTML con desglose de créditos ---
+        dishes_html = ""
+        for dish in dishes:
+            image_url = dish.get('image_url') or "https://via.placeholder.com/100"
+            dishes_html += f"""
+            <div class="dish-item">
+                <img src="{image_url}" alt="{dish['dish_name']}">
+                <div class="dish-info">
+                    <strong>{dish['dish_name']}</strong> ({dish['credits']} crédito/s)<br>
+                    <small>{dish['dish_type']}</small><br>
+                    <em>Instrucciones: {dish.get('instructions', 'Ninguna')}</em>
+                </div>
+            </div>
+            """
+
+        # --- Crear el cuerpo completo del correo ---
+        html_body = f"""
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }}
+                .header {{ font-size: 24px; color: #d9534f; text-align: center; }}
+                .content {{ margin-top: 20px; }}
+                .total-cost {{ text-align: right; font-size: 18px; font-weight: bold; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;}}
+                .footer {{ margin-top: 30px; font-size: 12px; text-align: center; color: #888; }}
+                .dish-item {{ display: flex; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px; }}
+                .dish-item:last-child {{ border-bottom: none; }}
+                .dish-item img {{ width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin-right: 15px; }}
+                .dish-info {{ flex: 1; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1 class="header">¡Tu pedido en Yami está en marcha!</h1>
+                <div class="content">
+                    <p>Hola {recipient_name},</p>
+                    <p>Hemos recibido tu pedido del restaurante <strong>{restaurant_name}</strong>. ¡Ya estamos preparando tus platos!</p>
+                    <h3>Resumen de tu pedido:</h3>
+                    {dishes_html}
+                    <div class="total-cost">
+                        Total: {total_credits} crédito/s
+                    </div>
+                    <p>Gracias por confiar en Yami.</p>
+                </div>
+                <div class="footer">
+                    <p>&copy; {datetime.now().year} Yami. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f"Confirmación de tu pedido #{order_id} en {restaurant_name}"
+        msg['From'] = sender_email
+        msg['To'] = recipient_email
+
+        message_id = make_msgid()
+        msg['Message-ID'] = message_id
+        
+        msg.attach(MIMEText(html_body, 'html'))
+
+        with smtplib.SMTP(os.getenv("MAIL_SERVER"), int(os.getenv("MAIL_PORT"))) as server:
+            server.starttls()
+            server.login(sender_email, password)
+            server.send_message(msg)
+            print(f"Correo de confirmación de pedido enviado a {recipient_email}")
+
+        return message_id 
+    except Exception as e:
+        print(f"Error al enviar correo de confirmación de pedido a {recipient_email}: {e}")
+
+def send_order_in_delivery_email(recipient_email: str, recipient_name: str, restaurant_name: str, order_id: int, original_message_id: str = None):
+    """
+    Envía un correo para notificar que el pedido está en reparto.
+    """
+    try:
+        sender_email = os.getenv("MAIL_USERNAME")
+        password = os.getenv("MAIL_PASSWORD")
+        
+        if not sender_email or not password:
+            print("Advertencia: Credenciales de correo no configuradas. No se enviará el correo.")
+            return
+
+        html_body = f"""
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }}
+                .header {{ font-size: 24px; color: #d9534f; text-align: center; }}
+                .content {{ margin-top: 20px; }}
+                .footer {{ margin-top: 30px; font-size: 12px; text-align: center; color: #888; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1 class="header">¡Tu pedido está en camino!</h1>
+                <div class="content">
+                    <p>Hola {recipient_name},</p>
+                    <p>¡Buenas noticias! Tu pedido del restaurante <strong>{restaurant_name}</strong> ya ha salido del restaurante y está de camino a tu dirección.</p>
+                    <p>Puedes seguir el estado de tu pedido en la aplicación.</p>
+                    <p>¡Que aproveche!</p>
+                </div>
+                <div class="footer">
+                    <p>&copy; {datetime.now().year} Yami. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f"¡Tu pedido #{order_id} de {restaurant_name} está en camino!"
+        msg['From'] = sender_email
+        msg['To'] = recipient_email
+
+        if original_message_id:
+            msg['In-Reply-To'] = original_message_id
+            msg['References'] = original_message_id
+
+        msg.attach(MIMEText(html_body, 'html'))
+
+        with smtplib.SMTP(os.getenv("MAIL_SERVER"), int(os.getenv("MAIL_PORT"))) as server:
+            server.starttls()
+            server.login(sender_email, password)
+            server.send_message(msg)
+            print(f"Correo de 'pedido en reparto' enviado a {recipient_email}")
+
+    except Exception as e:
+        print(f"Error al enviar correo de 'pedido en reparto' a {recipient_email}: {e}")
+
+def send_order_delivered_email(recipient_email: str, recipient_name: str, restaurant_name: str, order_id: int, original_message_id: str = None):
+    """
+    Envía un correo para notificar que el pedido ha sido entregado.
+    """
+    try:
+        sender_email = os.getenv("MAIL_USERNAME")
+        password = os.getenv("MAIL_PASSWORD")
+        
+        if not sender_email or not password:
+            print("Advertencia: Credenciales de correo no configuradas. No se enviará el correo.")
+            return
+
+        html_body = f"""
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }}
+                .header {{ font-size: 24px; color: #d9534f; text-align: center; }}
+                .content {{ margin-top: 20px; }}
+                .rating-link {{ display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #d9534f; color: #fff; text-decoration: none; border-radius: 5px; }}
+                .footer {{ margin-top: 30px; font-size: 12px; text-align: center; color: #888; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1 class="header">¡Tu pedido ha sido entregado!</h1>
+                <div class="content">
+                    <p>Hola {recipient_name},</p>
+                    <p>Confirmamos que tu pedido del restaurante <strong>{restaurant_name}</strong> ha sido entregado con éxito.</p>
+                    <p>Esperamos que hayas disfrutado de tu comida. ¿Qué tal si valoras tu experiencia?</p>
+                    <a href="#" class="rating-link">Valorar el restaurante</a>
+                </div>
+                <div class="footer">
+                    <p>&copy; {datetime.now().year} Yami. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f"¡Pedido #{order_id} de {restaurant_name} entregado!"
+        msg['From'] = sender_email
+        msg['To'] = recipient_email
+
+        if original_message_id:
+            msg['In-Reply-To'] = original_message_id
+            msg['References'] = original_message_id
+
+        msg.attach(MIMEText(html_body, 'html'))
+
+        with smtplib.SMTP(os.getenv("MAIL_SERVER"), int(os.getenv("MAIL_PORT"))) as server:
+            server.starttls()
+            server.login(sender_email, password)
+            server.send_message(msg)
+            print(f"Correo de 'pedido entregado' enviado a {recipient_email}")
+
+    except Exception as e:
+        print(f"Error al enviar correo de 'pedido entregado' a {recipient_email}: {e}")
 
 def create_new_client(client_data: ClientCreate) -> int:
     """
@@ -276,25 +488,54 @@ def create_new_order(client_id: int, restaurant_id:int, order_data: OrderCreate)
     Valida que el cliente tenga suficientes créditos.
     """
     try:
-        # Convertir los objetos DishOrder a diccionarios
-        dishes_dict = [
-            {
-                "dish_name": dish.dish_name,
+        email_dishes_dict = []
+        dishes_dict = []
+        total_credits = 0
+
+        dish_dao = dishDAO()
+        dishType_dao = db_utils.dishTypeDAO()
+        for ordered_dish in order_data.dishes:
+            dish = dish_dao.get_by_id(ordered_dish.dish_id)
+            credits = dishType_dao.get_credits_by_name(dish.dish_type)
+            email_dishes_dict.append({
+                "dish_name": dish.name,
                 "dish_type": dish.dish_type,
-                "instructions": dish.instructions
-            }
-            for dish in order_data.dishes
-        ]
-        
+                "image_url": dish.image_url,
+                "credits": credits,
+                "instructions": ordered_dish.instructions
+            })
+
+            total_credits += credits
+
+            dishes_dict.append({
+                "dish_name": dish.name,
+                "dish_type": dish.dish_type,
+                "instructions": ordered_dish.instructions
+            })
+
         # Crear el pedido usando db_utils
         order_id = db_utils.create_order(
             client_id=client_id,
             restaurant_id=restaurant_id,
             dishes=dishes_dict
         )
-        
+
         if order_id is None:
             raise ValueError("No se pudo crear el pedido. Verifica los datos.")
+        
+        client_dao = clientDAO()
+        user_dao = userDAO()
+        restaurant_dao = restaurantDAO()
+        client = client_dao.get_by_id(client_id)
+        user = user_dao.get_by_id(client.user_id)
+        restaurant = restaurant_dao.get_by_id(restaurant_id)
+
+        message_id = send_order_confirmation_email(user.email, client.name, restaurant.name, email_dishes_dict, total_credits, order_id)
+
+        # Si se generó un Message-ID, guardarlo en la base de datos
+        if message_id:
+            order_dao = orderDAO()
+            order_dao.update(order_id, {"email_message_id": message_id})
         
         return order_id
         
@@ -303,14 +544,43 @@ def create_new_order(client_id: int, restaurant_id:int, order_data: OrderCreate)
 
 def update_existing_order_status(order_id: int) -> int:
     """
-    Actualiza el estado de un pedido existente.
+    Actualiza el estado de un pedido existente y envía notificaciones por correo.
     """
     try:
-        # Pasamos el ID y el diccionario de datos a la función de la base de datos.
-        order_id = db_utils.update_order_status(
-            order_id=order_id
-        )
-        return order_id
+        # 1. Actualiza el estado del pedido en la base de datos
+        updated_order = db_utils.update_order_status(order_id=order_id)
+
+        if updated_order is None:
+            raise ValueError("No se pudo actualizar el estado del pedido.")
+
+        # 3. Obtener detalles del cliente, usuario y restaurante para el correo
+        client_dao = clientDAO()
+        user_dao = userDAO()
+        restaurant_dao = restaurantDAO()
+
+        client = client_dao.get_by_id(updated_order.client_id)
+        user = user_dao.get_by_id(client.user_id)
+        restaurant = restaurant_dao.get_by_id(updated_order.restaurant_id)
+
+        # 4. Enviar el correo electrónico según el nuevo estado del pedido
+        if updated_order.order_status == 'En reparto':
+            send_order_in_delivery_email(
+                recipient_email=user.email,
+                recipient_name=client.name,
+                restaurant_name=restaurant.name,
+                order_id=updated_order.id,
+                original_message_id=updated_order.email_message_id
+            )
+        elif updated_order.order_status == 'Entregado':
+            send_order_delivered_email(
+                recipient_email=user.email,
+                recipient_name=client.name,
+                restaurant_name=restaurant.name,
+                order_id=updated_order.id,
+                original_message_id=updated_order.email_message_id
+            )
+
+        return updated_order.id
     except Exception as e:
         # Puedes manejar o registrar el error aquí antes de relanzarlo
         raise e
@@ -376,8 +646,13 @@ def _upload_file_to_supabase(bucket_name: str, file_path: str, file, content_typ
         file_options={"content-type": content_type, "upsert": "true"}
     )
 
+    public_url = supabase.storage.from_(bucket_name).get_public_url(file_path)
+
+    if public_url.endswith('?'):
+        public_url = public_url[:-1]
+
     # Devuelve la URL pública del archivo.
-    return supabase.storage.from_(bucket_name).get_public_url(file_path)
+    return public_url
     
 def upload_restaurant_logo(restaurant_id: int, file, content_type: str) -> str:
     """

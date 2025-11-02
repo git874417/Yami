@@ -63,19 +63,6 @@ def login_endpoint(form_data: UserLogin):
     #    y devolverlo al cliente.
     return {"message": "Login exitoso", "user_id": user.id, "role": user.role}
 
-@app.put("/api/upload/profile_picture/{user_id}", status_code=200)
-async def upload_profile_picture_endpoint(user_id: int, file: UploadFile = File(...)):
-    if file.content_type not in ["image/jpeg", "image/png"]:
-        raise HTTPException(status_code=400, detail="Tipo de archivo no válido. Solo .jpg o .png")
-    
-    try:
-        file_content = await file.read()
-        image_url = services.upload_user_profile_picture(user_id, file_content, file.content_type)
-        return {"message": "Foto de perfil subida exitosamente", "image_url": image_url}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
-
-
 @app.post("/api/create_client", status_code=201)
 def create_client_endpoint(client: ClientCreate):
     """
@@ -106,33 +93,6 @@ def create_restaurant_endpoint(restaurant: RestaurantCreate):
         # Captura cualquier otra excepción y devuelve un error 500
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}") 
 
-@app.put("/api/upload/restaurant_image/{restaurant_id}", status_code=200)
-async def upload_restaurant_image(restaurant_id: int, file: UploadFile = File(...)):
-    """
-    Sube o actualiza la imagen de un restaurante.
-    """
-    try:
-        # 1. Validar el tipo de archivo (opcional pero recomendado)
-        if file.content_type not in ["image/jpeg", "image/png"]:
-            raise HTTPException(status_code=400, detail="Tipo de archivo no válido. Solo se permiten .jpg o .png")
-
-        file_content = await file.read()
-        # 2. Llamar al servicio para que suba el archivo
-        image_url = services.upload_restaurant_logo(
-            restaurant_id=restaurant_id,
-            file=file_content,
-            content_type=file.content_type
-        )
-
-        if not image_url:
-            raise HTTPException(status_code=500, detail="No se pudo subir la imagen.")
-
-        return {"message": "Imagen subida exitosamente", "image_url": image_url}
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
-  
-
 @app.post("/api/create_dish/{restaurant_id}", status_code=201)
 def create_dish_endpoint(restaurant_id: int, dish: DishCreate):
     """
@@ -146,18 +106,6 @@ def create_dish_endpoint(restaurant_id: int, dish: DishCreate):
         return {"message": "plato creado exitosamente", "dish_id": dish_id}
     except Exception as e:
         # Captura cualquier otra excepción y devuelve un error 500
-        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
-    
-@app.put("/api/upload/dish_image/{dish_id}", status_code=200)
-async def upload_dish_image_endpoint(dish_id: int, file: UploadFile = File(...)):
-    if file.content_type not in ["image/jpeg", "image/png"]:
-        raise HTTPException(status_code=400, detail="Tipo de archivo no válido. Solo .jpg o .png")
-    
-    try:
-        file_content = await file.read()
-        image_url = services.upload_dish_image(dish_id, file_content, file.content_type)
-        return {"message": "Imagen del plato subida exitosamente", "image_url": image_url}
-    except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
     
 @app.post("/api/create_order/{client_id}/{restaurant_id}", status_code=201)
@@ -370,6 +318,55 @@ def delete_dish_endpoint(id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
     
+@app.put("/api/upload/profile_picture/{user_id}", status_code=200)
+async def upload_profile_picture_endpoint(user_id: int, file: UploadFile = File(...)):
+    if file.content_type not in ["image/jpeg", "image/png"]:
+        raise HTTPException(status_code=400, detail="Tipo de archivo no válido. Solo .jpg o .png")
+    
+    try:
+        file_content = await file.read()
+        image_url = services.upload_user_profile_picture(user_id, file_content, file.content_type)
+        return {"message": "Foto de perfil subida exitosamente", "image_url": image_url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+    
+@app.put("/api/upload/restaurant_image/{restaurant_id}", status_code=200)
+async def upload_restaurant_image(restaurant_id: int, file: UploadFile = File(...)):
+    """
+    Sube o actualiza la imagen de un restaurante.
+    """
+    try:
+        # 1. Validar el tipo de archivo (opcional pero recomendado)
+        if file.content_type not in ["image/jpeg", "image/png"]:
+            raise HTTPException(status_code=400, detail="Tipo de archivo no válido. Solo se permiten .jpg o .png")
+
+        file_content = await file.read()
+        # 2. Llamar al servicio para que suba el archivo
+        image_url = services.upload_restaurant_logo(
+            restaurant_id=restaurant_id,
+            file=file_content,
+            content_type=file.content_type
+        )
+
+        if not image_url:
+            raise HTTPException(status_code=500, detail="No se pudo subir la imagen.")
+
+        return {"message": "Imagen subida exitosamente", "image_url": image_url}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+    
+@app.put("/api/upload/dish_image/{dish_id}", status_code=200)
+async def upload_dish_image_endpoint(dish_id: int, file: UploadFile = File(...)):
+    if file.content_type not in ["image/jpeg", "image/png"]:
+        raise HTTPException(status_code=400, detail="Tipo de archivo no válido. Solo .jpg o .png")
+    
+    try:
+        file_content = await file.read()
+        image_url = services.upload_dish_image(dish_id, file_content, file.content_type)
+        return {"message": "Imagen del plato subida exitosamente", "image_url": image_url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
 @app.get("/api/users")
 def get_all_users():

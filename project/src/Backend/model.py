@@ -54,8 +54,7 @@ class DishUpdate(BaseModel):
     dish_type: str | None = None
 
 class DishOrder(BaseModel):
-    dish_name: str
-    dish_type: str
+    dish_id: int
     instructions: str = ""
 
 class OrderCreate(BaseModel):

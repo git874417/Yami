@@ -21,29 +21,27 @@ class orderDAO:
         }).execute()
         return res.data, res.data[0]["id"]
 
-    def update(self, order_id: int, new_client_id: int = None, new_restaurant_id: int = None, new_order_credits: int = None):
-        update_data = {}
-        
-        if new_client_id is not None:
-            update_data["client_id"] = new_client_id
-        if new_restaurant_id is not None:
-            update_data["restaurant_id"] = new_restaurant_id
-        if new_order_credits is not None:
-            update_data["order_credits"] = new_order_credits
-        
+    def update(self, order_id: int, update_data: dict):
+        """
+        Actualiza un pedido existente con los datos proporcionados en un diccionario.
+        """
         if not update_data:
-            return None  # No fields to update
+            return None  # No hay campos para actualizar
             
         res = self.supabase.table("Orders").update(update_data).eq("id", order_id).execute()
-        return res.data, res.data[0]["id"]
-    
+        
+        # La respuesta de Supabase es una lista, debemos tomar el primer elemento.
+        if res.data:
+            return orderVO(**res.data[0])
+        return None
+
     def updateOrderStatus(self, new_status: str, order_id: int):
 
         if new_status not in ["Encargado", "En preparacion", "En reparto", "Entregado", "Cancelado"]:
             raise ValueError("Invalid order status")
         
         res = self.supabase.table("Orders").update({"order_status": new_status}).eq("id", order_id).execute()
-        return res.data, res.data[0]["id"]
+        return orderVO(**res.data[0]) if res.data else None
 
 
     def delete(self, order_id: int):

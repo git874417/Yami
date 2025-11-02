@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class orderVO:
-    def __init__(self, client_id: int, restaurant_id: int, order_credits: int, id: int = None, order_status: str = "Encargado", order_date: str = None):
+    def __init__(self, client_id: int, restaurant_id: int, order_credits: int, id: int = None, order_status: str = "Encargado", order_date: str = None, email_message_id: str = None):
         if not client_id or not restaurant_id or order_credits is None:
             raise ValueError("client_id, restaurant_id, and order_credits are required fields")
         if client_id < 0 or restaurant_id < 0 or order_credits < 0:
@@ -17,6 +17,7 @@ class orderVO:
         self.__id = id  # Cambiar a privado para que sea realmente de solo lectura
         self.order_status = order_status 
         self.order_date = order_date
+        self.email_message_id = email_message_id  # Inicializar el atributo email_message_id
 
     @property
     def id(self):
