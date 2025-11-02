@@ -170,11 +170,13 @@ def send_order_confirmation_email(recipient_email: str, recipient_name: str, res
         """
 
         msg = MIMEMultipart('alternative')
-        msg['Subject'] = f"Confirmación de tu pedido #{order_id} en {restaurant_name}"
+        msg['Subject'] = f"[Pedido Yami #{order_id}] Confirmación de tu pedido en {restaurant_name}"
         msg['From'] = sender_email
         msg['To'] = recipient_email
 
-        message_id = make_msgid()
+        # Extraer el dominio del correo del remitente para usarlo en el Message-ID
+        domain = sender_email.split('@')[-1]
+        message_id = make_msgid(domain=domain)
         msg['Message-ID'] = message_id
         
         msg.attach(MIMEText(html_body, 'html'))
@@ -185,7 +187,7 @@ def send_order_confirmation_email(recipient_email: str, recipient_name: str, res
             server.send_message(msg)
             print(f"Correo de confirmación de pedido enviado a {recipient_email}")
 
-        return message_id 
+        return message_id.strip('<>')
     except Exception as e:
         print(f"Error al enviar correo de confirmación de pedido a {recipient_email}: {e}")
 
@@ -230,13 +232,18 @@ def send_order_in_delivery_email(recipient_email: str, recipient_name: str, rest
         """
 
         msg = MIMEMultipart('alternative')
-        msg['Subject'] = f"¡Tu pedido #{order_id} de {restaurant_name} está en camino!"
+        msg['Subject'] = f"[Pedido Yami #{order_id}] Tu pedido de {restaurant_name} está en camino"
         msg['From'] = sender_email
         msg['To'] = recipient_email
 
+        domain = sender_email.split('@')[-1]
+        message_id = make_msgid(domain=domain)
+        msg['Message-ID'] = message_id
+
         if original_message_id:
-            msg['In-Reply-To'] = original_message_id
-            msg['References'] = original_message_id
+            print(f"Original Message-ID: {original_message_id}")
+            msg['In-Reply-To'] = f"<{original_message_id}>"
+            msg['References'] = f"<{original_message_id}>"
 
         msg.attach(MIMEText(html_body, 'html'))
 
@@ -291,15 +298,21 @@ def send_order_delivered_email(recipient_email: str, recipient_name: str, restau
         """
 
         msg = MIMEMultipart('alternative')
-        msg['Subject'] = f"¡Pedido #{order_id} de {restaurant_name} entregado!"
+        msg['Subject'] = f"[Pedido Yami #{order_id}] Tu pedido de {restaurant_name} ha sido entregado"
         msg['From'] = sender_email
         msg['To'] = recipient_email
 
+        domain = sender_email.split('@')[-1]
+        message_id = make_msgid(domain=domain)
+        msg['Message-ID'] = message_id
+
         if original_message_id:
-            msg['In-Reply-To'] = original_message_id
-            msg['References'] = original_message_id
+            msg['In-Reply-To'] = f"<{original_message_id}>"
+            msg['References'] = f"<{original_message_id}>"
 
         msg.attach(MIMEText(html_body, 'html'))
+
+        print(msg)
 
         with smtplib.SMTP(os.getenv("MAIL_SERVER"), int(os.getenv("MAIL_PORT"))) as server:
             server.starttls()
