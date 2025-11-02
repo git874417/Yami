@@ -1,15 +1,47 @@
 from project.db_utils import db_utils
 from .model import *
+from passlib.context import CryptContext
+import bcrypt
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    Compara una contraseña en texto plano con su hash usando bcrypt.
+    """
+    # bcrypt necesita que ambas contraseñas estén codificadas en bytes.
+    plain_password_bytes = plain_password.encode('utf-8')
+    hashed_password_bytes = hashed_password.encode('utf-8')
+    
+    # Compara la contraseña con el hash
+    return bcrypt.checkpw(plain_password_bytes, hashed_password_bytes)
+
+def get_password_hash(password: str) -> str:
+    """
+    Genera el hash de una contraseña usando bcrypt.
+    """
+    # Codificar la contraseña a bytes
+    password_bytes = password.encode('utf-8')
+    
+    # Generar un "salt" y hashear la contraseña
+    salt = bcrypt.gensalt()
+    hashed_bytes = bcrypt.hashpw(password_bytes, salt)
+    
+    # Decodificar el hash para guardarlo como string en la base de datos
+    return hashed_bytes.decode('utf-8')
 
 def create_new_client(client_data: ClientCreate) -> int:
     """
     Orquesta la creación de un nuevo cliente.
     Aquí puedes añadir más lógica en el futuro (ej. enviar un email de bienvenida).
     """
+
+    hashed_password = get_password_hash(client_data.password)
+
     try:
         client_id = db_utils.create_client(
             email=client_data.email,
-            password=client_data.password,
+            password=hashed_password,
             sub_plan=client_data.sub_plan,
             name=client_data.name,
             surname=client_data.surname,

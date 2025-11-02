@@ -41,6 +41,28 @@ app.add_middleware(
 def read_root():
     return {"message": "Bienvenido a la API de Yami"}
 
+@app.post("/api/login")
+def login_endpoint(form_data: UserLogin):
+    """
+    Autentica a un usuario.
+    """
+    user_dao = userDAO()
+    # 1. Buscar al usuario por su email
+    user = user_dao.get_by_email(form_data.email)
+    
+    # 2. Si el usuario no existe o la contraseña es incorrecta, devolver un error
+    #    Se usa una función de verificación segura para evitar "timing attacks"
+    if not user or not services.verify_password(form_data.password, user.password):
+        raise HTTPException(
+            status_code=401,
+            detail="Email o contraseña incorrectos",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        
+    # 3. Si la autenticación es exitosa, puedes generar un token JWT (no incluido aquí)
+    #    y devolverlo al cliente.
+    return {"message": "Login exitoso", "user_id": user.id, "role": user.role}
+
 @app.post("/api/create_client", status_code=201)
 def create_client_endpoint(client: ClientCreate):
     """
