@@ -1,0 +1,13 @@
+:root {
+  --naranja-yami: #d96941;
+  --azul-yami: #0f4c75;
+}
+
+#root {
+  max-width: 1280px auto;
+  padding: 0rem;
+}
+
+body {
+  margin: 0;
+}
