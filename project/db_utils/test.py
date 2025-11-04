@@ -1,5 +1,16 @@
+import sys
+import os
+
+# --- INICIO DE LA SOLUCIÓN ---
+# Añade la carpeta raíz del proyecto (Yammi) a la ruta de búsqueda de Python
+# para que los imports como "from project..." funcionen.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+# --- FIN DE LA SOLUCIÓN ---
+
 #Codigo para probar la base de datos
-import db_utils
+import project.db_utils.db_utils as db_utils
+from project.db_utils.userDAO import userDAO
+from project.src.Backend.services import get_password_hash
 
 def test_db():
     id_alice = db_utils.create_client("alice@example.com", "alicepass", "Plus", "Alice", "Smith", "456 Elm St", "Springfield", "54321", "87654321B", "987654321")
@@ -39,7 +50,41 @@ def clean_db():
 
     db_utils.clean_db()
 
-clean_db()
-test_db()
+def upgrade_passwords_to_hashed():
+    """
+    Actualiza todas las contraseñas en texto plano de la base de datos a su formato hasheado.
+    Es una función de utilidad para migrar datos existentes.
+    """
+    user_dao = userDAO()
+    all_users = user_dao.get_all()
+    
+    print("Iniciando actualización de contraseñas...")
+    updated_count = 0
+    
+    for user in all_users:
+        # La contraseña hasheada con bcrypt siempre empieza con '$2b$'
+        # Si no empieza así, asumimos que está en texto plano.
+        if not user.password.startswith('$2b$'):
+            print(f"Actualizando contraseña para el usuario ID: {user.id} ({user.email})...")
+            
+            # Hashear la contraseña en texto plano
+            hashed_password = get_password_hash(user.password)
+            
+            # Actualizar el registro en la base de datos
+            user_dao.update(user_id=user.id, new_password=hashed_password)
+            updated_count += 1
+        else:
+            print(f"La contraseña del usuario ID: {user.id} ya está hasheada. Omitiendo.")
+            
+    print(f"\nActualización completada. Se actualizaron {updated_count} contraseñas.")
+
+
+
+#clean_db()
+#test_db()
+
+upgrade_passwords_to_hashed()
+
+
 
 #Basta con comentar clean_db() para comprobar que al crear datos duplicados saltan errores.

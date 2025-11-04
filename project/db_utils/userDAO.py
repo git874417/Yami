@@ -21,20 +21,23 @@ class userDAO:
         }).execute()
         return res.data, res.data[0]["id"]
 
-    def update(self, user_id: int, new_email: str = None, new_password: str = None, new_role: int = None):
-        update_data = {}
-        
-        if new_email is not None:
-            update_data["email"] = new_email
-        if new_password is not None:
-            update_data["password"] = new_password
-        if new_role is not None:
-            update_data["role"] = new_role
-        
+    def update(self, user_id: int, data_to_update: dict):
+        """
+        Actualiza un usuario en la base de datos a partir de un diccionario.
+        Filtra los datos para solo permitir la actualización de campos válidos.
+        """
+        allowed_fields = ["email", "password", "role", "image_url"]
+        update_data = {key: value for key, value in data_to_update.items() if key in allowed_fields}
+
         if not update_data:
-            return None  # No fields to update
-            
+            return None, None  # No hay campos válidos para actualizar
+
         res = self.supabase.table("Users").update(update_data).eq("id", user_id).execute()
+
+        # Comprobar si la actualización devolvió algún dato
+        if not res.data:
+            return None, None # Ocurre si el user_id no fue encontrado
+
         return res.data, res.data[0]["id"]
 
     def delete(self, user_id: int):

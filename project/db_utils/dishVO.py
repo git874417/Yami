@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class dishVO:
-    def __init__(self, restaurant_id: int, name: str, description: str, allergens: str, dish_type: str, id: int = None):
+    def __init__(self, restaurant_id: int, name: str, description: str, allergens: str, dish_type: str, id: int = None, image_url: str = None):
         if not restaurant_id or not name or not dish_type:
             raise ValueError("restaurant_id, name, and dish_type are required fields")
         
@@ -15,6 +15,7 @@ class dishVO:
         self.allergens = allergens
         self.dish_type = dish_type
         self.__id = id
+        self.image_url = image_url  # Inicializar image_url con el valor proporcionado
 
     @property
     def id(self):

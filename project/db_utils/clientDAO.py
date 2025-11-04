@@ -107,3 +107,10 @@ class clientDAO:
 
         res = self.supabase.table("Clients").update({"available_credits": credits, "subscription_renewal_date": updated_timestamp}).eq("id", client_id).execute()
         return res.data
+
+    def update_credits_after_cancellation(self, client_id: int, credits: int):
+        client = self.supabase.table("Clients").select("available_credits").eq("id", client_id).single().execute()
+        current_credits = client.data["available_credits"]
+        new_credits = current_credits + credits if current_credits is not None else credits
+        res = self.supabase.table("Clients").update({"available_credits": new_credits}).eq("id", client_id).execute()
+        return res.data

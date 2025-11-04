@@ -40,3 +40,32 @@ class RestaurantUpdate(BaseModel):
     address: str | None = None
     phone_number: str | None = None
     category: str | None = None
+
+class DishCreate(BaseModel):
+    name: str
+    description: str
+    allergens: str | None = None
+    dish_type: str
+
+class DishUpdate(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    allergens: str | None = None
+    dish_type: str | None = None
+
+class DishOrder(BaseModel):
+    dish_id: int
+    instructions: str = ""
+
+class OrderCreate(BaseModel):
+    dishes: list[DishOrder]    
+
+class RatingCreate(BaseModel):
+    rating: int 
+
+class RatingUpdate(BaseModel):
+    rating: int | None = None
+
+class UserLogin(BaseModel):
+    email: str
+    password: str

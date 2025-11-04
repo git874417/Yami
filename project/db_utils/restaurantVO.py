@@ -7,7 +7,7 @@ load_dotenv()
 
 class restaurantVO:
 
-    def __init__(self, user_id: int, name: str, description: str, city: str, address: str, phone_number: str, category: str, id: int = None):
+    def __init__(self, user_id: int, name: str, description: str, city: str, address: str, phone_number: str, category: str, id: int = None, logo_url: str = None):
         if not user_id or not name or not city or not address or not phone_number or not category:
             raise ValueError("user_id, name, city, address, phone_number, and category are required fields")
 
@@ -19,6 +19,7 @@ class restaurantVO:
         self.address = address
         self.phone_number = phone_number
         self.category = category
+        self.logo_url = logo_url  # Inicializar logo_url con el valor proporcionado
     
     @property
     def id(self):
