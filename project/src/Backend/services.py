@@ -96,7 +96,7 @@ def send_welcome_email(recipient_email: str, recipient_name: str):
         with smtplib.SMTP(os.getenv("MAIL_SERVER"), int(os.getenv("MAIL_PORT"))) as server:
             server.starttls()  # Iniciar conexión segura
             server.login(sender_email, password)
-            server.send_message(msg)
+            #server.send_message(msg)
             print(f"Correo de bienvenida enviado exitosamente a {recipient_email}")
 
     except Exception as e:
