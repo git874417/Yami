@@ -1,20 +1,21 @@
 import React from "react";
 import "../css/Header.css";
 import Navbar from "./Navbar.js";
+import logo from "../assets/logo.png";
 
 const Header = () => {
   return (
-    <header
-      style={{
-        backgroundColor: "#ffffffff",
-        color: " rgba(0, 0, 0, 1)",
-        textalign: "center",
-        padding: "1rem",
-        display: "flex",
-      }}
-    >
-      <h1>Yami</h1>
-      <Navbar />
+    <header className="Header">
+      <div className="header-content">  
+        <div className="logo">
+          <img src={logo} alt="Yami logo" className="logo-img" />
+          <h1>Yami</h1>
+        <Navbar />
+        </div>
+        <div className="header-spacer">
+          <div className="hero-divider" />
+        </div>
+      </div>
     </header>
   );
 };

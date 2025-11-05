@@ -1,8 +1,39 @@
-header {
+.Header {
   background-color: rgb(255, 255, 255);
   color: rgb(0, 0, 0);
   text-align: center;
   padding: 1rem;
   box-sizing: border-box;
   display: flex;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo-img {
+  width: 70px;        /* ajustar según necesidad */
+  height: 70px;
+  object-fit: contain;
+  border-radius: 6px; /* opcional */
+}
+
+.hero-divider {
+	width: 100vw;
+	height: 40px;
+	background: #0F4C75;
+	border-radius: 0;
+	margin: 0.6rem 0;
+	transform: translateY(-12px);
+	margin-left: calc(50% - 50vw);
+	margin-right: calc(50% - 50vw);
+}
+
+.header-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
