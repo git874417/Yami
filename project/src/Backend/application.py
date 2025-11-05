@@ -435,7 +435,7 @@ def get_all_restaurants():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
-@app.get("/api/dish/{restaurant_id}")
+@app.get("/api/dishes/{restaurant_id}")
 def get_all_dishes(restaurant_id: int):
     """
     Obtiene una lista de todos los platos de un restaurante.
@@ -454,7 +454,37 @@ def get_all_dishes(restaurant_id: int):
             "dish_type": dish.dish_type
             } for dish in dishes
         ]
-        return {"dish_id": dish_list}
+        return {"dishes": dish_list}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
+@app.get("/api/dish/{dish_id}")
+def get_dish_by_id(dish_id: int):
+    """
+    Obtiene un plato específico por su ID.
+    """
+    try:
+        dao = dishDAO()
+        dish = dao.get_by_id(dish_id)
+        
+        if not dish:
+            raise HTTPException(status_code=404, detail="Plato no encontrado")
+        
+        # Calcular los créditos del plato
+        credits = dao.get_dish_credits(dish_id)
+        
+        return {
+            "id": dish.id,
+            "restaurant_id": dish.restaurant_id,
+            "name": dish.name,
+            "description": dish.description,
+            "allergens": dish.allergens,
+            "dish_type": dish.dish_type,
+            "credits": credits,
+            "image": dish.image_url if dish.image_url else None
+        }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 

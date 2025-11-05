@@ -7,35 +7,70 @@ const OrderDish = () => {
   const navigate = useNavigate();
   
   const [orderData, setOrderData] = useState({
-    dishName: 'Doble Cheeseburger',
-    dishDescription: 'Hamburguesa con doble carne de vacuno, queso cheddar, ketchup, mostaza y pan brioche',
-    credits: 10,
+    dishName: '',
+    dishDescription: '',
+    credits: 0,
     instructions: '',
-    allergens: ['Lactosa', 'Gluten', 'Nueces'],
-    dishImage: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=600&fit=crop'
+    allergens: [],
+    dishImage: 'https://via.placeholder.com/800x600?text=Cargando...'
   });
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
+  const [error, setError] = useState(null);
 
   // Cargar datos del plato desde el backend
   useEffect(() => {
     const fetchOrderData = async () => {
       try {
         setLoading(true);
-        // Aquí conectarías con tu API
-        // const response = await fetch(`http://localhost:8000/api/dish/${orderId}`);
-        // const data = await response.json();
-        // setOrderData(data);
+        setError(null);
+        
+        console.log('Fetching dish with ID:', orderId);
+        
+        // Conectar con tu API
+        const response = await fetch(`http://localhost:8000/api/dish/${orderId}`);
+        
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Error response:', errorData);
+          throw new Error(errorData.detail || `Error ${response.status}: No se pudo cargar el plato`);
+        }
+        
+        const data = await response.json();
+        console.log('Dish data received:', data);
+        
+        // Procesar alérgenos: puede venir como string separado por comas o como array
+        let allergensArray = [];
+        if (data.allergens) {
+          if (typeof data.allergens === 'string') {
+            allergensArray = data.allergens.split(',').map(a => a.trim()).filter(a => a);
+          } else if (Array.isArray(data.allergens)) {
+            allergensArray = data.allergens;
+          }
+        }
+        
+        // Mapear los datos del backend al estado del frontend
+        setOrderData({
+          dishName: data.name,
+          dishDescription: data.description,
+          credits: data.credits,
+          instructions: '',
+          allergens: allergensArray,
+          dishImage: data.image || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=600&fit=crop'
+        });
       } catch (error) {
         console.error('Error fetching order data:', error);
+        setError(error.message);
       } finally {
         setLoading(false);
       }
     };
 
     if (orderId) {
-      // fetchOrderData();
+      fetchOrderData();
     }
   }, [orderId]);
 
@@ -78,7 +113,21 @@ const OrderDish = () => {
     return (
       <div className="order-dish-container">
         <div className="loading-container">
-          <p>Cargando...</p>
+          <p>Cargando plato...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="order-dish-container">
+        <div className="error-container">
+          <h2>⚠️ Error</h2>
+          <p>{error}</p>
+          <button className="btn-primary" onClick={() => navigate('/')}>
+            Volver al inicio
+          </button>
         </div>
       </div>
     );
@@ -86,19 +135,6 @@ const OrderDish = () => {
 
   return (
     <div className="order-dish-container">
-      {/* Header */}
-      <header className="order-header">
-        <div className="logo" onClick={() => navigate('/')}>Yami</div>
-        <nav className="nav-links">
-          <a href="/" className="nav-link">Inicio</a>
-          <a href="/menu" className="nav-link">Menú</a>
-          <a href="/pedidos" className="nav-link">Mis Pedidos</a>
-          <button className="btn-primary" onClick={() => navigate('/cart')}>
-            Carrito ({cart.length})
-          </button>
-        </nav>
-      </header>
-
       {/* Main Content */}
       <div className="order-content">
         {/* Imagen del plato */}
@@ -119,7 +155,7 @@ const OrderDish = () => {
           <p className="dish-description">{orderData.dishDescription}</p>
           
           <div className="dish-credits">
-            <strong>{orderData.credits} Créditos</strong>
+            <strong>{orderData.credits} Yameats</strong>
           </div>
 
           {/* Instrucciones */}
@@ -156,48 +192,6 @@ const OrderDish = () => {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="order-footer">
-        <div className="footer-content">
-          <div className="footer-section">
-            <h3 className="footer-logo">Yami</h3>
-            <div className="social-links">
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon">📘</a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="social-icon">💼</a>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="social-icon">📺</a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-icon">📷</a>
-            </div>
-          </div>
-          
-          <div className="footer-section">
-            <h4>Empresa</h4>
-            <ul className="footer-links">
-              <li><a href="/about">Sobre Nosotros</a></li>
-              <li><a href="/contact">Contacto</a></li>
-              <li><a href="/careers">Trabaja con Nosotros</a></li>
-            </ul>
-          </div>
-
-          <div className="footer-section">
-            <h4>Legal</h4>
-            <ul className="footer-links">
-              <li><a href="/privacy">Privacidad</a></li>
-              <li><a href="/terms">Términos</a></li>
-              <li><a href="/cookies">Cookies</a></li>
-            </ul>
-          </div>
-
-          <div className="footer-section">
-            <h4>Ayuda</h4>
-            <ul className="footer-links">
-              <li><a href="/faq">Preguntas Frecuentes</a></li>
-              <li><a href="/support">Soporte</a></li>
-              <li><a href="/shipping">Envíos</a></li>
-            </ul>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

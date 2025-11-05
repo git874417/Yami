@@ -2,6 +2,7 @@ import os
 from supabase import create_client, Client, ClientOptions
 from dotenv import load_dotenv 
 from project.db_utils.dishVO import dishVO
+from project.db_utils.dishTypeDAO import dishTypeDAO
 
 load_dotenv()
     
@@ -63,4 +64,23 @@ class dishDAO:
     def get_by_name(self, dish_name: str, restaurant_id: int):
         res = self.supabase.table("Dishes").select("*").eq("name", dish_name).eq("restaurant_id", restaurant_id).single().execute()
         return dishVO(**res.data) if res.data else None 
+    
+    #Añadido para poder acceder desde el frontend a platos que ya existen, ver si se puede cambiar
+    def get_dish_credits(self, dish_id: int):
+        """
+        Obtiene los créditos de un plato basándose en su tipo (dish_type).
+        """
+        try:
+            # Obtener el plato
+            dish = self.get_by_id(dish_id)
+            if not dish:
+                return 0
+            
+            # Obtener los créditos según el tipo de plato
+            dish_type_dao = dishTypeDAO()
+            credits = dish_type_dao.get_credits_by_name(dish.dish_type)
+            return credits
+        except Exception as e:
+            print(f"Error getting dish credits: {e}")
+            return 0
     
