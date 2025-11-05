@@ -454,7 +454,7 @@ def get_all_dishes(restaurant_id: int):
             "dish_type": dish.dish_type
             } for dish in dishes
         ]
-        return {"restaurants": dish_list}
+        return {"dish_id": dish_list}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
