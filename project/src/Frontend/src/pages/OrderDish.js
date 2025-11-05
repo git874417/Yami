@@ -28,7 +28,7 @@ const OrderDish = () => {
         
         console.log('Fetching dish with ID:', orderId);
         
-        // Conectar con tu API
+        // Conectamos con la API
         const response = await fetch(`http://localhost:8000/api/dish/${orderId}`);
         
         console.log('Response status:', response.status);
@@ -42,7 +42,7 @@ const OrderDish = () => {
         const data = await response.json();
         console.log('Dish data received:', data);
         
-        // Procesar alérgenos: puede venir como string separado por comas o como array
+        // Procesamos los alérgenos: puede venir como string separado por comas o como array
         let allergensArray = [];
         if (data.allergens) {
           if (typeof data.allergens === 'string') {
@@ -52,7 +52,7 @@ const OrderDish = () => {
           }
         }
         
-        // Mapear los datos del backend al estado del frontend
+        // Mapeamos los datos del backend al estado del frontend
         setOrderData({
           dishName: data.name,
           dishDescription: data.description,
@@ -84,11 +84,12 @@ const OrderDish = () => {
       };
       
       // Aquí guardarías en el carrito (localStorage o estado global)
+      /*
       const currentCart = JSON.parse(localStorage.getItem('cart') || '[]');
       currentCart.push(newItem);
-      localStorage.setItem('cart', JSON.stringify(currentCart));
-      
+      localStorage.setItem('cart', JSON.stringify(currentCart)); 
       setCart(currentCart);
+      */
       alert('✓ Plato añadido al carrito');
     } catch (error) {
       console.error('Error adding to cart:', error);
