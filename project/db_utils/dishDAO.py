@@ -15,13 +15,19 @@ class dishDAO:
         ))
 
     def insert(self, vo: dishVO):
-        res = self.supabase.table("Dishes").insert({
+        dish_data = {
             "restaurant_id": vo.restaurant_id,
             "name": vo.name,
             "description": vo.description,
             "allergens": vo.allergens,
             "dish_type": vo.dish_type
-        }).execute()
+        }
+        
+        # Agregar image_url solo si está presente
+        if vo.image_url:
+            dish_data["image_url"] = vo.image_url
+            
+        res = self.supabase.table("Dishes").insert(dish_data).execute()
         return res.data, res.data[0]["id"]
 
     def update(self, dish_id: int, data_to_update: dict):

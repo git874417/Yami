@@ -14,7 +14,7 @@ class restaurantDAO:
         ))
 
     def insert(self, vo: restaurantVO):
-        res = self.supabase.table("Restaurants").insert({
+        restaurant_data = {
             "user_id": vo.user_id,
             "name": vo.name,
             "description": vo.description,
@@ -22,7 +22,13 @@ class restaurantDAO:
             "address": vo.address,
             "phone_number": vo.phone_number,
             "category": vo.category
-        }).execute()
+        }
+        
+        # Agregar logo_url solo si está presente
+        if vo.logo_url:
+            restaurant_data["logo_url"] = vo.logo_url
+            
+        res = self.supabase.table("Restaurants").insert(restaurant_data).execute()
         return res.data, res.data[0]["id"]
 
     def update(self, restaurant_id: int, data_to_update: dict):
