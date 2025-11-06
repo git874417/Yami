@@ -381,7 +381,37 @@ def get_all_users():
         return {"users": users_list}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
-    
+
+@app.get("/api/client/{client_id}")
+def get_client_by_id(client_id: int):
+    """
+    Obtiene un cliente específico por su ID.
+    """
+    try:
+        dao = clientDAO()
+        client = dao.get_by_id(client_id)
+        
+        if not client:
+            raise HTTPException(status_code=404, detail="Cliente no encontrado")
+        
+        return {
+            "id": client.id,
+            "user_id": client.user_id,
+            "sub_plan": client.sub_plan,
+            "name": client.name,
+            "surname": client.surname,
+            "address": client.address,
+            "city": client.city,        
+            "postal_code": client.postal_code,
+            "dni": client.dni,
+            "phone_number": client.phone_number,
+            "available_credits": client.available_credits,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
 @app.get("/api/clients")
 def get_all_clients():
     """
@@ -409,7 +439,35 @@ def get_all_clients():
         return {"clients": clients_list}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
-    
+
+@app.get("/api/restaurant/{restaurant_id}")
+def get_restaurant_by_id(restaurant_id: int):
+    """
+    Obtiene un restaurante específico por su ID.
+    """
+    try:
+        dao = restaurantDAO()
+        restaurant = dao.get_by_id(restaurant_id)
+        
+        if not restaurant:
+            raise HTTPException(status_code=404, detail="Restaurante no encontrado")
+        
+        return {
+            "id": restaurant.id,
+            "user_id": restaurant.user_id,
+            "name": restaurant.name,
+            "description": restaurant.description,
+            "city": restaurant.city,
+            "address": restaurant.address,
+            "phone_number": restaurant.phone_number,
+            "category": restaurant.category,
+            "image_url": restaurant.logo_url if restaurant.logo_url else None
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}") 
+
 @app.get("/api/restaurants")
 def get_all_restaurants():
     """
@@ -428,7 +486,8 @@ def get_all_restaurants():
             "city": restaurant.city,
             "address": restaurant.address,
             "phone_number": restaurant.phone_number,
-            "category": restaurant.category
+            "category": restaurant.category,
+            "image_url": restaurant.logo_url if restaurant.logo_url else None
             } for restaurant in restaurants
         ]
         return {"restaurants": restaurants_list}
@@ -451,7 +510,8 @@ def get_all_dishes(restaurant_id: int):
             "name": dish.name,
             "description": dish.description,
             "allergens": dish.allergens,
-            "dish_type": dish.dish_type
+            "dish_type": dish.dish_type,
+            "image_url": dish.image_url if dish.image_url else None
             } for dish in dishes
         ]
         return {"dishes": dish_list}

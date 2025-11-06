@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import Home from "./pages/Home.js";
 import OrderDish from "./pages/OrderDish.js";
+import RestaurantDishes from "./pages/Restaurant_Dishes.js";
 import Header from "./components/Header.js";
 import Login from "./pages/Login.js";
 import Register_Client from "./pages/Register_Client.js";
@@ -22,6 +23,7 @@ function AppContent() {
           <Route path="/inicio-sesion" element={<Login />} />
           <Route path="/registro" element={<Register_Client />} />
           <Route path="/order/:orderId" element={<OrderDish />} />
+          <Route path="/restaurants/:id" element={<RestaurantDishes />} />
         </Routes>
       </div>
       <Footer />
