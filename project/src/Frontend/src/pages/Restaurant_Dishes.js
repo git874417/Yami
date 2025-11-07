@@ -60,34 +60,6 @@ const RestaurantDishes = () => {
   return (
     <main className="restaurant-page">
       <div className="page-inner">
-        <aside className="sidebar">
-          <div className="restaurant-card">
-            <div className="restaurant-logo">
-              {restaurant?.logo_url ? (
-                <img
-                  className="header-hero-img"
-                  src={normalizeUrl(restaurant.logo_url)}
-                  alt={`${restaurant.name} image`}
-                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant?.name || 'R')}` }}
-                />
-              ) : (
-                <img
-                  className="header-hero-img"
-                  src={`https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant?.name || 'R')}`}
-                  alt={`${restaurant?.name || 'Restaurant'} logo`}
-                />
-              )}
-            </div>
-            <h3 className="restaurant-name">{restaurant?.name || "Restaurante"}</h3>
-            <div className="meta">
-              <span className="rating">★ {restaurant?.rating ?? "-"}</span>
-              <span className="reviews">{restaurant?.reviews ?? 0} reseñas</span>
-            </div>
-            <h4 className="about-title">Acerca de</h4>
-            <p className="about-text">{restaurant?.description}</p>
-          </div>
-        </aside>
-
         <section className="content">
           {loading && <p>Loading...</p>}
           {error && <p style={{ color: 'crimson' }}>Error: {error}</p>}
@@ -111,13 +83,10 @@ const RestaurantDishes = () => {
             <div className="header-right">
               <h1 className="title">{restaurant?.name}</h1>
               <div className="header-meta">
-                <span className="rating-big">★ {restaurant?.rating}</span>
+                <span className="rating">★ {restaurant?.rating ?? "-"}</span>
                 <span className="location">{restaurant?.address}</span>
               </div>
-              <div className="header-actions">
-                <Link to="/reservar" className="btn btn-primary">Reservar</Link>
-                <Link to="/contacto" className="btn btn-ghost">Contacto</Link>
-              </div>
+              <p className="restaurant-description">{restaurant?.description}</p>
             </div>
           </header>
 
@@ -148,7 +117,6 @@ const RestaurantDishes = () => {
                     <p className="dish-sub">{d.dish_type || d.subtitle || d.description || ''}</p>
                     <div className="dish-footer">
                       <span className="dish-price">{d.price ?? (d.credits ? `${d.credits} créditos` : '')}</span>
-                      <span className="dish-rating">★ {d.rating ?? '-'}</span>
                     </div>
                   </div>
                 </article>
