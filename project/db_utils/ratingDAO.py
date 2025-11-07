@@ -47,3 +47,13 @@ class ratingDAO:
     def get_by_id(self, rating_id: int):
         res = self.supabase.table("Ratings").select("*").eq("id", rating_id).single().execute()
         return ratingVO(**res.data) if res.data else None 
+
+    def get_average_rating_by_restaurant(self, restaurant_id: int):
+        # En lugar de usar RPC, usamos una consulta SQL directa
+        res = self.supabase.table("Ratings").select("rating").eq("restaurant_id", restaurant_id).execute()
+        if res.data:
+            # Calcular el promedio de los ratings
+            ratings = [r['rating'] for r in res.data]
+            if ratings:
+                return round(sum(ratings) / len(ratings), 2)
+        return 0.0

@@ -446,17 +446,28 @@ def get_restaurant_by_name(restaurant_name: str):
     Obtiene un restaurante específico por su nombre.
     """
     try:
-        dao = restaurantDAO()
-        restaurant = dao.get_by_name(restaurant_name)
+        restaurant_dao = restaurantDAO()
+        restaurant = restaurant_dao.get_by_name(restaurant_name)
         
         if not restaurant:
             raise HTTPException(status_code=404, detail="Restaurante no encontrado")
+        
+        try:
+            # Obtener el rating promedio
+            from project.db_utils.ratingDAO import ratingDAO
+            rating_dao = ratingDAO()
+            avg_rating = rating_dao.get_average_rating_by_restaurant(restaurant["id"])
+            restaurant["rating"] = avg_rating
+        except Exception as rating_error:
+            print(f"Error obteniendo rating: {rating_error}")
+            restaurant["rating"] = 0.0
         
         return restaurant
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+        print(f"Error getting restaurant: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {str(e)}")
 
 @app.get("/api/restaurant/{restaurant_id}")
 def get_restaurant_by_id(restaurant_id: int):
