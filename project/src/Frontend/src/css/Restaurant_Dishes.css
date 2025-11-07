@@ -35,12 +35,17 @@
   top: 18px;
 }
 
-.logo-placeholder {
+.restaurant-logo {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.restaurant-logo img {
   width: 100%;
   height: 110px;
   border-radius: 8px;
+  object-fit: cover;
   background: #e9e9e9;
-  margin-bottom: 12px;
 }
 
 .restaurant-name {
@@ -82,12 +87,18 @@
   background: transparent;
 }
 
-.header-left .hero-image-placeholder {
+.header-left {
   width: 220px;
+  flex-shrink: 0;
+}
+
+.header-left img {
+  width: 100%;
   height: 140px;
-  background: #eaeaea;
+  object-fit: cover;
   border-radius: 10px;
   box-shadow: var(--card-shadow);
+  background: #eaeaea;
 }
 
 .header-hero-img {

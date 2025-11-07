@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import "../css/Restaurant_Dishes.css";
 
 const RestaurantDishes = () => {
-  const { id: restaurantId } = useParams();
+  const { restaurantName } = useParams();
   const [restaurant, setRestaurant] = useState(null);
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,7 @@ const RestaurantDishes = () => {
   };
 
   useEffect(() => {
-    if (!restaurantId) return;
+    if (!restaurantName) return;
 
     const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
 
@@ -28,9 +28,11 @@ const RestaurantDishes = () => {
       setLoading(true);
       setError(null);
       try {
+        // Use encodeURIComponent to handle special characters in the restaurant name
+        const encodedName = encodeURIComponent(restaurantName);
         const [rRes, dRes] = await Promise.all([
-          fetch(`${API_BASE}/api/restaurant/${restaurantId}`),
-          fetch(`${API_BASE}/api/dishes/${restaurantId}`),
+          fetch(`${API_BASE}/restaurants/name/${encodedName}`),
+          fetch(`${API_BASE}/restaurants/name/${encodedName}/dishes`),
         ]);
 
         if (!rRes.ok) throw new Error(`Error fetching restaurant: ${rRes.status}`);
@@ -39,11 +41,13 @@ const RestaurantDishes = () => {
         const rJson = await rRes.json();
         const dJson = await dRes.json();
 
-        // backend returns { ... } for restaurant and { dishes: [...] } for dishes
         setRestaurant(rJson);
-        setDishes(dJson.dishes || []);
+        setDishes(Array.isArray(dJson) ? dJson : []);
+
+        console.log('Restaurant:', rJson);
+        console.log('Dishes:', dJson);
       } catch (err) {
-        console.error(err);
+        console.error('Error loading data:', err);
         setError(err.message || String(err));
       } finally {
         setLoading(false);
@@ -51,23 +55,29 @@ const RestaurantDishes = () => {
     }
 
     load();
-  }, [restaurantId]);
+  }, [restaurantName]);
 
   return (
     <main className="restaurant-page">
       <div className="page-inner">
         <aside className="sidebar">
           <div className="restaurant-card">
-            {restaurant?.image_url ? (
+            <div className="restaurant-logo">
+              {restaurant?.logo_url ? (
                 <img
                   className="header-hero-img"
-                  src={normalizeUrl(restaurant.image_url)}
+                  src={normalizeUrl(restaurant.logo_url)}
                   alt={`${restaurant.name} image`}
-                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://via.placeholder.com/220x140?text=No+image'; }}
+                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant?.name || 'R')}` }}
                 />
               ) : (
-                <div className="hero-image-placeholder" />
-            )}
+                <img
+                  className="header-hero-img"
+                  src={`https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant?.name || 'R')}`}
+                  alt={`${restaurant?.name || 'Restaurant'} logo`}
+                />
+              )}
+            </div>
             <h3 className="restaurant-name">{restaurant?.name || "Restaurante"}</h3>
             <div className="meta">
               <span className="rating">★ {restaurant?.rating ?? "-"}</span>
@@ -83,15 +93,19 @@ const RestaurantDishes = () => {
           {error && <p style={{ color: 'crimson' }}>Error: {error}</p>}
           <header className="restaurant-header">
             <div className="header-left">
-              {restaurant?.image_url ? (
+            {restaurant?.logo_url ? (
                 <img
                   className="header-hero-img"
-                  src={normalizeUrl(restaurant.image_url)}
+                  src={normalizeUrl(restaurant.logo_url)}
                   alt={`${restaurant.name} image`}
-                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://via.placeholder.com/220x140?text=No+image'; }}
+                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant?.name || 'R')}` }}
                 />
               ) : (
-                <div className="hero-image-placeholder" />
+                <img
+                  className="header-hero-img"
+                  src={`https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant?.name || 'R')}`}
+                  alt={`${restaurant?.name || 'Restaurant'} logo`}
+                />
               )}
             </div>
             <div className="header-right">
@@ -121,7 +135,12 @@ const RestaurantDishes = () => {
           <div className="dishes-list">
             {dishes.length === 0 && !loading && <p>No hay platos para este restaurante.</p>}
             {dishes.map(d => (
-              <Link key={d.id} to={`/order/${d.id}`} className="card-link">
+              <Link 
+                key={d.id} 
+                to={`/restaurants/${restaurant?.name}/order/${d.name}`} 
+                state={{ dish: d }}
+                className="card-link"
+              >
                 <article className="dish-card">
                   <div className="dish-img" style={{ backgroundImage: d.image_url ? `url(${d.image_url})` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }} />
                   <div className="dish-body">

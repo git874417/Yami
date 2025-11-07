@@ -440,6 +440,24 @@ def get_all_clients():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
+@app.get("/restaurants/name/{restaurant_name}")
+def get_restaurant_by_name(restaurant_name: str):
+    """
+    Obtiene un restaurante específico por su nombre.
+    """
+    try:
+        dao = restaurantDAO()
+        restaurant = dao.get_by_name(restaurant_name)
+        
+        if not restaurant:
+            raise HTTPException(status_code=404, detail="Restaurante no encontrado")
+        
+        return restaurant
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
 @app.get("/api/restaurant/{restaurant_id}")
 def get_restaurant_by_id(restaurant_id: int):
     """
@@ -491,6 +509,38 @@ def get_all_restaurants():
             } for restaurant in restaurants
         ]
         return {"restaurants": restaurants_list}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
+@app.get("/restaurants/name/{restaurant_name}/dishes")
+def get_dishes_by_restaurant_name(restaurant_name: str):
+    """
+    Obtiene una lista de todos los platos de un restaurante por su nombre.
+    """
+    try:
+        restaurant_dao = restaurantDAO()
+        restaurant = restaurant_dao.get_by_name(restaurant_name)
+        
+        if not restaurant:
+            raise HTTPException(status_code=404, detail="Restaurante no encontrado")
+        
+        dish_dao = dishDAO()
+        dishes = dish_dao.get_all_from_restaurant(restaurant["id"])
+        
+        # Convertir los VOs a diccionarios para la respuesta JSON
+        return [
+            {
+                "id": dish.id,
+                "name": dish.name,
+                "description": dish.description,
+                "allergens": dish.allergens,
+                "dish_type": dish.dish_type,
+                "credits": dish_dao.get_dish_credits(dish.id),
+                "image_url": dish.image_url if dish.image_url else None
+            } for dish in dishes
+        ]
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
