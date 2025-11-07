@@ -1,36 +1,102 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import '../css/OrderDish.css';
 
 const OrderDish = () => {
-  const { restaurantName, dishName } = useParams();
+  const { restaurantId, dishName } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get dish data from state
-  const dishData = location.state?.dish;
-  
-  // Convert allergens string to array if necessary
-  const getAllergens = (allergens) => {
-    if (!allergens) return [];
-    if (Array.isArray(allergens)) return allergens;
-    if (typeof allergens === 'string') {
-      return allergens.split(',').map(a => a.trim()).filter(Boolean);
-    }
-    return [];
-  };
+  // Get dishId from navigation state
+  const dishIdFromState = location.state?.dishId;
   
   const [orderData, setOrderData] = useState({
-    dishName: dishData?.name || '',
-    dishDescription: dishData?.description || '',
-    credits: dishData?.credits || 0,
+    dishName: '',
+    dishDescription: '',
+    credits: 0,
     instructions: '',
-    allergens: getAllergens(dishData?.allergens),
-    dishImage: dishData?.image_url || 'https://via.placeholder.com/800x600?text=Cargando...'
+    allergens: [],
+    dishImage: 'https://via.placeholder.com/800x600?text=Cargando...'
   });
 
-  const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
+
+  const normalizeUrl = (u) => {
+    if (!u) return u;
+    // Fix double slashes in URLs (common Supabase issue)
+    let url = u.replace(/([^:]\/)\/+/g, '$1');
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('//')) return window.location.protocol + url;
+    if (url.startsWith('/')) return API_BASE.replace(/\/$/, '') + url;
+    return url;
+  };
+
+  // Cargar datos del plato desde el backend
+  useEffect(() => {
+    const fetchOrderData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Get dishId from state or session
+        const idFromSession = sessionStorage.getItem('currentDishId');
+        const dishId = dishIdFromState || idFromSession;
+
+        if (dishIdFromState) {
+          try { sessionStorage.setItem('currentDishId', dishIdFromState); } catch(e){}
+        }
+
+        if (!dishId) {
+          throw new Error('No se encontró el ID del plato');
+        }
+        
+        console.log('Fetching dish with ID:', dishId);
+        
+        const response = await fetch(`${API_BASE}/api/dish/${dishId}`);
+        
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Error response:', errorData);
+          throw new Error(errorData.detail || `Error ${response.status}: No se pudo cargar el plato`);
+        }
+        
+        const data = await response.json();
+        console.log('Dish data received:', data);
+        
+        // Procesamos los alérgenos: puede venir como string separado por comas o como array
+        let allergensArray = [];
+        if (data.allergens) {
+          if (typeof data.allergens === 'string') {
+            allergensArray = data.allergens.split(',').map(a => a.trim()).filter(a => a);
+          } else if (Array.isArray(data.allergens)) {
+            allergensArray = data.allergens;
+          }
+        }
+        
+        // Mapeamos los datos del backend al estado del frontend
+        setOrderData({
+          dishName: data.name,
+          dishDescription: data.description,
+          credits: data.credits,
+          instructions: '',
+          allergens: allergensArray,
+          dishImage: data.image || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=600&fit=crop'
+        });
+      } catch (error) {
+        console.error('Error fetching order data:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderData();
+  }, [dishIdFromState, API_BASE]);
 
   const handleAddToCart = async () => {
     try {
@@ -68,15 +134,11 @@ const OrderDish = () => {
     return icons[allergen] || '⚠️';
   };
 
-  if (!dishData) {
+  if (loading) {
     return (
       <div className="order-dish-container">
-        <div className="error-container">
-          <h2>⚠️ Error</h2>
-          <p>No se encontró información del plato</p>
-          <button className="btn-primary" onClick={() => navigate(-1)}>
-            Volver
-          </button>
+        <div className="loading-container">
+          <p>Cargando plato...</p>
         </div>
       </div>
     );
