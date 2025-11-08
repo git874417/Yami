@@ -22,8 +22,8 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/inicio-sesion" element={<Login />} />
           <Route path="/registro" element={<Register_Client />} />
-          <Route path="/restaurants/:restaurantName/order/:dishName" element={<OrderDish />} />
-          <Route path="/restaurants/:restaurantName" element={<RestaurantDishes />} />
+          <Route path="/restaurants/:restaurantId/order/:dishName" element={<OrderDish />} />
+          <Route path="/restaurants/:restaurantId" element={<RestaurantDishes />} />
         </Routes>
       </div>
       <Footer />
