@@ -1,10 +1,10 @@
 // ...existing code...
-import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import React, {useEffect, useState} from "react";
+import {Link, useParams} from "react-router-dom";
 import "../css/Restaurant_Dishes.css";
 
 const RestaurantDishes = () => {
-  const { restaurantName } = useParams();
+  const {restaurantName} = useParams();
   const [restaurant, setRestaurant] = useState(null);
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,9 +13,9 @@ const RestaurantDishes = () => {
 
   const normalizeUrl = (u) => {
     if (!u) return u;
-    if (u.startsWith('http://') || u.startsWith('https://')) return u;
-    if (u.startsWith('//')) return window.location.protocol + u;
-    if (u.startsWith('/')) return API_BASE.replace(/\/$/, '') + u;
+    if (u.startsWith("http://") || u.startsWith("https://")) return u;
+    if (u.startsWith("//")) return window.location.protocol + u;
+    if (u.startsWith("/")) return API_BASE.replace(/\/$/, "") + u;
     return u;
   };
 
@@ -44,10 +44,10 @@ const RestaurantDishes = () => {
         setRestaurant(rJson);
         setDishes(Array.isArray(dJson) ? dJson : []);
 
-        console.log('Restaurant:', rJson);
-        console.log('Dishes:', dJson);
+        console.log("Restaurant:", rJson);
+        console.log("Dishes:", dJson);
       } catch (err) {
-        console.error('Error loading data:', err);
+        console.error("Error loading data:", err);
         setError(err.message || String(err));
       } finally {
         setLoading(false);
@@ -62,21 +62,28 @@ const RestaurantDishes = () => {
       <div className="page-inner">
         <section className="content">
           {loading && <p>Loading...</p>}
-          {error && <p style={{ color: 'crimson' }}>Error: {error}</p>}
+          {error && <p style={{color: "crimson"}}>Error: {error}</p>}
           <header className="restaurant-header">
             <div className="header-left">
-            {restaurant?.logo_url ? (
+              {restaurant?.logo_url ? (
                 <img
                   className="header-hero-img"
                   src={normalizeUrl(restaurant.logo_url)}
                   alt={`${restaurant.name} image`}
-                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant?.name || 'R')}` }}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
+                      restaurant?.name || "R"
+                    )}`;
+                  }}
                 />
               ) : (
                 <img
                   className="header-hero-img"
-                  src={`https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant?.name || 'R')}`}
-                  alt={`${restaurant?.name || 'Restaurant'} logo`}
+                  src={`https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
+                    restaurant?.name || "R"
+                  )}`}
+                  alt={`${restaurant?.name || "Restaurant"} logo`}
                 />
               )}
             </div>
@@ -103,20 +110,29 @@ const RestaurantDishes = () => {
 
           <div className="dishes-list">
             {dishes.length === 0 && !loading && <p>No hay platos para este restaurante.</p>}
-            {dishes.map(d => (
-              <Link 
-                key={d.id} 
-                to={`/restaurants/${restaurant?.name}/order/${d.name}`} 
-                state={{ dish: d }}
+            {dishes.map((d) => (
+              <Link
+                key={d.id}
+                to={`/restaurants/${restaurant?.name}/order/${d.name}`}
+                state={{dish: d}}
                 className="card-link"
               >
                 <article className="dish-card">
-                  <div className="dish-img" style={{ backgroundImage: d.image_url ? `url(${d.image_url})` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                  <div
+                    className="dish-img"
+                    style={{
+                      backgroundImage: d.image_url ? `url(${d.image_url})` : undefined,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                  />
                   <div className="dish-body">
                     <h3 className="dish-title">{d.name}</h3>
-                    <p className="dish-sub">{d.dish_type || d.subtitle || d.description || ''}</p>
+                    <p className="dish-sub">{d.dish_type || d.subtitle || d.description || ""}</p>
                     <div className="dish-footer">
-                      <span className="dish-price">{d.price ?? (d.credits ? `${d.credits} créditos` : '')}</span>
+                      <span className="dish-price">
+                        {d.price ?? (d.credits ? `${d.credits} créditos` : "")}
+                      </span>
                     </div>
                   </div>
                 </article>
