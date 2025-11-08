@@ -500,25 +500,37 @@ def get_restaurant_by_id(restaurant_id: int):
 @app.get("/api/restaurants")
 def get_all_restaurants():
     """
-    Obtiene una lista de todos los restaurantes.
+    Obtiene una lista de todos los restaurantes con sus ratings promedio.
     """
     try:
-        dao = restaurantDAO()
-        restaurants = dao.get_all()
-        # Convertir los VOs a diccionarios para la respuesta JSON
-        restaurants_list = [
-            {
-            "id": restaurant.id,
-            "user_id": restaurant.user_id,
-            "name": restaurant.name,
-            "description": restaurant.description,
-            "city": restaurant.city,
-            "address": restaurant.address,
-            "phone_number": restaurant.phone_number,
-            "category": restaurant.category,
-            "image_url": restaurant.logo_url if restaurant.logo_url else None
-            } for restaurant in restaurants
-        ]
+        from project.db_utils.ratingDAO import ratingDAO
+        
+        restaurant_dao = restaurantDAO()
+        rating_dao = ratingDAO()
+        restaurants = restaurant_dao.get_all()
+        
+        # Convertir los VOs a diccionarios y añadir el rating promedio
+        restaurants_list = []
+        for restaurant in restaurants:
+            try:
+                avg_rating = rating_dao.get_average_rating_by_restaurant(restaurant.id)
+            except Exception as rating_error:
+                print(f"Error obteniendo rating para restaurante {restaurant.id}: {rating_error}")
+                avg_rating = 0.0
+            
+            restaurants_list.append({
+                "id": restaurant.id,
+                "user_id": restaurant.user_id,
+                "name": restaurant.name,
+                "description": restaurant.description,
+                "city": restaurant.city,
+                "address": restaurant.address,
+                "phone_number": restaurant.phone_number,
+                "category": restaurant.category,
+                "image_url": restaurant.logo_url if restaurant.logo_url else None,
+                "rating": avg_rating
+            })
+        
         return {"restaurants": restaurants_list}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")

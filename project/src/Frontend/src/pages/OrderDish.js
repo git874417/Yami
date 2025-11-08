@@ -7,19 +7,30 @@ const OrderDish = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get dishId from navigation state
-  const dishIdFromState = location.state?.dishId;
+  // Get dish data from navigation state
+  const dishFromState = location.state?.dish;
+  const restaurantFromState = location.state?.restaurant;
   
+  // Convert allergens string to array if necessary
+  const getAllergens = (allergens) => {
+    if (!allergens) return [];
+    if (Array.isArray(allergens)) return allergens;
+    if (typeof allergens === 'string') {
+      return allergens.split(',').map(a => a.trim()).filter(Boolean);
+    }
+    return [];
+  };
+
   const [orderData, setOrderData] = useState({
-    dishName: '',
-    dishDescription: '',
-    credits: 0,
+    dishName: dishFromState?.name || '',
+    dishDescription: dishFromState?.description || '',
+    credits: dishFromState?.credits || 0,
     instructions: '',
-    allergens: [],
-    dishImage: 'https://via.placeholder.com/800x600?text=Cargando...'
+    allergens: getAllergens(dishFromState?.allergens),
+    dishImage: dishFromState?.image_url || 'https://via.placeholder.com/800x600?text=Cargando...'
   });
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!dishFromState);
   const [error, setError] = useState(null);
 
   const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
@@ -34,58 +45,55 @@ const OrderDish = () => {
     return url;
   };
 
-  // Cargar datos del plato desde el backend
+  // Cargar datos del plato desde el backend solo si no vienen del state
   useEffect(() => {
+    // Si ya tenemos los datos del plato del state, no hacer fetch
+    if (dishFromState) {
+      console.log('Using dish data from state:', dishFromState);
+      setLoading(false);
+      return;
+    }
+
+    // Si no tenemos los datos, hacer fetch por nombre del plato
     const fetchOrderData = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        // Get dishId from state or session
-        const idFromSession = sessionStorage.getItem('currentDishId');
-        const dishId = dishIdFromState || idFromSession;
-
-        if (dishIdFromState) {
-          try { sessionStorage.setItem('currentDishId', dishIdFromState); } catch(e){}
-        }
-
-        if (!dishId) {
-          throw new Error('No se encontró el ID del plato');
+        if (!dishName || !restaurantId) {
+          throw new Error('No se encontró información del plato');
         }
         
-        console.log('Fetching dish with ID:', dishId);
+        console.log('Fetching dish by name:', dishName, 'from restaurant:', restaurantId);
         
-        const response = await fetch(`${API_BASE}/api/dish/${dishId}`);
-        
-        console.log('Response status:', response.status);
+        // Primero obtener los platos del restaurante
+        const encodedRestaurantName = encodeURIComponent(restaurantId);
+        const response = await fetch(`${API_BASE}/restaurants/name/${encodedRestaurantName}/dishes`);
         
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error('Error response:', errorData);
-          throw new Error(errorData.detail || `Error ${response.status}: No se pudo cargar el plato`);
+          throw new Error(`Error ${response.status}: No se pudieron cargar los platos`);
         }
         
-        const data = await response.json();
-        console.log('Dish data received:', data);
+        const dishes = await response.json();
+        console.log('Dishes received:', dishes);
         
-        // Procesamos los alérgenos: puede venir como string separado por comas o como array
-        let allergensArray = [];
-        if (data.allergens) {
-          if (typeof data.allergens === 'string') {
-            allergensArray = data.allergens.split(',').map(a => a.trim()).filter(a => a);
-          } else if (Array.isArray(data.allergens)) {
-            allergensArray = data.allergens;
-          }
+        // Buscar el plato por nombre
+        const dish = dishes.find(d => d.name === decodeURIComponent(dishName));
+        
+        if (!dish) {
+          throw new Error('No se encontró el plato');
         }
         
-        // Mapeamos los datos del backend al estado del frontend
+        console.log('Found dish:', dish);
+        
+        // Actualizar el estado con los datos del plato
         setOrderData({
-          dishName: data.name,
-          dishDescription: data.description,
-          credits: data.credits,
+          dishName: dish.name,
+          dishDescription: dish.description,
+          credits: dish.credits,
           instructions: '',
-          allergens: allergensArray,
-          dishImage: data.image || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=600&fit=crop'
+          allergens: getAllergens(dish.allergens),
+          dishImage: dish.image_url || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&h=600&fit=crop'
         });
       } catch (error) {
         console.error('Error fetching order data:', error);
@@ -96,7 +104,7 @@ const OrderDish = () => {
     };
 
     fetchOrderData();
-  }, [dishIdFromState, API_BASE]);
+  }, [dishFromState, dishName, restaurantId, API_BASE]);
 
   const handleAddToCart = async () => {
     try {
@@ -107,13 +115,7 @@ const OrderDish = () => {
         instructions: orderData.instructions
       };
       
-      // Aquí guardarías en el carrito (localStorage o estado global)
-      /*
-      const currentCart = JSON.parse(localStorage.getItem('cart') || '[]');
-      currentCart.push(newItem);
-      localStorage.setItem('cart', JSON.stringify(currentCart)); 
-      setCart(currentCart);
-      */
+      //Aquí guardaremos en el carrito
       alert('✓ Plato añadido al carrito');
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -123,13 +125,24 @@ const OrderDish = () => {
 
   const getAllergenIcon = (allergen) => {
     const icons = {
-      'Lactosa': '🥛',
       'Gluten': '🌾',
-      'Nueces': '🥜',
+      'Huevos': '🥚',
       'Huevo': '🥚',
+      'Lácteos': '🥛',
+      'Lactosa': '🥛',
       'Pescado': '🐟',
-      'Marisco': '🦐',
-      'Soja': '🌱'
+      'Soja': '🌱',
+      'Frutos de Cáscara': '�',
+      'Nueces': '🥜',
+      'Cacahuetes': '🥜',
+      'Moluscos': '�',
+      'Mostaza': '🌭',
+      'Granos de Sésamo': '🌾',
+      'Sésamo': '🌾',
+      'Dióxido de Azufre y Sulfitos': '💨',
+      'Sulfitos': '�',
+      'Crustáceos': '🦐',
+      'Marisco': '🦐'
     };
     return icons[allergen] || '⚠️';
   };

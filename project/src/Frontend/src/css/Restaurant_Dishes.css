@@ -19,55 +19,68 @@
 .page-inner {
   max-width: var(--max-width);
   margin: 0 auto;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 28px;
+  align-items: start;
 }
 
 /* SIDEBAR */
-.sidebar .restaurant-card {
+.sidebar {
   background: var(--bg);
-  padding: 18px;
+  padding: 20px;
   border-radius: var(--radius);
   box-shadow: var(--card-shadow);
   position: sticky;
   top: 18px;
+  height: fit-content;
 }
 
-.restaurant-logo {
-  width: 100%;
-  margin-bottom: 12px;
-}
-
-.restaurant-logo img {
-  width: 100%;
-  height: 110px;
-  border-radius: 8px;
-  object-fit: cover;
-  background: #e9e9e9;
-}
-
-.restaurant-name {
-  font-size: 1.05rem;
-  margin: 0 0 6px;
+.filter-title {
+  font-size: 1.1rem;
   font-weight: 700;
+  margin: 0 0 20px 0;
+  color: #1a1a1a;
 }
 
-.meta {
-  display:flex;
-  gap:8px;
-  align-items:center;
-  color: var(--muted);
+.filter-section {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.filter-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.filter-subtitle {
   font-size: 0.9rem;
-  margin-bottom: 12px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #333;
 }
 
-.about-title {
-  font-size: 0.95rem;
-  margin: 10px 0 6px;
-}
-
-.about-text {
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
   font-size: 0.9rem;
   color: #555;
-  margin: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.filter-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  cursor: pointer;
+  accent-color: #1a1a1a;
+}
+
+.filter-checkbox:hover {
+  color: #1a1a1a;
 }
 
 /* CONTENT */
@@ -187,7 +200,15 @@
   gap: 14px;
 }
 
-/* make the entire dish card clickable when wrapped by .card-link */
+.dishes-list .no-results {
+  background: #fff3cd;
+  color: #856404;
+  padding: 20px;
+  border-radius: var(--radius);
+  text-align: center;
+  font-size: 0.95rem;
+}
+
 .card-link {
   display: block;
   text-decoration: none;
@@ -199,7 +220,6 @@
   cursor: pointer;
   border-radius: 10px;
   box-shadow: var(--card-shadow);
-  /* layout (display, gap, padding, align-items) is controlled by .dish-card to avoid selector conflicts */
 }
 
 .card-link:hover .dish-card {
@@ -209,10 +229,10 @@
 
 .dish-card {
   display: flex;
-  flex-direction: column; /* vertical layout: image on top, content below */
+  flex-direction: column; 
   gap: 12px;
   background: #fff;
-  padding: 0; /* body will provide padding, keep image flush */
+  padding: 0; 
   border-radius: 10px;
   box-shadow: var(--card-shadow);
   align-items: stretch;
@@ -221,7 +241,7 @@
 
 .dish-img {
   width: 100%;
-  height: 160px; /* taller hero-style image */
+  height: 160px; 
   background: #e9e9e9;
   border-radius: 10px 10px 0 0;
   flex: 0 0 auto;
@@ -235,8 +255,8 @@
   display:flex;
   flex-direction:column;
   gap:8px;
-  padding: 12px; /* content spacing below the image */
-  text-align: left; /* align text to the left */
+  padding: 12px; 
+  text-align: left; 
 }
 
 .dish-title {
@@ -268,4 +288,3 @@
   .dish-img { width: 140px; height: 90px; flex: 0 0 140px; }
   .restaurant-page { padding: 16px 10px; }
 }
-/* ...existing code... */
