@@ -4,7 +4,7 @@ import {Link, useParams} from "react-router-dom";
 import "../css/Restaurant_Dishes.css";
 
 const RestaurantDishes = () => {
-  const {restaurantName} = useParams();
+  const {restaurantId} = useParams();
   const [restaurant, setRestaurant] = useState(null);
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,26 +13,26 @@ const RestaurantDishes = () => {
 
   const normalizeUrl = (u) => {
     if (!u) return u;
-    if (u.startsWith("http://") || u.startsWith("https://")) return u;
-    if (u.startsWith("//")) return window.location.protocol + u;
-    if (u.startsWith("/")) return API_BASE.replace(/\/$/, "") + u;
-    return u;
+    // Fix double slashes in URLs (common Supabase issue)
+    let url = u.replace(/([^:]\/)\/+/g, "$1");
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    if (url.startsWith("//")) return window.location.protocol + url;
+    if (url.startsWith("/")) return API_BASE.replace(/\/$/, "") + url;
+    return url;
   };
 
   useEffect(() => {
-    if (!restaurantName) return;
-
-    const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
+    if (!restaurantId) return;
 
     async function load() {
       setLoading(true);
       setError(null);
       try {
-        // Use encodeURIComponent to handle special characters in the restaurant name
-        const encodedName = encodeURIComponent(restaurantName);
+        // Use the restaurantId param to fetch restaurant and its dishes
+        const id = encodeURIComponent(restaurantId);
         const [rRes, dRes] = await Promise.all([
-          fetch(`${API_BASE}/restaurants/name/${encodedName}`),
-          fetch(`${API_BASE}/restaurants/name/${encodedName}/dishes`),
+          fetch(`${API_BASE}/api/restaurant/${id}`),
+          fetch(`${API_BASE}/api/dishes/${id}`),
         ]);
 
         if (!rRes.ok) throw new Error(`Error fetching restaurant: ${rRes.status}`);
@@ -42,10 +42,12 @@ const RestaurantDishes = () => {
         const dJson = await dRes.json();
 
         setRestaurant(rJson);
-        setDishes(Array.isArray(dJson) ? dJson : []);
+        // Handle both array response and { dishes: [...] } object response
+        const dishesArray = Array.isArray(dJson) ? dJson : dJson.dishes || [];
+        setDishes(dishesArray);
 
         console.log("Restaurant:", rJson);
-        console.log("Dishes:", dJson);
+        console.log("Dishes:", dishesArray);
       } catch (err) {
         console.error("Error loading data:", err);
         setError(err.message || String(err));
@@ -55,7 +57,7 @@ const RestaurantDishes = () => {
     }
 
     load();
-  }, [restaurantName]);
+  }, [restaurantId]);
 
   return (
     <main className="restaurant-page">
@@ -65,10 +67,10 @@ const RestaurantDishes = () => {
           {error && <p style={{color: "crimson"}}>Error: {error}</p>}
           <header className="restaurant-header">
             <div className="header-left">
-              {restaurant?.logo_url ? (
+              {restaurant?.image_url ? (
                 <img
                   className="header-hero-img"
-                  src={normalizeUrl(restaurant.logo_url)}
+                  src={normalizeUrl(restaurant.image_url)}
                   alt={`${restaurant.name} image`}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
@@ -110,34 +112,37 @@ const RestaurantDishes = () => {
 
           <div className="dishes-list">
             {dishes.length === 0 && !loading && <p>No hay platos para este restaurante.</p>}
-            {dishes.map((d) => (
-              <Link
-                key={d.id}
-                to={`/restaurants/${restaurant?.name}/order/${d.name}`}
-                state={{dish: d}}
-                className="card-link"
-              >
-                <article className="dish-card">
-                  <div
-                    className="dish-img"
-                    style={{
-                      backgroundImage: d.image_url ? `url(${d.image_url})` : undefined,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }}
-                  />
-                  <div className="dish-body">
-                    <h3 className="dish-title">{d.name}</h3>
-                    <p className="dish-sub">{d.dish_type || d.subtitle || d.description || ""}</p>
-                    <div className="dish-footer">
-                      <span className="dish-price">
-                        {d.price ?? (d.credits ? `${d.credits} créditos` : "")}
-                      </span>
+            {dishes.length > 0 &&
+              dishes.map((d) => (
+                <Link
+                  key={d.id}
+                  to={`/restaurants/${encodeURIComponent(
+                    restaurant?.id || restaurantId
+                  )}/order/${encodeURIComponent(d.name || "")}`}
+                  state={{dishId: d.id}}
+                  className="card-link"
+                >
+                  <article className="dish-card">
+                    <div
+                      className="dish-img"
+                      style={{
+                        backgroundImage: d.image_url ? `url("${normalizeUrl(d.image_url)}")` : undefined,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    />
+                    <div className="dish-body">
+                      <h3 className="dish-title">{d.name}</h3>
+                      <p className="dish-sub">{d.dish_type || d.subtitle || d.description || ""}</p>
+                      <div className="dish-footer">
+                        <span className="dish-price">
+                          {d.price ?? (d.credits ? `${d.credits} créditos` : "")}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              </Link>
-            ))}
+                  </article>
+                </Link>
+              ))}
           </div>
         </section>
       </div>
