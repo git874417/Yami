@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, {useState, useEffect} from "react";
+import {Link} from "react-router-dom";
 import "../css/Home.css";
 
 const Home = () => {
@@ -13,7 +13,7 @@ const Home = () => {
       try {
         const response = await fetch(`${API_BASE}/restaurants`);
         if (!response.ok) {
-          throw new Error('Failed to fetch restaurants');
+          throw new Error("Failed to fetch restaurants");
         }
         const data = await response.json();
         setRestaurants(data);
@@ -40,7 +40,7 @@ const Home = () => {
           </Link>
         </div>
       </div>
-      
+
       <div className="hero-image">
         <img
           src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=60"
@@ -50,7 +50,7 @@ const Home = () => {
 
       <div className="cards">
         <div className="cards-inner">
-          <h2>Nuestros Restaurantes</h2>
+          {/* <h2>Nuestros Restaurantes</h2>
           {loading && <p>Cargando restaurantes...</p>}
           {error && <p style={{ color: 'red' }}>Error: {error}</p>}
           <div className="card-grid">
@@ -79,7 +79,7 @@ const Home = () => {
                 </article>
               </Link>
             ))}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

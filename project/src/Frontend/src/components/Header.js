@@ -3,14 +3,14 @@ import "../css/Header.css";
 import Navbar from "./Navbar.js";
 import logo from "../assets/logo.png";
 
-const Header = () => {
+const Header = ({location}) => {
   return (
     <header className="Header">
-      <div className="header-content">  
+      <div className="header-content">
         <div className="logo">
           <img src={logo} alt="Yami logo" className="logo-img" />
           <h1>Yami</h1>
-        <Navbar />
+          <Navbar location={location} />
         </div>
         <div className="header-spacer">
           <div className="hero-divider" />

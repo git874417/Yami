@@ -1,7 +1,8 @@
 import React, {useState} from "react";
 import axios from "axios";
-import {Link, Links, useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import "./../css/Login.css";
+import ShopPage from "./ShopPage";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -27,10 +28,10 @@ const Login = () => {
 
       if (data.length === 0) return setMensaje("Usuario no encontrado");
 
-      localStorage.setItem("user_id", data.user_id);
-      localStorage.setItem("role", data.role);
-
-      navigate("/ShopPage");
+      // localStorage.setItem("user_id", data.user_id);
+      // localStorage.setItem("role", data.role);
+      sessionStorage.setItem("user", JSON.stringify(data));
+      navigate("/restaurants");
 
       console.log("Login correcto:");
     } catch (error) {
@@ -40,25 +41,27 @@ const Login = () => {
   };
 
   return (
-    <div>
-      <h2>¡Bienvenido de vuelta!</h2>
-      <form onSubmit={handleLogin}>
-        <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} required />
+    <body>
+      <div className="login-container">
+        <h2>¡Bienvenido de vuelta!</h2>
+        <form onSubmit={handleLogin}>
+          <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} required />
 
-        {/*el input nos permite elegir el tipo de input */}
-        <input
-          type="password"
-          placeholder="Contraseña"
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Iniciar Sesión</button>
-      </form>
-      <p>{mensaje}</p>
-      <Link to="/" className="login-volver-inicio">
-        Volver
-      </Link>
-    </div>
+          {/*el input nos permite elegir el tipo de input */}
+          <input
+            type="password"
+            placeholder="Contraseña"
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button type="submit">Iniciar Sesión</button>
+        </form>
+        <p>{mensaje}</p>
+        <Link to="/" className="login-volver-inicio">
+          Volver
+        </Link>
+      </div>
+    </body>
   );
 };
 

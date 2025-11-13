@@ -42,3 +42,10 @@
 .navbar-button-registro:hover {
   background-color: #0056b3;
 }
+
+.navbar-button.carrito-button {
+  background-color: var(--azul-yami);
+}
+.navbar-button-logout {
+  background-color: var(--azul-yami);
+}

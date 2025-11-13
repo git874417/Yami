@@ -46,49 +46,50 @@ const RestaurantDishes = () => {
 
   //Ahora definimos unos mapeos que nos serán de utilidad a la hora de filtrar
   //lo que mostramos por pantalla
-  
+
   // Mapeo de tipos de plato
   const dishTypeMapping = {
-    entrante: ['entrante', 'entrada', 'starter', 'aperitivo', 'appetizer'],
-    principal: ['principal', 'main', 'plato principal', 'segundo'],
-    postre: ['postre', 'dessert', 'dulce']
+    entrante: ["entrante", "entrada", "starter", "aperitivo", "appetizer"],
+    principal: ["principal", "main", "plato principal", "segundo"],
+    postre: ["postre", "dessert", "dulce"],
   };
 
   // Mapeo de alérgenos
   const allergenMapping = {
-    gluten: ['gluten'],
-    huevos: ['huevo', 'huevos', 'egg'],
-    lacteos: ['lactosa', 'lácteos', 'lacteos', 'leche', 'dairy'],
-    pescado: ['pescado', 'fish'],
-    soja: ['soja', 'soy'],
-    frutosCascara: ['frutos de cáscara', 'frutos secos', 'nueces', 'nuts'],
-    cacahuetes: ['cacahuetes', 'cacahuete', 'maní', 'peanut'],
-    moluscos: ['moluscos', 'mollusks'],
-    mostaza: ['mostaza', 'mustard'],
-    granosSesamo: ['granos de sésamo', 'sésamo', 'sesamo', 'sesame'],
-    dioxidoAzufre: ['dióxido de azufre', 'sulfitos', 'sulfito', 'sulfur dioxide'],
-    crustaceos: ['crustáceos', 'crustaceos', 'marisco', 'shellfish']
+    gluten: ["gluten"],
+    huevos: ["huevo", "huevos", "egg"],
+    lacteos: ["lactosa", "lácteos", "lacteos", "leche", "dairy"],
+    pescado: ["pescado", "fish"],
+    soja: ["soja", "soy"],
+    frutosCascara: ["frutos de cáscara", "frutos secos", "nueces", "nuts"],
+    cacahuetes: ["cacahuetes", "cacahuete", "maní", "peanut"],
+    moluscos: ["moluscos", "mollusks"],
+    mostaza: ["mostaza", "mustard"],
+    granosSesamo: ["granos de sésamo", "sésamo", "sesamo", "sesame"],
+    dioxidoAzufre: ["dióxido de azufre", "sulfitos", "sulfito", "sulfur dioxide"],
+    crustaceos: ["crustáceos", "crustaceos", "marisco", "shellfish"],
   };
 
   // Función para filtrar platos
   const getFilteredDishes = () => {
-    return dishes.filter(dish => {
+    return dishes.filter((dish) => {
       // Filtro de tipo de plato
-      const activeDishTypes = Object.keys(filterPlato).filter(key => filterPlato[key]);
-      
+      const activeDishTypes = Object.keys(filterPlato).filter((key) => filterPlato[key]);
+
       // Si ninguno está activo, no filtrar por tipo (mostrar todos)
-      const dishTypeMatch = activeDishTypes.length === 0 ||
-                           activeDishTypes.some(filterKey => {
-                             const typeVariants = dishTypeMapping[filterKey] || [];
-                             const dishType = (dish.dish_type || '').toLowerCase();
-                             return typeVariants.some(variant => dishType.includes(variant.toLowerCase()));
-                           });
+      const dishTypeMatch =
+        activeDishTypes.length === 0 ||
+        activeDishTypes.some((filterKey) => {
+          const typeVariants = dishTypeMapping[filterKey] || [];
+          const dishType = (dish.dish_type || "").toLowerCase();
+          return typeVariants.some((variant) => dishType.includes(variant.toLowerCase()));
+        });
 
       if (!dishTypeMatch) return false;
 
       // Filtro de alérgenos (EVITAR los que están MARCADOS)
-      const allergensToAvoid = Object.keys(filterAlergenos).filter(key => filterAlergenos[key]);
-      
+      const allergensToAvoid = Object.keys(filterAlergenos).filter((key) => filterAlergenos[key]);
+
       // Si ningún alérgeno está marcado (no se evita ninguno), mostrar todos
       if (allergensToAvoid.length === 0) return true;
 
@@ -97,21 +98,21 @@ const RestaurantDishes = () => {
       if (dish.allergens) {
         if (Array.isArray(dish.allergens)) {
           dishAllergens = dish.allergens;
-        } else if (typeof dish.allergens === 'string') {
+        } else if (typeof dish.allergens === "string") {
           // Si es un string, intentar parsearlo o dividirlo
           try {
             dishAllergens = JSON.parse(dish.allergens);
           } catch {
-            dishAllergens = dish.allergens.split(',').map(a => a.trim());
+            dishAllergens = dish.allergens.split(",").map((a) => a.trim());
           }
         }
       }
-      
-      const hasAvoidedAllergen = allergensToAvoid.some(filterKey => {
+
+      const hasAvoidedAllergen = allergensToAvoid.some((filterKey) => {
         const allergenVariants = allergenMapping[filterKey] || [];
-        return dishAllergens.some(allergen => {
-          const allergenLower = (allergen || '').toString().toLowerCase();
-          return allergenVariants.some(variant => allergenLower.includes(variant.toLowerCase()));
+        return dishAllergens.some((allergen) => {
+          const allergenLower = (allergen || "").toString().toLowerCase();
+          return allergenVariants.some((variant) => allergenLower.includes(variant.toLowerCase()));
         });
       });
 
@@ -130,7 +131,7 @@ const RestaurantDishes = () => {
       setLoading(true);
       try {
         const encodedName = encodeURIComponent(restaurantId);
-        
+
         // Si ya tenemos los datos del restaurante del state, solo cargamos los platos
         if (location.state?.restaurant) {
           console.log("Using restaurant data from state:", location.state.restaurant);
@@ -186,7 +187,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterPlato.entrante}
-                onChange={(e) => setFilterPlato({ ...filterPlato, entrante: e.target.checked })}
+                onChange={(e) => setFilterPlato({...filterPlato, entrante: e.target.checked})}
               />
               Entrante
             </label>
@@ -194,7 +195,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterPlato.principal}
-                onChange={(e) => setFilterPlato({ ...filterPlato, principal: e.target.checked })}
+                onChange={(e) => setFilterPlato({...filterPlato, principal: e.target.checked})}
               />
               Principal
             </label>
@@ -202,7 +203,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterPlato.postre}
-                onChange={(e) => setFilterPlato({ ...filterPlato, postre: e.target.checked })}
+                onChange={(e) => setFilterPlato({...filterPlato, postre: e.target.checked})}
               />
               Postre
             </label>
@@ -215,7 +216,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterAlergenos.gluten}
-                onChange={(e) => setFilterAlergenos({ ...filterAlergenos, gluten: e.target.checked })}
+                onChange={(e) => setFilterAlergenos({...filterAlergenos, gluten: e.target.checked})}
               />
               Gluten
             </label>
@@ -223,7 +224,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterAlergenos.huevos}
-                onChange={(e) => setFilterAlergenos({ ...filterAlergenos, huevos: e.target.checked })}
+                onChange={(e) => setFilterAlergenos({...filterAlergenos, huevos: e.target.checked})}
               />
               Huevos
             </label>
@@ -231,7 +232,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterAlergenos.lacteos}
-                onChange={(e) => setFilterAlergenos({ ...filterAlergenos, lacteos: e.target.checked })}
+                onChange={(e) => setFilterAlergenos({...filterAlergenos, lacteos: e.target.checked})}
               />
               Lácteos
             </label>
@@ -239,7 +240,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterAlergenos.pescado}
-                onChange={(e) => setFilterAlergenos({ ...filterAlergenos, pescado: e.target.checked })}
+                onChange={(e) => setFilterAlergenos({...filterAlergenos, pescado: e.target.checked})}
               />
               Pescado
             </label>
@@ -247,7 +248,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterAlergenos.soja}
-                onChange={(e) => setFilterAlergenos({ ...filterAlergenos, soja: e.target.checked })}
+                onChange={(e) => setFilterAlergenos({...filterAlergenos, soja: e.target.checked})}
               />
               Soja
             </label>
@@ -255,7 +256,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterAlergenos.frutosCascara}
-                onChange={(e) => setFilterAlergenos({ ...filterAlergenos, frutosCascara: e.target.checked })}
+                onChange={(e) => setFilterAlergenos({...filterAlergenos, frutosCascara: e.target.checked})}
               />
               Frutos de Cáscara
             </label>
@@ -263,7 +264,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterAlergenos.cacahuetes}
-                onChange={(e) => setFilterAlergenos({ ...filterAlergenos, cacahuetes: e.target.checked })}
+                onChange={(e) => setFilterAlergenos({...filterAlergenos, cacahuetes: e.target.checked})}
               />
               Cacahuetes
             </label>
@@ -271,7 +272,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterAlergenos.moluscos}
-                onChange={(e) => setFilterAlergenos({ ...filterAlergenos, moluscos: e.target.checked })}
+                onChange={(e) => setFilterAlergenos({...filterAlergenos, moluscos: e.target.checked})}
               />
               Moluscos
             </label>
@@ -279,7 +280,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterAlergenos.mostaza}
-                onChange={(e) => setFilterAlergenos({ ...filterAlergenos, mostaza: e.target.checked })}
+                onChange={(e) => setFilterAlergenos({...filterAlergenos, mostaza: e.target.checked})}
               />
               Mostaza
             </label>
@@ -287,7 +288,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterAlergenos.granosSesamo}
-                onChange={(e) => setFilterAlergenos({ ...filterAlergenos, granosSesamo: e.target.checked })}
+                onChange={(e) => setFilterAlergenos({...filterAlergenos, granosSesamo: e.target.checked})}
               />
               Granos de Sésamo
             </label>
@@ -295,7 +296,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterAlergenos.dioxidoAzufre}
-                onChange={(e) => setFilterAlergenos({ ...filterAlergenos, dioxidoAzufre: e.target.checked })}
+                onChange={(e) => setFilterAlergenos({...filterAlergenos, dioxidoAzufre: e.target.checked})}
               />
               Dióxido de Azufre y Sulfitos
             </label>
@@ -303,7 +304,7 @@ const RestaurantDishes = () => {
               <input
                 type="checkbox"
                 checked={filterAlergenos.crustaceos}
-                onChange={(e) => setFilterAlergenos({ ...filterAlergenos, crustaceos: e.target.checked })}
+                onChange={(e) => setFilterAlergenos({...filterAlergenos, crustaceos: e.target.checked})}
               />
               Crustáceos
             </label>

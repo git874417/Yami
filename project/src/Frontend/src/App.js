@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import {BrowserRouter as Router, Route, Routes, useLocation} from "react-router-dom";
 import Home from "./pages/Home.js";
 import OrderDish from "./pages/OrderDish.js";
 import RestaurantDishes from "./pages/Restaurant_Dishes.js";
@@ -17,7 +17,7 @@ function AppContent() {
 
   return (
     <>
-      {mostrarHeader && <Header />}
+      {mostrarHeader && <Header location={location} />}
       <div className="main-page">
         <Routes>
           <Route path="/" element={<Home />} />
