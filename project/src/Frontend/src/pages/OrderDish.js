@@ -55,14 +55,14 @@ const OrderDish = () => {
         setLoading(true);
         setError(null);
 
-        if (!dishName || !restaurantId) {
+        if (!dishName || !restaurantNameUrl) {
           throw new Error("No se encontró información del plato");
         }
 
-        console.log("Fetching dish by name:", dishName, "from restaurant:", restaurantId);
+        console.log("Fetching dish by name:", dishName, "from restaurant:", restaurantNameUrl);
 
         // Primero obtener los platos del restaurante
-        const encodedRestaurantName = encodeURIComponent(restaurantId);
+        const encodedRestaurantName = encodeURIComponent(restaurantNameUrl);
         const response = await fetch(`${API_BASE}/restaurants/name/${encodedRestaurantName}/dishes`);
 
         if (!response.ok) {
@@ -101,7 +101,7 @@ const OrderDish = () => {
     };
 
     fetchOrderData();
-  }, [dishFromState, dishName, restaurantId, API_BASE]);
+  }, [dishFromState, dishName, restaurantNameUrl, API_BASE]);
 
   const handleCreateOrder = async () => {
     const userSession = sessionStorage.getItem("user");
