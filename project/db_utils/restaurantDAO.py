@@ -66,7 +66,11 @@ class restaurantDAO:
     def get_by_id(self, restaurant_id: int):
         res = self.supabase.table("Restaurants").select("*").eq("id", restaurant_id).single().execute()
         return restaurantVO(**res.data) if res.data else None
+    
+    def get_by_user_id(self, user_id: int):
+        res = self.supabase.table("Restaurants").select("*").eq("user_id", user_id).single().execute()
+        return restaurantVO(**res.data) if res.data else None
 
     def get_by_name(self, name: str):
         res = self.supabase.table("Restaurants").select("*").eq("name", name).single().execute()
-        return res.data if res.data else None
+        return restaurantVO(**res.data) if res.data else None

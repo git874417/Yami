@@ -61,8 +61,12 @@ class clientDAO:
         res = self.supabase.table("Clients").select("*").execute()
         return [clientVO(**row) for row in res.data]
 
-    def get_by_id(self, user_id: int):
-        res = self.supabase.table("Clients").select("*").eq("id", user_id).single().execute()
+    def get_by_id(self, client_id: int):
+        res = self.supabase.table("Clients").select("*").eq("id", client_id).single().execute()
+        return clientVO(**res.data) if res.data else None
+    
+    def get_by_user_id(self, user_id: int):
+        res = self.supabase.table("Clients").select("*").eq("user_id", user_id).single().execute()
         return clientVO(**res.data) if res.data else None
     
     def update_credits_after_order(self, client_id: int, credits: int):

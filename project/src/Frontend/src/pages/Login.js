@@ -26,11 +26,11 @@ const Login = () => {
         password,
       });
 
-      if (data.length === 0) return setMensaje("Usuario no encontrado");
+      if (!data.user_id) return setMensaje("Usuario o contraseña incorrectos");
 
-      // localStorage.setItem("user_id", data.user_id);
-      // localStorage.setItem("role", data.role);
-      sessionStorage.setItem("user", JSON.stringify(data));
+      sessionStorage.setItem("user_id", data.user_id);
+      sessionStorage.setItem("role_id", data.role_id);
+      sessionStorage.setItem("role", data.role);
       navigate("/restaurants");
 
       console.log("Login correcto:");

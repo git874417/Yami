@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {useParams, useNavigate, useLocation} from "react-router-dom";
+import {useParams, useNavigate, useLocation, data} from "react-router-dom";
 import "../css/OrderDish.css";
 import axios from "axios";
 
@@ -104,37 +104,35 @@ const OrderDish = () => {
   }, [dishFromState, dishName, restaurantNameUrl, API_BASE]);
 
   const handleCreateOrder = async () => {
-    const userSession = sessionStorage.getItem("user");
-    if (!userSession) {
+    const clientId = sessionStorage.getItem("role_id");
+    if (!clientId) {
       alert("Por favor, inicia sesión para realizar un pedido.");
       navigate("/inicio-sesion");
       return;
     }
-    const user = JSON.parse(userSession);
-    const clientId = user.user_id;
-    const restaurantId_numerico = restaurantFromState?.id;
+    const clientIdNumber = Number(clientId);
+    const restaurantId_numerico = Number(restaurantFromState?.id);
 
-    if (!clientId || !restaurantId_numerico || !orderData.dishId) {
+    if (!clientIdNumber || !restaurantId_numerico || !orderData.dishId) {
       alert("Error: Faltan datos clave (usuario, restaurante o plato) para crear el pedido.");
-      console.error("IDs faltantes:", {clientId, restaurantId_numerico, dishId: orderData.dishId});
+      console.error("IDs faltantes:", {clientId: clientIdNumber, restaurantId_numerico, dishId: orderData.dishId});
       return;
     }
 
+    // Backend expects only the OrderCreate body: { dishes: [ { dish_id, instructions } ] }
     const datosOrder = {
-      client_id: clientId,
-      restaurant_id: restaurantId_numerico,
-      order_credits: orderData.credits,
       dishes: [
         {
-          dish_id: orderData.dishId,
-          dish_name: orderData.dishName,
-          instructions: orderData.instructions || null,
+          dish_id: Number(orderData.dishId),
+          instructions: orderData.instructions || "",
         },
       ],
     };
     const url = `http://127.0.0.1:8000/api/create_order/${clientId}/${restaurantId_numerico}`;
     try {
-      const response = await axios.post(url, datosOrder);
+      const response = await axios.post(url, datosOrder, {
+        headers: { "Content-Type": "application/json" },
+      });
 
       console.log("Pedido Creado:", response.data);
       alert("¡Pedido realizado con éxito!");

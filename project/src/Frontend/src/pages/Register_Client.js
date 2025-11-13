@@ -51,7 +51,7 @@ const Register_client = () => {
       }
 
       localStorage.setItem("client_id", data.client_id);
-      navigate("/ShopPage");
+      navigate("/restaurants");
       console.log("Cliente creado con id", data.client_id);
     } catch (error) {
       console.error("Error al crear el cliente", error);

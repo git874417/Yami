@@ -96,7 +96,7 @@ def send_welcome_email(recipient_email: str, recipient_name: str):
         with smtplib.SMTP(os.getenv("MAIL_SERVER"), int(os.getenv("MAIL_PORT"))) as server:
             server.starttls()  # Iniciar conexión segura
             server.login(sender_email, password)
-            #server.send_message(msg)
+            server.send_message(msg)
             print(f"Correo de bienvenida enviado exitosamente a {recipient_email}")
 
     except Exception as e:
@@ -540,8 +540,16 @@ def create_new_order(client_id: int, restaurant_id:int, order_data: OrderCreate)
         user_dao = userDAO()
         restaurant_dao = restaurantDAO()
         client = client_dao.get_by_id(client_id)
+        if not client:
+            raise ValueError(f"Client with id {client_id} not found")
+
         user = user_dao.get_by_id(client.user_id)
+        if not user:
+            raise ValueError(f"User with id {client.user_id} not found")
+
         restaurant = restaurant_dao.get_by_id(restaurant_id)
+        if not restaurant:
+            raise ValueError(f"Restaurant with id {restaurant_id} not found")
 
         message_id = send_order_confirmation_email(user.email, client.name, restaurant.name, email_dishes_dict, total_credits, order_id)
 

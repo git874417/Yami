@@ -46,22 +46,49 @@ def login_endpoint(form_data: UserLogin):
     """
     Autentica a un usuario.
     """
-    user_dao = userDAO()
-    # 1. Buscar al usuario por su email
-    user = user_dao.get_by_email(form_data.email)
-    
-    # 2. Si el usuario no existe o la contraseña es incorrecta, devolver un error
-    #    Se usa una función de verificación segura para evitar "timing attacks"
-    if not user or not services.verify_password(form_data.password, user.password):
-        raise HTTPException(
-            status_code=401,
-            detail="Email o contraseña incorrectos",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    try:
+        user_dao = userDAO()
+        # 1. Buscar al usuario por su email
+        user = user_dao.get_by_email(form_data.email)
         
-    # 3. Si la autenticación es exitosa, puedes generar un token JWT (no incluido aquí)
-    #    y devolverlo al cliente.
-    return {"message": "Login exitoso", "user_id": user.id, "role": user.role}
+        # 2. Si el usuario no existe o la contraseña es incorrecta, devolver un error
+        #    Se usa una función de verificación segura para evitar "timing attacks"
+        if not user or not services.verify_password(form_data.password, user.password):
+            raise HTTPException(
+                status_code=401,
+                detail="Email o contraseña incorrectos",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+            
+        if user.role == "Restaurant":
+            restaurant_dao = restaurantDAO()
+            restaurant = restaurant_dao.get_by_user_id(user.id)
+            if not restaurant:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Restaurante no encontrado para el usuario dado",
+                )
+            return {"message": "Login exitoso", "user_id": user.id, "role": user.role, "role_id": restaurant.id}
+        
+        elif user.role == "Client":
+            client_dao = clientDAO()
+            client = client_dao.get_by_user_id(user.id)
+            if not client:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Cliente no encontrado para el usuario dado",
+                )
+            return {"message": "Login exitoso", "user_id": user.id, "role": user.role, "role_id": client.id}
+
+    except HTTPException:
+        # Si el error ya es una HTTPException (como 401 o 404), simplemente la relanzamos.
+        raise
+    except Exception as e:
+        # Para cualquier otro error inesperado, devolvemos un error 500.
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error interno del servidor durante el login: {e}"
+        )
 
 @app.post("/api/create_client", status_code=201)
 def create_client_endpoint(client: ClientCreate):
@@ -124,6 +151,14 @@ def create_order_endpoint(client_id: int, restaurant_id: int, order: OrderCreate
     - Principal: Y créditos
     - Postre: Z créditos
     """
+
+    print("--- INICIO: Payload de Pedido Recibido ---")
+    print(f"Cliente ID: {client_id}, Restaurante ID: {restaurant_id}")
+    print("Cuerpo del pedido (JSON):")
+    # Usamos model_dump_json para una impresión bonita del modelo Pydantic
+    print(order.model_dump_json(indent=2))
+    print("--- FIN: Payload de Pedido Recibido ---")
+
     try:
         # Validar que la lista de platos no esté vacía
         if not order.dishes or len(order.dishes) == 0:
@@ -452,17 +487,28 @@ def get_restaurant_by_name(restaurant_name: str):
         if not restaurant:
             raise HTTPException(status_code=404, detail="Restaurante no encontrado")
         
+        rating = 0.0
         try:
             # Obtener el rating promedio
             from project.db_utils.ratingDAO import ratingDAO
             rating_dao = ratingDAO()
-            avg_rating = rating_dao.get_average_rating_by_restaurant(restaurant["id"])
-            restaurant["rating"] = avg_rating
+            avg_rating = rating_dao.get_average_rating_by_restaurant(restaurant.id)
+            rating = avg_rating
         except Exception as rating_error:
             print(f"Error obteniendo rating: {rating_error}")
-            restaurant["rating"] = 0.0
         
-        return restaurant
+        return {
+            "id": restaurant.id,
+            "user_id": restaurant.user_id,
+            "name": restaurant.name,
+            "description": restaurant.description,
+            "city": restaurant.city,
+            "address": restaurant.address,
+            "phone_number": restaurant.phone_number,
+            "category": restaurant.category,
+            "image_url": restaurant.logo_url if restaurant.logo_url else None,
+            "rating": rating
+        }
     except HTTPException:
         raise
     except Exception as e:
@@ -548,7 +594,7 @@ def get_dishes_by_restaurant_name(restaurant_name: str):
             raise HTTPException(status_code=404, detail="Restaurante no encontrado")
         
         dish_dao = dishDAO()
-        dishes = dish_dao.get_all_from_restaurant(restaurant["id"])
+        dishes = dish_dao.get_all_from_restaurant(restaurant.id)
         
         # Convertir los VOs a diccionarios para la respuesta JSON
         return [
