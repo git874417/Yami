@@ -1,0 +1,164 @@
+.home-container {
+	font-family: Arial, Helvetica, sans-serif;
+	color: #000000;
+    overflow: visible !important;
+}
+
+.hero {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center; 
+	justify-content: center; 
+	gap: 2rem;
+	padding: 2rem;
+}
+
+.hero-content {
+    flex: 1 1 280px;
+    min-width: 260px;
+}
+
+.hero-image {
+    flex: 1.4 1 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 260px;
+}
+
+.hero-image img {
+    width: 95%;
+    max-width: none;
+    height: 540px;        
+    object-fit: cover;   
+    display: block;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.hero h1 {
+    font-size: 2.8rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.hero-sub {
+  font-size: 1.2rem; /* aumentado */
+  line-height: 1.4;
+  color: #555;
+  margin-top: 0.5rem;
+}
+
+.hero-actions {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 12px; 
+}
+
+
+.hero-actions .btn-primary {
+  background: #D96941;
+  color: #fff;
+  padding: 1rem 1.8rem; 
+  font-size: 1.25rem;    
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  display: inline-block;
+  transition: background 0.15s ease, transform 0.12s ease;
+  margin-left: 0; 
+}
+
+.hero-actions .btn-primary:hover {
+  background: #bf5c37;
+  transform: translateY(-2px);
+}
+
+.hero-actions .btn-primary:active {
+  transform: translateY(0);
+}
+
+.card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  height: 100%; /* ensure link fills the grid cell */
+}
+
+.card-link .card {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0; /* image is flush to top, text gets its own padding */
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.card-link:hover .card {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+}
+
+.cards { padding: 2rem; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+.card { background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.card img { width: 100%; height: 140px; object-fit: cover; border-radius: 6px 6px 0 0; }
+
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 320px;            /* fixed height for all cards */
+  padding: 0;               /* move padding into content area to keep image flush */
+  overflow: hidden;
+}
+
+.card img {
+  width: 100%;
+  flex: 0 0 160px;          /* fixed image area height */
+  height: 160px;
+  object-fit: cover;        /* crop if needed */
+  border-radius: 8px 8px 0 0;
+  display: block;
+}
+
+/* content area inside the card */
+.card > h3,
+.card > p {
+  padding: 1rem; /* fully padded text area */
+}
+
+.card > h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.05rem;
+}
+
+.card > p {
+  margin: 0;
+  color: #555;
+  flex: 1;                  
+  padding-bottom: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.card .placeholder-box {
+  height: 160px;
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  background: #f4f4f4;
+}
+
+
+.card-grid .card {
+  width: 100%;
+}
+
+/* Responsive tweaks */
+@media (max-width: 720px) {
+	.hero { padding: 1rem; }
+	.hero h1 { font-size: 1.6rem; }
+}
+
