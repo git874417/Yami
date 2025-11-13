@@ -1,11 +1,8 @@
 import sys
 import os
 
-# --- INICIO DE LA SOLUCIÓN ---
-# Añade la carpeta raíz del proyecto (Yammi) a la ruta de búsqueda de Python
-# para que los imports como "from project..." funcionen al dar "Play".
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-# --- FIN DE LA SOLUCIÓN ---
 
 from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -48,11 +45,10 @@ def login_endpoint(form_data: UserLogin):
     """
     try:
         user_dao = userDAO()
-        # 1. Buscar al usuario por su email
+        
         user = user_dao.get_by_email(form_data.email)
         
-        # 2. Si el usuario no existe o la contraseña es incorrecta, devolver un error
-        #    Se usa una función de verificación segura para evitar "timing attacks"
+        
         if not user or not services.verify_password(form_data.password, user.password):
             raise HTTPException(
                 status_code=401,
@@ -81,10 +77,10 @@ def login_endpoint(form_data: UserLogin):
             return {"message": "Login exitoso", "user_id": user.id, "role": user.role, "role_id": client.id}
 
     except HTTPException:
-        # Si el error ya es una HTTPException (como 401 o 404), simplemente la relanzamos.
+        
         raise
     except Exception as e:
-        # Para cualquier otro error inesperado, devolvemos un error 500.
+        
         raise HTTPException(
             status_code=500,
             detail=f"Error interno del servidor durante el login: {e}"

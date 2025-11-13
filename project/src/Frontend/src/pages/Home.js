@@ -50,36 +50,38 @@ const Home = () => {
 
       <div className="cards">
         <div className="cards-inner">
-          {/* <h2>Nuestros Restaurantes</h2>
-          {loading && <p>Cargando restaurantes...</p>}
-          {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+          <h2>Unete a Yami!</h2>
           <div className="card-grid">
-            {restaurants.map(restaurant => (
-              <Link key={restaurant.id} to={`/restaurants/${restaurant.name}`} className="card-link">
-                <article className="card">
-                  <div className="card-image">
-                    {restaurant.logo_url ? (
-                      <img
-                        src={restaurant.logo_url}
-                        alt={restaurant.name}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant.name)}`;
-                        }}
-                      />
-                    ) : (
-                      <img
-                        src={`https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant.name)}`}
-                        alt={restaurant.name}
-                      />
-                    )}
-                  </div>
-                  <h3>{restaurant.name}</h3>
-                  <p>{restaurant.description || 'Descubre nuestros platos'}</p>
-                </article>
-              </Link>
-            ))}
-          </div> */}
+            <Link to="/registro" className="card-link">
+              <article className="card">
+                <img
+                  src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=60"
+                  alt="Burger"
+                />
+                <h3>Únete a Yami</h3>
+                <p>Elige uno de nuestros planes y empieza a disfrutar.</p>
+              </article>
+            </Link>
+
+            <Link to="/registro" className="card-link">
+              <article className="card">
+                <img
+                  src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=60"
+                  alt="Vende"
+                />
+                <h3>Vende con Yami</h3>
+                <p>Ofrece tus servicios a través de Yami.</p>
+              </article>
+            </Link>
+
+            <Link to="/registro" className="card-link"> 
+              <article className="card">
+                <div className="placeholder-box" />
+                <h3>Reparte con Yami</h3>
+                <p>Únete a nuestro equipo de repartidores.</p>
+              </article>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
