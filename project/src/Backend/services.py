@@ -395,9 +395,12 @@ def create_new_restaurant(restaurant_data: RestaurantCreate) -> int:
     Aquí puedes añadir más lógica en el futuro (ej. enviar un email de bienvenida).
     """
     try:
+        
+        hashed_password = get_password_hash(restaurant_data.password)
+        
         restaurant_id = db_utils.create_restaurant(
             email=restaurant_data.email,
-            password=restaurant_data.password,
+            password=hashed_password,
             name=restaurant_data.name,
             description=restaurant_data.description,
             address=restaurant_data.address,
