@@ -8,14 +8,14 @@ const Navbar = ({onCarritoClick, carritoCount = 0, location}) => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   useEffect(() => {
-    const userSession = sessionStorage.getItem("user");
+    const userSession = sessionStorage.getItem("user_id");
     if (userSession) {
       setUser(JSON.parse(userSession));
     }
   }, []);
 
   const handleLogout = () => {
-    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("user_id");
     sessionStorage.removeItem("carrito");
     setUser(null);
     navigate("/");
