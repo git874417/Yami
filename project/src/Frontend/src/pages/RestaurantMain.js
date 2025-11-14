@@ -58,7 +58,7 @@ const RestaurantMain = () => {
 
   const handleEditDish = (dish) => {
     // Navegar a la página de edición
-    navigate(`/restaurant/edit-dish/${dish.id}`, {
+    navigate(`/restaurantPage/${encodeURIComponent(restaurantId)}/${encodeURIComponent(dish.name)}`, {
       state: { dish, restaurant }
     });
   };
@@ -87,7 +87,7 @@ const RestaurantMain = () => {
   };
 
   const handleAddDish = () => {
-    navigate('/restaurant/add-dish', {
+    navigate(`/restaurantPage/${encodeURIComponent(restaurantId)}/createDish`, {
       state: { restaurant }
     });
   };

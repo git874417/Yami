@@ -76,7 +76,7 @@ const CreateDish = () => {
       setError(null);
 
       // Validar campos requeridos
-      if (!dishData.name || !dishData.description || !dishData.credits || !dishData.category) {
+      if (!dishData.name || !dishData.description || !dishData.category) {
         alert("Por favor, completa todos los campos obligatorios");
         setLoading(false);
         return;
@@ -128,8 +128,12 @@ const CreateDish = () => {
         console.log("Image uploaded successfully:", uploadImageResponse.data);
       }
 
+      // 3. Obtener el nombre del restaurante para la navegación
+      const restaurantResponse = await axios.get(`${API_BASE}/api/restaurant/${restaurantId}`);
+      const restaurantName = restaurantResponse.data.name;
+
       alert("✓ Plato creado exitosamente");
-      navigate("/"); // O navegar a la página de gestión de platos del restaurante
+      navigate(`/restaurantPage/${encodeURIComponent(restaurantName)}`); // Navegar a la página del restaurante
     } catch (error) {
       console.error("Error al crear el plato:", error.response?.data || error.message);
       setError(error.response?.data?.detail || "Hubo un error al crear el plato");

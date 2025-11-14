@@ -43,7 +43,7 @@ const Login = () => {
           
           if (restaurant) {
             sessionStorage.setItem("restaurant_name", restaurant.name);
-            navigate(`/restaurant/${encodeURIComponent(restaurant.name)}`);
+            navigate(`/restaurantPage/${encodeURIComponent(restaurant.name)}`);
           } else {
             setMensaje("No se encontró el restaurante asociado");
           }
