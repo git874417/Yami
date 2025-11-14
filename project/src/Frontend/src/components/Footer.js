@@ -7,7 +7,16 @@ const Footer = () => {
     <footer>
       <div className="footer-titulo-redes">
         <li className="titulo-yami">Yami</li>
-        <li>Ig</li>
+        <li>
+          <a 
+            href="https://www.instagram.com/yaamibot?igsh=OXF2ZnBhZWJ2eTAx" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
+            📸
+          </a>
+        </li>
       </div>
       <div className="footer-otras-opciones">
         <ul>
