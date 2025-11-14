@@ -1,15 +1,16 @@
-// ...existing code...
-import React, {useEffect, useState} from "react";
-import {Link, useParams, useLocation} from "react-router-dom";
-import "../css/Restaurant_Dishes.css";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import "../css/ShopPage.css";
 
-const RestaurantDishes = () => {
-  const {restaurantId} = useParams();
-  const location = useLocation();
-  const [restaurant, setRestaurant] = useState(location.state?.restaurant || null);
+const RestaurantMain = () => {
+  const { restaurantId } = useParams();
+  const [restaurant, setRestaurant] = useState(null);
   const [dishes, setDishes] = useState([]);
-  const [loading, setLoading] = useState(!location.state?.restaurant);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] = useState("newest");
+  const navigate = useNavigate();
   const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
 
   // Filtros de tipo de plato
@@ -19,55 +20,19 @@ const RestaurantDishes = () => {
     postre: false,
   });
 
-  // Filtros de alérgenos
-  const [filterAlergenos, setFilterAlergenos] = useState({
-    gluten: false,
-    huevos: false,
-    lacteos: false,
-    pescado: false,
-    soja: false,
-    frutosCascara: false,
-    cacahuetes: false,
-    moluscos: false,
-    mostaza: false,
-    granosSesamo: false,
-    dioxidoAzufre: false,
-    crustaceos: false,
-  });
-
-  const normalizeUrl = (u) => {
-    if (!u) return u;
-    let url = u.replace(/([^:]\/)\/+/g, "$1");
-    if (url.startsWith("http://") || url.startsWith("https://")) return url;
-    if (url.startsWith("//")) return window.location.protocol + url;
-    if (url.startsWith("/")) return API_BASE.replace(/\/$/, "") + url;
+  const normalizeUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('//')) return window.location.protocol + url;
+    if (url.startsWith('/')) return API_BASE.replace(/\/$/, '') + url;
     return url;
   };
-
-  //Ahora definimos unos mapeos que nos serán de utilidad a la hora de filtrar
-  //lo que mostramos por pantalla
 
   // Mapeo de tipos de plato
   const dishTypeMapping = {
     entrante: ["entrante", "entrada", "starter", "aperitivo", "appetizer"],
     principal: ["principal", "main", "plato principal", "segundo"],
     postre: ["postre", "dessert", "dulce"],
-  };
-
-  // Mapeo de alérgenos
-  const allergenMapping = {
-    gluten: ["gluten"],
-    huevos: ["huevo", "huevos", "egg"],
-    lacteos: ["lactosa", "lácteos", "lacteos", "leche", "dairy"],
-    pescado: ["pescado", "fish"],
-    soja: ["soja", "soy"],
-    frutosCascara: ["frutos de cáscara", "frutos secos", "nueces", "nuts"],
-    cacahuetes: ["cacahuetes", "cacahuete", "maní", "peanut"],
-    moluscos: ["moluscos", "mollusks"],
-    mostaza: ["mostaza", "mustard"],
-    granosSesamo: ["granos de sésamo", "sésamo", "sesamo", "sesame"],
-    dioxidoAzufre: ["dióxido de azufre", "sulfitos", "sulfito", "sulfur dioxide"],
-    crustaceos: ["crustáceos", "crustaceos", "marisco", "shellfish"],
   };
 
   // Función para filtrar platos
@@ -85,324 +50,252 @@ const RestaurantDishes = () => {
           return typeVariants.some((variant) => dishType.includes(variant.toLowerCase()));
         });
 
-      if (!dishTypeMatch) return false;
-
-      // Filtro de alérgenos (EVITAR los que están MARCADOS)
-      const allergensToAvoid = Object.keys(filterAlergenos).filter((key) => filterAlergenos[key]);
-
-      // Si ningún alérgeno está marcado (no se evita ninguno), mostrar todos
-      if (allergensToAvoid.length === 0) return true;
-
-      // Normalizar los alérgenos del plato a un array
-      let dishAllergens = [];
-      if (dish.allergens) {
-        if (Array.isArray(dish.allergens)) {
-          dishAllergens = dish.allergens;
-        } else if (typeof dish.allergens === "string") {
-          // Si es un string, intentar parsearlo o dividirlo
-          try {
-            dishAllergens = JSON.parse(dish.allergens);
-          } catch {
-            dishAllergens = dish.allergens.split(",").map((a) => a.trim());
-          }
-        }
-      }
-
-      const hasAvoidedAllergen = allergensToAvoid.some((filterKey) => {
-        const allergenVariants = allergenMapping[filterKey] || [];
-        return dishAllergens.some((allergen) => {
-          const allergenLower = (allergen || "").toString().toLowerCase();
-          return allergenVariants.some((variant) => allergenLower.includes(variant.toLowerCase()));
-        });
-      });
-
-      // Si el plato contiene un alérgeno que queremos evitar, no mostrarlo
-      return !hasAvoidedAllergen;
+      return dishTypeMatch;
     });
   };
 
   const filteredDishes = getFilteredDishes();
 
-  useEffect(() => {
-    if (!restaurantId) return;
+  const handleEditDish = (dish) => {
+    // Navegar a la página de edición
+    navigate(`/restaurant/edit-dish/${dish.id}`, {
+      state: { dish, restaurant }
+    });
+  };
 
-    async function load() {
-      setError(null);
+  const handleDeleteDish = async (dishId) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este plato?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/dishes/${dishId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar el plato');
+      }
+
+      // Recargar los platos después de eliminar
+      setDishes(dishes.filter(d => d.id !== dishId));
+      alert('Plato eliminado correctamente');
+    } catch (error) {
+      console.error('Error deleting dish:', error);
+      alert('Error al eliminar el plato');
+    }
+  };
+
+  const handleAddDish = () => {
+    navigate('/restaurant/add-dish', {
+      state: { restaurant }
+    });
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!restaurantId) return;
+      
       setLoading(true);
+      setError(null);
       try {
         const encodedName = encodeURIComponent(restaurantId);
+        
+        const [restaurantRes, dishesRes] = await Promise.all([
+          fetch(`${API_BASE}/restaurants/name/${encodedName}`),
+          fetch(`${API_BASE}/restaurants/name/${encodedName}/dishes`)
+        ]);
 
-        // Si ya tenemos los datos del restaurante del state, solo cargamos los platos
-        if (location.state?.restaurant) {
-          console.log("Using restaurant data from state:", location.state.restaurant);
-          const dRes = await fetch(`${API_BASE}/restaurants/name/${encodedName}/dishes`);
-          if (!dRes.ok) throw new Error(`Error fetching dishes: ${dRes.status}`);
-          const dJson = await dRes.json();
-          console.log("Dishes from API:", dJson);
-          setDishes(Array.isArray(dJson) ? dJson : []);
-        } else {
-          // Si no tenemos los datos, cargamos todo usando el endpoint por nombre
-          console.log("Fetching all data for restaurant:", restaurantId);
-          const [rRes, dRes] = await Promise.all([
-            fetch(`${API_BASE}/restaurants/name/${encodedName}`),
-            fetch(`${API_BASE}/restaurants/name/${encodedName}/dishes`),
-          ]);
-
-          if (!rRes.ok) throw new Error(`Error fetching restaurant: ${rRes.status}`);
-          if (!dRes.ok) throw new Error(`Error fetching dishes: ${dRes.status}`);
-
-          const rJson = await rRes.json();
-          const dJson = await dRes.json();
-
-          console.log("Restaurant from API:", rJson);
-          console.log("Dishes from API:", dJson);
-
-          setRestaurant(rJson);
-          setDishes(Array.isArray(dJson) ? dJson : []);
+        if (!restaurantRes.ok || !dishesRes.ok) {
+          throw new Error('Error al cargar datos');
         }
 
-        console.log("Dishes loaded successfully");
+        const restaurantData = await restaurantRes.json();
+        const dishesData = await dishesRes.json();
+
+        setRestaurant(restaurantData);
+        setDishes(Array.isArray(dishesData) ? dishesData : []);
       } catch (err) {
-        console.error("Error loading data:", err);
-        setError(err.message || String(err));
+        console.error('Error:', err);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    load();
+    fetchData();
   }, [restaurantId, API_BASE]);
 
   return (
-    <main className="restaurant-page">
-      <div className="page-inner">
-        {/* Sidebar con filtros */}
-        <aside className="sidebar">
-          <h3 className="filter-title">Filtros</h3>
-
-          {/* Filtro de Plato */}
-          <div className="filter-section">
-            <h4 className="filter-subtitle">Tipo de Plato</h4>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterPlato.entrante}
-                onChange={(e) => setFilterPlato({...filterPlato, entrante: e.target.checked})}
+    <main className="shop-page">
+      <div className="shop-container">
+        <header className="shop-header">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            {restaurant?.image_url ? (
+              <img
+                src={normalizeUrl(restaurant.image_url)}
+                alt={restaurant.name}
+                style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '8px' }}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant?.name || "R")}`;
+                }}
               />
-              Entrante
-            </label>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterPlato.principal}
-                onChange={(e) => setFilterPlato({...filterPlato, principal: e.target.checked})}
+            ) : (
+              <img
+                src={`https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant?.name || "R")}`}
+                alt={restaurant?.name || "Restaurant"}
+                style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '8px' }}
               />
-              Principal
-            </label>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterPlato.postre}
-                onChange={(e) => setFilterPlato({...filterPlato, postre: e.target.checked})}
-              />
-              Postre
-            </label>
-          </div>
-
-          {/* Filtro de Evitar alérgenos */}
-          <div className="filter-section">
-            <h4 className="filter-subtitle">Evitar alérgenos</h4>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterAlergenos.gluten}
-                onChange={(e) => setFilterAlergenos({...filterAlergenos, gluten: e.target.checked})}
-              />
-              Gluten
-            </label>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterAlergenos.huevos}
-                onChange={(e) => setFilterAlergenos({...filterAlergenos, huevos: e.target.checked})}
-              />
-              Huevos
-            </label>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterAlergenos.lacteos}
-                onChange={(e) => setFilterAlergenos({...filterAlergenos, lacteos: e.target.checked})}
-              />
-              Lácteos
-            </label>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterAlergenos.pescado}
-                onChange={(e) => setFilterAlergenos({...filterAlergenos, pescado: e.target.checked})}
-              />
-              Pescado
-            </label>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterAlergenos.soja}
-                onChange={(e) => setFilterAlergenos({...filterAlergenos, soja: e.target.checked})}
-              />
-              Soja
-            </label>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterAlergenos.frutosCascara}
-                onChange={(e) => setFilterAlergenos({...filterAlergenos, frutosCascara: e.target.checked})}
-              />
-              Frutos de Cáscara
-            </label>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterAlergenos.cacahuetes}
-                onChange={(e) => setFilterAlergenos({...filterAlergenos, cacahuetes: e.target.checked})}
-              />
-              Cacahuetes
-            </label>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterAlergenos.moluscos}
-                onChange={(e) => setFilterAlergenos({...filterAlergenos, moluscos: e.target.checked})}
-              />
-              Moluscos
-            </label>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterAlergenos.mostaza}
-                onChange={(e) => setFilterAlergenos({...filterAlergenos, mostaza: e.target.checked})}
-              />
-              Mostaza
-            </label>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterAlergenos.granosSesamo}
-                onChange={(e) => setFilterAlergenos({...filterAlergenos, granosSesamo: e.target.checked})}
-              />
-              Granos de Sésamo
-            </label>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterAlergenos.dioxidoAzufre}
-                onChange={(e) => setFilterAlergenos({...filterAlergenos, dioxidoAzufre: e.target.checked})}
-              />
-              Dióxido de Azufre y Sulfitos
-            </label>
-            <label className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={filterAlergenos.crustaceos}
-                onChange={(e) => setFilterAlergenos({...filterAlergenos, crustaceos: e.target.checked})}
-              />
-              Crustáceos
-            </label>
-          </div>
-        </aside>
-
-        <section className="content">
-          {loading && <p>Loading...</p>}
-          {error && <p style={{color: "crimson"}}>Error: {error}</p>}
-          <header className="restaurant-header">
-            <div className="header-left">
-              {restaurant?.image_url ? (
-                <img
-                  className="header-hero-img"
-                  src={normalizeUrl(restaurant.image_url)}
-                  alt={`${restaurant.name} image`}
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
-                      restaurant?.name || "R"
-                    )}`;
-                  }}
-                />
-              ) : (
-                <img
-                  className="header-hero-img"
-                  src={`https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
-                    restaurant?.name || "R"
-                  )}`}
-                  alt={`${restaurant?.name || "Restaurant"} logo`}
-                />
-              )}
-            </div>
-            <div className="header-right">
-              <h1 className="title">{restaurant?.name}</h1>
-              <div className="header-meta">
-                <span className="rating">⭐ {restaurant?.rating ?? "-"}</span>
-                <span className="location">
-                  {restaurant?.address}
-                  {restaurant?.city && `, ${restaurant.city}`}
-                </span>
-              </div>
-              <p className="restaurant-description">{restaurant?.description}</p>
-            </div>
-          </header>
-
-          <div className="controls">
-            <input className="search" placeholder="Buscar plato..." />
-            <select className="filter">
-              <option>Todos</option>
-              <option>Entrantes</option>
-              <option>Platos principales</option>
-              <option>Postres</option>
-            </select>
-            <button className="btn btn-outline">Ordenar</button>
-          </div>
-
-          <div className="dishes-list">
-            {dishes.length === 0 && !loading && <p>No hay platos para este restaurante.</p>}
-            {dishes.length > 0 && filteredDishes.length === 0 && !loading && (
-              <p className="no-results">No hay platos que coincidan con los filtros seleccionados.</p>
             )}
-            {filteredDishes.length > 0 &&
-              filteredDishes.map((d) => (
-                <Link
-                  key={d.id}
-                  to={`/restaurants/${encodeURIComponent(
-                    restaurant?.name || restaurantId
-                  )}/order/${encodeURIComponent(d.name || "")}`}
-                  state={{dish: d, restaurant: restaurant}}
-                  className="card-link"
+            <div>
+              <h1>{restaurant?.name || "Nombre Restaurante"}</h1>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '8px', fontSize: '0.95rem', color: '#666' }}>
+                <span>⭐ {restaurant?.rating ?? "5"}</span>
+                <span>Tipo {restaurant?.category || "Restaurante"}</span>
+                <span>📍 {restaurant?.address || "Ubicacion"}</span>
+              </div>
+              <p style={{ marginTop: '8px', fontSize: '0.9rem', color: '#666' }}>
+                {restaurant?.phone || "Número de teléfono"}
+              </p>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
+                <button 
+                  onClick={() => navigate(`/restaurant/${restaurantId}/edit`)}
+                  style={{
+                    padding: '8px 16px',
+                    background: '#1a1a1a',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer'
+                  }}
                 >
-                  <article className="dish-card">
-                    <div
-                      className="dish-img"
-                      style={{
-                        backgroundImage: d.image_url ? `url("${normalizeUrl(d.image_url)}")` : undefined,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }}
-                    />
-                    <div className="dish-body">
-                      <h3 className="dish-title">{d.name}</h3>
-                      <p className="dish-sub">{d.dish_type || d.subtitle || d.description || ""}</p>
-                      <div className="dish-footer">
-                        <span className="dish-price">
-                          {d.price ?? (d.credits ? `${d.credits} créditos` : "")}
-                        </span>
+                  Modificar Datos
+                </button>
+                <button 
+                  onClick={handleAddDish}
+                  style={{
+                    padding: '8px 16px',
+                    background: '#1a1a1a',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Añadir Plato
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="shop-content">
+          {/* Sidebar con filtros */}
+          <aside className="shop-sidebar">
+            <h3 className="filter-title">Acerca de</h3>
+            <p style={{ fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+              {restaurant?.description || "Descripción"}
+            </p>
+          </aside>
+
+          {/* Contenido principal */}
+          <section className="shop-main">
+            {/* Barra de búsqueda y ordenar */}
+            <div className="shop-controls">
+              <div className="search-wrapper">
+                <input
+                  type="text"
+                  className="search-input"
+                  placeholder="Buscar"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <button className="search-button">🔍</button>
+              </div>
+
+              <button className="sort-button active">✓ Nuevo</button>
+              <button className="sort-button">Precio ascendente</button>
+              <button className="sort-button">Precio descendente</button>
+              <button className="sort-button rating-button">⭐ Valoración</button>
+            </div>
+
+            {/* Mensajes de estado */}
+            {loading && <p className="status-message">Cargando platos...</p>}
+            {error && <p className="error-message">Error: {error}</p>}
+
+            {/* Grid de platos */}
+            <div className="restaurants-grid">
+              {filteredDishes.length === 0 && !loading ? (
+                <p className="no-results">No se encontraron platos</p>
+              ) : (
+                filteredDishes.map((dish) => (
+                  <div key={dish.id} className="restaurant-card">
+                    <div className="restaurant-image">
+                      {dish.image_url ? (
+                        <img
+                          src={normalizeUrl(dish.image_url)}
+                          alt={dish.name}
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(dish.name)}`;
+                          }}
+                        />
+                      ) : (
+                        <img
+                          src={`https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(dish.name)}`}
+                          alt={dish.name}
+                        />
+                      )}
+                    </div>
+                    <div className="restaurant-info">
+                      <div className="restaurant-rating">
+                        <span className="star">⭐</span>
+                        <span className="rating-value">{dish.rating || "5"}</span>
+                      </div>
+                      <p className="restaurant-label">{dish.dish_type || "Nombre del plato"}</p>
+                      <h3 className="restaurant-name">{dish.name}</h3>
+                      <p className="restaurant-category">{dish.dish_type || "Tipo de plato"}</p>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                        <button
+                          onClick={() => handleEditDish(dish)}
+                          style={{
+                            padding: '6px 12px',
+                            background: '#ff6b35',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem'
+                          }}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDish(dish.id)}
+                          style={{
+                            padding: '6px 12px',
+                            background: 'transparent',
+                            color: '#333',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '1.2rem'
+                          }}
+                        >
+                          🗑️
+                        </button>
                       </div>
                     </div>
-                  </article>
-                </Link>
-              ))}
-          </div>
-        </section>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        </div>
       </div>
     </main>
   );
 };
 
-export default RestaurantDishes;
+export default RestaurantMain;

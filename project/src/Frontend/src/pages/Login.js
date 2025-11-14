@@ -31,9 +31,30 @@ const Login = () => {
       sessionStorage.setItem("user_id", data.user_id);
       sessionStorage.setItem("role_id", data.role_id);
       sessionStorage.setItem("role", data.role);
-      navigate("/restaurants");
 
-      console.log("Login correcto:");
+      console.log("Login correcto:", data);
+
+      // Redirigir según el rol del usuario
+      if (data.role === "Restaurant" || data.role === "restaurant") {
+        // Si es restaurante, obtenemos todos los restaurantes y buscamos por role_id
+        try {
+          const restaurantsResponse = await axios.get(`http://127.0.0.1:8000/api/restaurants`);
+          const restaurant = restaurantsResponse.data.restaurants.find(r => r.id === data.role_id);
+          
+          if (restaurant) {
+            sessionStorage.setItem("restaurant_name", restaurant.name);
+            navigate(`/restaurant/${encodeURIComponent(restaurant.name)}`);
+          } else {
+            setMensaje("No se encontró el restaurante asociado");
+          }
+        } catch (error) {
+          console.error("Error obteniendo datos del restaurante:", error);
+          setMensaje("Error al cargar datos del restaurante");
+        }
+      } else {
+        // Si es cliente, redirigir a la página de restaurantes
+        navigate("/restaurants");
+      }
     } catch (error) {
       console.error("Error en el login", error);
       setMensaje("No se pudo hacer login");
