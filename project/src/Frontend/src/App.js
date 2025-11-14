@@ -4,6 +4,9 @@ import Home from "./pages/Home.js";
 import OrderDish from "./pages/OrderDish.js";
 import RestaurantDishes from "./pages/Restaurant_Dishes.js";
 import ShopPage from "./pages/ShopPage.js";
+import CreateDish from "./pages/CreateDish.js";
+import RestaurantMain from "./pages/RestaurantMain.js";
+import ModDish from "./pages/ModDish.js";
 import Header from "./components/Header.js";
 import Login from "./pages/Login.js";
 import Register_Client from "./pages/Register_Client.js";
@@ -26,6 +29,9 @@ function AppContent() {
           <Route path="/restaurants" element={<ShopPage />} />
           <Route path="/restaurants/:restaurantId/order/:dishName" element={<OrderDish />} />
           <Route path="/restaurants/:restaurantId" element={<RestaurantDishes />} />
+          <Route path="/restaurantPage/:restaurantId" element={<RestaurantMain />} />
+          <Route path="/restaurantPage/:restaurantId/:dishName" element={<ModDish />} />
+          <Route path="/restaurantPage/:restaurantId/createDish" element={<CreateDish />} />
         </Routes>
       </div>
       <Footer />
