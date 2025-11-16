@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useModal } from "../context/ModalContext";
 import "../css/ShopPage.css";
 
 const RestaurantMain = () => {
   const { restaurantId } = useParams();
+  const { showModal, hideModal } = useModal();
   const [restaurant, setRestaurant] = useState(null);
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,27 +65,44 @@ const RestaurantMain = () => {
     });
   };
 
-  const handleDeleteDish = async (dishId) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar este plato?')) {
-      return;
-    }
+  const handleDeleteDish = (dishId) => {
+    const performDelete = async () => {
+      try {
+        const response = await fetch(`${API_BASE}/api/delete_dish/${dishId}`, {
+          method: 'DELETE',
+        });
 
-    try {
-      const response = await fetch(`${API_BASE}/api/delete_dish/${dishId}`, {
-        method: 'DELETE',
-      });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.detail || 'Error al eliminar el plato');
+        }
 
-      if (!response.ok) {
-        throw new Error('Error al eliminar el plato');
+        hideModal();
+        showModal('Éxito', 'El plato ha sido eliminado correctamente.');
+        setDishes(dishes.filter(d => d.id !== dishId));
+      } catch (error) {
+        console.error('Error deleting dish:', error);
+        hideModal();
+        showModal('Error', error.message || 'Error al eliminar el plato');
       }
+    };
 
-      // Recargar los platos después de eliminar
-      setDishes(dishes.filter(d => d.id !== dishId));
-      alert('Plato eliminado correctamente');
-    } catch (error) {
-      console.error('Error deleting dish:', error);
-      alert('Error al eliminar el plato');
-    }
+    showModal(
+      'Confirmar Eliminación',
+      '¿Estás seguro de que quieres eliminar este plato? Esta acción no se puede deshacer.',
+      [
+        {
+          label: 'Cancelar',
+          onClick: hideModal,
+          className: 'secondary'
+        },
+        {
+          label: 'Eliminar',
+          onClick: performDelete,
+          className: 'danger'
+        }
+      ]
+    );
   };
 
   const handleAddDish = () => {

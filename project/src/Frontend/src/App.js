@@ -11,6 +11,7 @@ import Header from "./components/Header.js";
 import Login from "./pages/Login.js";
 import Register_Client from "./pages/Register_Client.js";
 import Footer from "./components/Footer.js";
+import { ModalProvider } from "./context/ModalContext";
 import "./App.css";
 
 function AppContent() {
@@ -42,7 +43,11 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <ModalProvider>
+        <div className="App">
+          <AppContent />
+        </div>
+      </ModalProvider>
     </Router>
   );
 }
