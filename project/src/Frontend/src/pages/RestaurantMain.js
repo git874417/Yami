@@ -249,7 +249,12 @@ const RestaurantMain = () => {
                 <p className="no-results">No se encontraron platos</p>
               ) : (
                 filteredDishes.map((dish) => (
-                  <div key={dish.id} className="restaurant-card">
+                  <div 
+                    key={dish.id} 
+                    className="restaurant-card"
+                    onClick={() => handleEditDish(dish)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <div className="restaurant-image">
                       {dish.image_url ? (
                         <img
@@ -277,7 +282,10 @@ const RestaurantMain = () => {
                       <p className="restaurant-category">{dish.dish_type || "Tipo de plato"}</p>
                       <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                         <button
-                          onClick={() => handleEditDish(dish)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditDish(dish);
+                          }}
                           style={{
                             padding: '6px 12px',
                             background: '#ff6b35',
@@ -291,7 +299,10 @@ const RestaurantMain = () => {
                           Editar
                         </button>
                         <button
-                          onClick={() => handleDeleteDish(dish.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteDish(dish.id);
+                          }}
                           style={{
                             padding: '6px 12px',
                             background: 'transparent',
