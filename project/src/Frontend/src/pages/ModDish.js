@@ -105,7 +105,6 @@ const ModDish = () => {
           dishId: dish.id,
           name: dish.name,
           description: dish.description,
-          credits: dish.credits || "",
           category: dish.dish_type || "",
           allergens: getAllergens(dish.allergens),
         });
@@ -188,7 +187,7 @@ const ModDish = () => {
       console.log("Updating dish:", dishPayload);
 
       // Actualizar el plato en el backend
-      const updateDishResponse = await axios.put(
+      const updateDishResponse = await axios.patch(
         `${API_BASE}/api/update_dish/${dishData.dishId}`,
         dishPayload
       );
@@ -215,8 +214,11 @@ const ModDish = () => {
         console.log("Image uploaded successfully:", uploadImageResponse.data);
       }
 
+      const restaurantResponse = await axios.get(`${API_BASE}/api/restaurant/${restaurantId}`);
+      const restaurantName = restaurantResponse.data.name;
+      
       alert("✓ Plato actualizado exitosamente");
-      navigate("/"); // O navegar a la página de gestión de platos del restaurante
+      navigate(`/restaurantPage/${encodeURIComponent(restaurantName)}`); // O navegar a la página de gestión de platos del restaurante
     } catch (error) {
       console.error("Error al actualizar el plato:", error.response?.data || error.message);
       setError(error.response?.data?.detail || "Hubo un error al actualizar el plato");
@@ -341,45 +343,27 @@ const ModDish = () => {
           </div>
 
           {/* Categoría y Precio */}
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="category" className="form-label">
-                Categoría
-              </label>
-              <select
-                id="category"
-                name="category"
-                className="form-select"
-                value={dishData.category}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Seleccionar</option>
-                <option value="Entrante">Entrante</option>
-                <option value="Principal">Principal</option>
-                <option value="Postre">Postre</option>
-                <option value="Bebida">Bebida</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="credits" className="form-label">
-                Precio (Yameats)
-              </label>
-              <input
-                id="credits"
-                name="credits"
-                type="number"
-                className="form-input"
-                placeholder="0"
-                value={dishData.credits}
-                onChange={handleInputChange}
-                min="0"
-                step="0.01"
-                required
-              />
-            </div>
+          
+          <div className="form-group">
+            <label htmlFor="category" className="form-label">
+              Categoría
+            </label>
+            <select
+              id="category"
+              name="category"
+              className="form-select"
+              value={dishData.category}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="">Seleccionar</option>
+              <option value="Entrante">Entrante</option>
+              <option value="Principal">Principal</option>
+              <option value="Postre">Postre</option>
+              <option value="Bebida">Bebida</option>
+            </select>
           </div>
+          
 
           {/* Alérgenos */}
           <div className="form-group">

@@ -69,7 +69,7 @@ const RestaurantMain = () => {
     }
 
     try {
-      const response = await fetch(`${API_BASE}/dishes/${dishId}`, {
+      const response = await fetch(`${API_BASE}/api/delete_dish/${dishId}`, {
         method: 'DELETE',
       });
 
