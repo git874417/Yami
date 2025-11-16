@@ -103,7 +103,7 @@ const CreateDish = () => {
       const createDishResponse = await axios.post(`${API_BASE}/api/create_dish/${restaurantId}`, dishPayload);
 
       const createdDish = createDishResponse.data;
-      const dishId = createdDish.id;
+      const dishId = createdDish.dish_id;
 
       console.log("Dish created successfully with ID:", dishId, createdDish);
 
