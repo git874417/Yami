@@ -202,6 +202,7 @@ def create_rating_endpoint(client_id: int, restaurant_id: int, rating: RatingCre
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
     
+    
 @app.patch("/api/update_user/{user_id}", status_code=200)
 def update_user_endpoint(user_id: int, user: UserUpdate):
     """
