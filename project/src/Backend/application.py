@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from project.db_utils.restaurantDAO import restaurantDAO
 from project.db_utils.userDAO import userDAO
 from project.db_utils.clientDAO import clientDAO
@@ -31,6 +32,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# --- Static Files ---
+# Monta la carpeta ProfileImages para servir las imágenes de perfil
+profile_images_path = os.path.join(os.path.dirname(__file__), "ProfileImages")
+app.mount("/ProfileImages", StaticFiles(directory=profile_images_path), name="profile_images")
 
 # --- Endpoints de la API ---
 
@@ -64,7 +70,7 @@ def login_endpoint(form_data: UserLogin):
                     status_code=404,
                     detail="Restaurante no encontrado para el usuario dado",
                 )
-            return {"message": "Login exitoso", "user_id": user.id, "role": user.role, "role_id": restaurant.id}
+            return {"message": "Login exitoso", "user_id": user.id, "role": user.role, "role_id": restaurant.id, "profile_picture": user.image_url}
         
         elif user.role == "Client":
             client_dao = clientDAO()
@@ -74,7 +80,7 @@ def login_endpoint(form_data: UserLogin):
                     status_code=404,
                     detail="Cliente no encontrado para el usuario dado",
                 )
-            return {"message": "Login exitoso", "user_id": user.id, "role": user.role, "role_id": client.id}
+            return {"message": "Login exitoso", "user_id": user.id, "role": user.role, "role_id": client.id, "profile_picture": user.image_url}
 
     except HTTPException:
         
@@ -92,11 +98,11 @@ def create_client_endpoint(client: ClientCreate):
     Crea un nuevo cliente en la base de datos.
     """
     try:
-        client_id = services.create_new_client(client)
+        client_id, user_id, profile_picture = services.create_new_client(client)
         if client_id is None:
             raise HTTPException(status_code=400, detail="No se pudo crear el cliente.")
             
-        return {"message": "Cliente creado exitosamente", "client_id": client_id}
+        return {"message": "Cliente creado exitosamente", "client_id": client_id, "user_id": user_id, "profile_picture": profile_picture}
     except Exception as e:
         # Captura cualquier otra excepción y devuelve un error 500
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
@@ -196,6 +202,21 @@ def create_rating_endpoint(client_id: int, restaurant_id: int, rating: RatingCre
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
     
+@app.patch("/api/update_user/{user_id}", status_code=200)
+def update_user_endpoint(user_id: int, user: UserUpdate):
+    """
+    Actualiza un usuario en la base de datos.
+    """
+    try:
+        updated_user_id = services.update_existing_user(user_id, user)
+        if updated_user_id is None:
+            raise HTTPException(status_code=400, detail="No se pudo actualizar el usuario.")
+
+        return {"message": "Usuario actualizado exitosamente", "user_id": updated_user_id}
+    except Exception as e:
+        # Captura cualquier otra excepción y devuelve un error 500
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
 @app.patch("/api/update_client/{id}", status_code=200)
 def update_client_endpoint(id: int, client: ClientUpdate):
     """
@@ -410,6 +431,29 @@ def get_all_users():
         # Convertir los VOs a diccionarios para la respuesta JSON
         users_list = [{"id": user.id, "email": user.email, "role": user.role} for user in users]
         return {"users": users_list}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+    
+@app.get("/api/user/{user_id}")
+def get_user_by_id(user_id: int):
+    """
+    Obtiene un usuario específico por su ID.
+    """
+    try:
+        dao = userDAO()
+        user = dao.get_by_id(user_id)
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+        return {
+            "id": user.id,
+            "email": user.email,
+            "role": user.role,
+            "image_url": user.image_url
+        }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 

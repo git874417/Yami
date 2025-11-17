@@ -8,6 +8,7 @@ import CreateDish from "./pages/CreateDish.js";
 import RestaurantMain from "./pages/RestaurantMain.js";
 import ModDish from "./pages/ModDish.js";
 import EditRestaurant from "./pages/EditRestaurant.js";
+import UserProfile from "./pages/UserProfile.js";
 import Header from "./components/Header.js";
 import Login from "./pages/Login.js";
 import Register_Client from "./pages/Register_Client.js";
@@ -30,6 +31,7 @@ function AppContent() {
           <Route path="/inicio-sesion" element={<Login />} />
           <Route path="/registerClient" element={<Register_Client />} />
           <Route path="/registerRestaurant" element={<Register_Restaurant />} />
+          <Route path="/profile" element={<UserProfile />} />
           <Route path="/restaurants" element={<ShopPage />} />
           <Route path="/restaurants/:restaurantId/order/:dishName" element={<OrderDish />} />
           <Route path="/restaurants/:restaurantId" element={<RestaurantDishes />} />

@@ -69,3 +69,6 @@ class RatingUpdate(BaseModel):
 class UserLogin(BaseModel):
     email: str
     password: str
+
+class UserUpdate(BaseModel):
+    password: str | None = None

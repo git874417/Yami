@@ -6,18 +6,27 @@ import {Link, useNavigate} from "react-router-dom";
 
 const Navbar = ({onCarritoClick, carritoCount = 0, location}) => {
   const [user, setUser] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null);
   const navigate = useNavigate();
+  
   useEffect(() => {
-    const userSession = sessionStorage.getItem("user_id");
-    if (userSession) {
-      setUser(JSON.parse(userSession));
+    const userId = sessionStorage.getItem("user_id");
+    const role = sessionStorage.getItem("role");
+    const profilePic = sessionStorage.getItem("profile_picture");
+    
+    if (userId) {
+      setUser({ id: userId, role });
+      setProfilePicture(profilePic);
     }
   }, []);
 
   const handleLogout = () => {
     sessionStorage.removeItem("user_id");
+    sessionStorage.removeItem("role");
+    sessionStorage.removeItem("profile_picture");
     sessionStorage.removeItem("carrito");
     setUser(null);
+    setProfilePicture(null);
     navigate("/");
   };
 
@@ -69,11 +78,36 @@ const Navbar = ({onCarritoClick, carritoCount = 0, location}) => {
           )}
 
           {isLoggedIn && (
-            <li>
-              <button onClick={handleLogout} className="navbar-button navbar-button-logout">
-                Cerrar Sesión
-              </button>
-            </li>
+            <>
+              <li>
+                <button onClick={handleLogout} className="navbar-button navbar-button-logout">
+                  Cerrar Sesión
+                </button>
+              </li>
+              <li>
+                <button 
+                  className="navbar-button profile-picture-button"
+                  onClick={() => navigate("/profile")}
+                >
+                  {profilePicture ? (
+                    <img 
+                      src={profilePicture} 
+                      alt="Profile" 
+                      className="profile-picture"
+                      onError={(e) => {
+                        e.currentTarget.src = `https://api.dicebear.com/6.x/initials/svg?seed=${user?.id || 'U'}`;
+                      }}
+                    />
+                  ) : (
+                    <img 
+                      src={`https://api.dicebear.com/6.x/initials/svg?seed=${user?.id || 'U'}`}
+                      alt="Profile" 
+                      className="profile-picture"
+                    />
+                  )}
+                </button>
+              </li>
+            </>
           )}
         </ul>
       </div>

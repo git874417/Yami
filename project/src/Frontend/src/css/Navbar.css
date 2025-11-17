@@ -49,3 +49,28 @@
 .navbar-button-logout {
   background-color: var(--azul-yami);
 }
+
+.navbar-button.profile-picture-button {
+  background: none;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  padding: 0;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.navbar-button.profile-picture-button:hover {
+  border-color: var(--azul-yami);
+}
+
+.profile-picture {
+  width:210%;
+  height: 210%;
+  object-fit: cover;
+  border-radius: 50%;
+}

@@ -31,6 +31,7 @@ const Login = () => {
       sessionStorage.setItem("user_id", data.user_id);
       sessionStorage.setItem("role_id", data.role_id);
       sessionStorage.setItem("role", data.role);
+      sessionStorage.setItem("profile_picture", data.profile_picture || "");
 
       console.log("Login correcto:", data);
 

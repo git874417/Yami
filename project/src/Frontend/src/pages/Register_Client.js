@@ -52,6 +52,9 @@ const Register_client = () => {
       }
 
       localStorage.setItem("client_id", data.client_id);
+      localStorage.setItem("role", "Client");
+      localStorage.setItem("profile_picture", data.profile_picture || "");
+      localStorage.setItem("user_id", data.user_id);
       navigate("/restaurants");
       console.log("Cliente creado con id", data.client_id);
     } catch (error) {

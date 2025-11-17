@@ -5,6 +5,7 @@ from .model import *
 from passlib.context import CryptContext
 import bcrypt
 import os
+import random
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -332,7 +333,7 @@ def create_new_client(client_data: ClientCreate) -> int:
     hashed_password = get_password_hash(client_data.password)
 
     try:
-        client_id = db_utils.create_client(
+        client_id, user_id = db_utils.create_client(
             email=client_data.email,
             password=hashed_password,
             sub_plan=client_data.sub_plan,
@@ -344,9 +345,54 @@ def create_new_client(client_data: ClientCreate) -> int:
             dni=client_data.dni,
             phone_number=client_data.phone_number
         )
+
+        # Asignar foto de perfil aleatoria
+        # Contar archivos profile_X.png en la carpeta ProfileImages
+        profile_images_dir = os.path.join(os.path.dirname(__file__), 'ProfileImages')
+        profile_files = [f for f in os.listdir(profile_images_dir) if f.startswith('profile_') and f.endswith('.png')]
+        
+        # Seleccionar un número aleatorio basado en los archivos disponibles
+        if profile_files:
+            random_index = random.randint(0, len(profile_files) - 1)
+            profile_filename = f"profile_{random_index}.png"
+            profile_image_path = os.path.join(profile_images_dir, profile_filename)
+            
+            # Leer el archivo y subirlo
+            with open(profile_image_path, 'rb') as f:
+                file_content = f.read()
+            
+            image_url = upload_user_profile_picture(user_id, file_content, "image/png")
+
         # Futura lógica: enviar_email_bienvenida(client_data.email)
-        send_welcome_email(recipient_email=client_data.email, recipient_name=client_data.name)
-        return client_id
+        #send_welcome_email(recipient_email=client_data.email, recipient_name=client_data.name)
+        return client_id, user_id, image_url 
+    except Exception as e:
+        # Puedes manejar o registrar el error aquí antes de relanzarlo
+        raise e
+
+def update_existing_user(id: int, user_data: UserUpdate) -> int:
+    """
+    Orquesta la actualización de un usuario existente.
+    """
+    # Convierte el modelo Pydantic a un diccionario.
+    # exclude_unset=True asegura que solo se incluyan los campos que el usuario envió.
+    update_data = user_data.model_dump(exclude_unset=True)
+
+    # Si no se envió ningún dato para actualizar, no hacemos nada.
+    if not update_data:
+        return id # O podrías lanzar un error si lo prefieres
+
+    # Si se está actualizando la contraseña, hashearla antes de guardarla
+    if 'password' in update_data:
+        update_data['password'] = get_password_hash(update_data['password'])
+
+    try:
+        # Pasamos el ID y el diccionario de datos a la función de la base de datos.
+        user_id = db_utils.update_user_information(
+            id=id,
+            data_to_update=update_data
+        )
+        return user_id
     except Exception as e:
         # Puedes manejar o registrar el error aquí antes de relanzarlo
         raise e
@@ -398,7 +444,7 @@ def create_new_restaurant(restaurant_data: RestaurantCreate) -> int:
         
         hashed_password = get_password_hash(restaurant_data.password)
         
-        restaurant_id = db_utils.create_restaurant(
+        restaurant_id, user_id = db_utils.create_restaurant(
             email=restaurant_data.email,
             password=hashed_password,
             name=restaurant_data.name,
@@ -408,8 +454,26 @@ def create_new_restaurant(restaurant_data: RestaurantCreate) -> int:
             phone_number=restaurant_data.phone_number,
             category=restaurant_data.category
         )
+        
+        # Asignar foto de perfil aleatoria
+        # Contar archivos profile_X.png en la carpeta ProfileImages
+        profile_images_dir = os.path.join(os.path.dirname(__file__), 'ProfileImages')
+        profile_files = [f for f in os.listdir(profile_images_dir) if f.startswith('profile_') and f.endswith('.png')]
+        
+        # Seleccionar un número aleatorio basado en los archivos disponibles
+        if profile_files:
+            random_index = random.randint(0, len(profile_files) - 1)
+            profile_filename = f"profile_{random_index}.png"
+            profile_image_path = os.path.join(profile_images_dir, profile_filename)
+            
+            # Leer el archivo y subirlo
+            with open(profile_image_path, 'rb') as f:
+                file_content = f.read()
+            
+            image_url = upload_user_profile_picture(user_id, file_content, "image/png")
+            
         # Futura lógica: enviar_email_bienvenida(restaurant_data.email)
-        return restaurant_id
+        return restaurant_id, user_id, image_url
     except Exception as e:
         # Puedes manejar o registrar el error aquí antes de relanzarlo
         raise e

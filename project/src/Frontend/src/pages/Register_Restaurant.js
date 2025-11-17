@@ -93,6 +93,9 @@ const Register_Restaurant = () => {
       }
 
       localStorage.setItem("restaurant_id", restaurantId);
+      localStorage.setItem("role", "Restaurant");
+      localStorage.setItem("user_id", data.user_id);
+      localStorage.setItem("profile_picture", data.profile_picture || "");
       setShowSuccessModal(true);
     } catch (error) {
       console.error("Error al crear el restaurante", error);

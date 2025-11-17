@@ -7,7 +7,7 @@ const ShopPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortOption, setSortOption] = useState("newest");
+  const [sortByRating, setSortByRating] = useState(false);
   const navigate = useNavigate();
   const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
 
@@ -71,7 +71,14 @@ const ShopPage = () => {
 
   // Función para filtrar restaurantes
   const getFilteredRestaurants = () => {
-    return restaurantes.filter(restaurant => {
+    let filtered = restaurantes.filter(restaurant => {
+      // Filtro de búsqueda por nombre
+      const matchesSearch = restaurant.name?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      if (!matchesSearch) {
+        return false;
+      }
+      
       // Obtenemos las categorías marcadas 
       const activeCategories = Object.keys(filterTipoComida).filter(key => filterTipoComida[key]);
       
@@ -90,6 +97,13 @@ const ShopPage = () => {
         );
       });
     });
+
+    // Ordenar por valoración si está activado
+    if (sortByRating) {
+      filtered = filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    }
+
+    return filtered;
   };
 
   const filteredRestaurants = getFilteredRestaurants();
@@ -183,18 +197,11 @@ const ShopPage = () => {
                 />
                 <button className="search-button">🔍</button>
               </div>
-
-              <button className="sort-button active">
-                ✓ Nuevo
-              </button>
-              <button className="sort-button">
-                Precio ascendente
-              </button>
-              <button className="sort-button">
-                Precio descendente
-              </button>
-              <button className="sort-button rating-button">
-                ⭐ Valoración
+              <button 
+                className={`sort-button rating-button ${sortByRating ? 'active' : ''}`}
+                onClick={() => setSortByRating(!sortByRating)}
+              >
+                ⭐ Mejor Valoración
               </button>
             </div>
 

@@ -48,7 +48,7 @@ def create_client(email: str, password: str, sub_plan: str, name: str, surname: 
         )
         _, client_id = client_dao.insert(client_vo)
         print(f"Client created with ID: {client_id}")
-        return client_id
+        return client_id, user_id  
     except Exception as e:
         print(f"Error creating client: {e}")
 
@@ -109,6 +109,26 @@ def update_client_information(id: int, data_to_update: dict):
         print(f"Error updating client information: {e}")
         raise
 
+def update_user_information(id: int, data_to_update: dict):
+    """
+    Actualiza la información de un usuario en la base de datos.
+    """
+    if not data_to_update:
+        # No hay nada que actualizar, simplemente retornamos el ID.
+        print(f"No data provided to update for user ID: {id}")
+        return id
+
+    try:
+        user_dao = userDAO()
+        # Asumimos que el método update del DAO ahora acepta un diccionario.
+        updated_user = user_dao.update(id, data_to_update)
+        
+        print(f"User information updated: {updated_user}")      
+        return updated_user
+    except Exception as e:
+        print(f"Error updating user information: {e}")
+        raise
+
 def create_restaurant(email: str, password: str, name: str, description: str, city: str, 
                       address: str, phone_number: str, category: str):
     try:
@@ -131,10 +151,10 @@ def create_restaurant(email: str, password: str, name: str, description: str, ci
         )
         _, restaurant_id = restaurant_dao.insert(restaurant_vo)
         print(f"Restaurant created with ID: {restaurant_id}")
-        return restaurant_id
+        return restaurant_id, user_id
     except Exception as e:
         print(f"Error creating restaurant: {e}")
-    return
+    return None, None
 
 def update_restaurant_information(id: int, data_to_update: dict):
     """

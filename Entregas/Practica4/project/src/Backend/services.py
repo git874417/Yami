@@ -351,6 +351,26 @@ def create_new_client(client_data: ClientCreate) -> int:
         # Puedes manejar o registrar el error aquí antes de relanzarlo
         raise e
 
+def update_existing_user(user_id: int, user_data) -> int:
+    """
+    Orquesta la actualización de un usuario (principalmente para cambio de contraseña).
+    """
+    update_data = user_data.model_dump(exclude_unset=True)
+
+    if not update_data:
+        return None
+
+    # Si se está actualizando la contraseña, hay que hashearla
+    if "password" in update_data:
+        update_data["password"] = get_password_hash(update_data["password"])
+
+    try:
+        user_dao = userDAO()
+        _, user_id = user_dao.update(user_id, update_data)
+        return user_id
+    except Exception as e:
+        raise e
+
 def update_existing_client(id: int, client_data: ClientUpdate) -> int:
     """
     Orquesta la actualización de un cliente existente.
