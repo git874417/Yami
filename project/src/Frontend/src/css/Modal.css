@@ -59,7 +59,7 @@
 
 .modal-body {
   font-size: 1rem;
-  color: #555;
+  color: #1a1a1a;
   line-height: 1.6;
   margin-bottom: 24px;
 }
@@ -107,6 +107,15 @@
 
 .modal-action-button.danger:hover {
   background-color: #c82333;
+}
+
+.modal-action-button-primary {
+  background: #0f4b63;
+  color: white;
+}
+
+.modal-action-button-primary:hover {
+  background-color: #0b3a4d;
 }
 
 /* Animations */

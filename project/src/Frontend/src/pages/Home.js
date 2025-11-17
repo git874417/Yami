@@ -35,7 +35,7 @@ const Home = () => {
           <p className="hero-sub">Yami es tu nuevo servicio de comida a domicilio.</p>
         </div>
         <div className="hero-actions">
-          <Link to="/registro" className="btn-primary">
+          <Link to="/registerClient" className="btn-primary">
             ¡Forma parte de Yami!
           </Link>
         </div>
@@ -52,7 +52,7 @@ const Home = () => {
         <div className="cards-inner">
           <h2>Unete a Yami!</h2>
           <div className="card-grid">
-            <Link to="/registro" className="card-link">
+            <Link to="/registerClient" className="card-link">
               <article className="card">
                 <img
                   src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=60"
@@ -63,7 +63,7 @@ const Home = () => {
               </article>
             </Link>
 
-            <Link to="/registro" className="card-link">
+            <Link to="/registerRestaurant" className="card-link">
               <article className="card">
                 <img
                   src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=60"

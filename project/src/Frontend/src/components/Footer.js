@@ -21,7 +21,7 @@ const Footer = () => {
       <div className="footer-otras-opciones">
         <ul>
           <li>
-            <Link to="/register-restaurante" className="footer-link-register-restaurante">
+            <Link to="/registerRestaurant" className="footer-link-register-restaurante">
               Añade tu restaurante
             </Link>
           </li>

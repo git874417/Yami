@@ -51,13 +51,13 @@ const Navbar = ({onCarritoClick, carritoCount = 0, location}) => {
                 </Link>
               </li>
               <li>
-                <Link to="/registro" className="navbar-button navbar-button-registro">
+                <Link to="/registerClient" className="navbar-button navbar-button-registro">
                   Registrarse
                 </Link>
               </li>
             </>
           )}
-
+  
           {mostrarCarrito && (
             <li>
               <button onClick={onCarritoClick} className="navbar-button carrito-button">

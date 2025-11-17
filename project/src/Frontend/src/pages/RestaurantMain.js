@@ -179,7 +179,7 @@ const RestaurantMain = () => {
               </p>
               <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
                 <button 
-                  onClick={() => navigate(`/restaurant/${restaurantId}/edit`)}
+                  onClick={() => navigate(`/restaurantPage/${encodeURIComponent(restaurantId)}/edit`)}
                   style={{
                     padding: '8px 16px',
                     background: '#1a1a1a',

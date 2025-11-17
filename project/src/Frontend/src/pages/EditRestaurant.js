@@ -1,0 +1,288 @@
+import React, {useState, useEffect} from "react";
+import axios from "axios";
+import {Link, useNavigate, useParams} from "react-router-dom";
+import Modal from "../components/Modal";
+import "../css/EditRestaurant.css";
+
+const EditRestaurant = () => {
+  const [mensaje, setMensaje] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordRepeat, setPasswordRepeat] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [descripcion, setDescripcion] = useState("");
+  const [direccion, setDireccion] = useState("");
+  const [ciudad, setCiudad] = useState("");
+  const [categoria, setCategoria] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [restaurantId, setRestaurantId] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  const navigate = useNavigate();
+  const {restaurantId: restaurantNameUrl} = useParams();
+  const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
+
+  // Cargar datos del restaurante
+  useEffect(() => {
+    const fetchRestaurantData = async () => {
+      try {
+        setLoading(true);
+        const encodedName = encodeURIComponent(restaurantNameUrl);
+        const response = await axios.get(`${API_BASE}/restaurants/name/${encodedName}`);
+        const restaurant = response.data;
+
+        setRestaurantId(restaurant.id);
+        setNombre(restaurant.name || "");
+        setDescripcion(restaurant.description || "");
+        setDireccion(restaurant.address || "");
+        setCiudad(restaurant.city || "");
+        setCategoria(restaurant.category || "");
+        setTelefono(restaurant.phone_number || "");
+        setEmail(restaurant.email || "");
+        
+        // Set logo preview if exists
+        if (restaurant.image_url) {
+          setLogoPreview(restaurant.image_url);
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error loading restaurant data:", error);
+        setMensaje("Error al cargar los datos del restaurante");
+        setLoading(false);
+      }
+    };
+
+    if (restaurantNameUrl) {
+      fetchRestaurantData();
+    }
+  }, [restaurantNameUrl, API_BASE]);
+
+  // Manejar selección de logo
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setLogoFile(file);
+      // Crear preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+
+    if (password && password !== passwordRepeat) {
+      setMensaje("Las contraseñas no coinciden");
+      return;
+    }
+
+    setLoading(true);
+    setMensaje("");
+
+    try {
+      // 1. Actualizar datos del restaurante
+      const updatePayload = {
+        description: descripcion,
+        address: direccion,
+        city: ciudad,
+        category: categoria,
+        phone_number: telefono,
+      };
+
+      await axios.patch(`${API_BASE}/api/update_restaurant/${restaurantId}`, updatePayload);
+
+      console.log("Restaurante actualizado exitosamente");
+
+      // 2. Si hay nuevo logo, subirlo
+      if (logoFile && restaurantId) {
+        const formData = new FormData();
+        formData.append("file", logoFile);
+
+        console.log("Uploading new logo for restaurant ID:", restaurantId);
+
+        await axios.put(
+          `${API_BASE}/api/upload/restaurant_image/${restaurantId}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        console.log("Logo uploaded successfully");
+      }
+
+      // 3. Si se proporcionó nueva contraseña, actualizarla (si tienes endpoint para esto)
+      if (password) {
+        // Aquí iría la llamada para actualizar la contraseña si existe endpoint
+        console.log("Password update not implemented yet");
+      }
+
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error("Error al actualizar el restaurante", error);
+      setMensaje(error.response?.data?.detail || "No se ha podido actualizar el restaurante");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="edit-restaurant-container">
+        <div style={{textAlign: 'center', padding: '3rem'}}>
+          <p>Cargando datos del restaurante...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="edit-restaurant-container">
+      <form onSubmit={handleUpdate}>
+        <h2>Modificar Datos del Restaurante</h2>
+        
+        {/* Logo Upload Section */}
+        <div className="logo-upload-section">
+          <div className="logo-preview-container">
+            {logoPreview ? (
+              <img src={logoPreview} alt="Logo Preview" className="logo-preview" />
+            ) : (
+              <div className="logo-placeholder">
+                <p>🏪</p>
+                <p>Logo del Restaurante</p>
+              </div>
+            )}
+          </div>
+          <label htmlFor="logo-upload" className="upload-logo-button">
+            {logoFile ? "Cambiar Logo" : "Actualizar Logo"}
+          </label>
+          <input
+            id="logo-upload"
+            type="file"
+            accept="image/png,image/jpeg,image/jpg"
+            onChange={handleLogoChange}
+            style={{display: "none"}}
+          />
+        </div>
+
+        {/* Nombre (disabled) */}
+        <input
+          type="text"
+          placeholder="Nombre del Restaurante"
+          value={nombre}
+          disabled
+          style={{backgroundColor: '#f5f5f5', cursor: 'not-allowed'}}
+        />
+        
+        <textarea
+          placeholder="Descripción"
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
+          rows={3}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Dirección"
+          value={direccion}
+          onChange={(e) => setDireccion(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Ciudad"
+          value={ciudad}
+          onChange={(e) => setCiudad(e.target.value)}
+          required
+        />
+        <select value={categoria} onChange={(e) => setCategoria(e.target.value)} required>
+          <option value="">Categoría</option>
+          <option value="Italiano">Italiano</option>
+          <option value="Asiático">Asiático</option>
+          <option value="Hamburguesería">Hamburguesería</option>
+          <option value="Turco">Turco</option>
+          <option value="Asador">Asador</option>
+          <option value="Comida Rapida">Comida Rapida</option>
+          <option value="Mexicano">Mexicano</option>
+          <option value="Indio">Indio</option>
+          <option value="Griego">Griego</option>
+          <option value="Bocatería">Bocatería</option>
+          <option value="Saludable">Saludable</option>
+          <option value="Vegana">Vegana</option>
+          <option value="Heladería">Heladería</option>
+        </select>
+        <input
+          type="tel"
+          placeholder="Teléfono"
+          value={telefono}
+          onChange={(e) => setTelefono(e.target.value)}
+          required
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          disabled
+          style={{backgroundColor: '#f5f5f5', cursor: 'not-allowed'}}
+        />
+        
+        <hr style={{margin: '20px 0', border: 'none', borderTop: '1px solid #e6e6e6'}} />
+        <p style={{fontSize: '0.9rem', color: '#666', margin: '10px 0'}}>
+          Deja los campos de contraseña vacíos si no deseas cambiarla
+        </p>
+        
+        <input
+          type="password"
+          placeholder="Nueva Contraseña (opcional)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Repetir Nueva Contraseña"
+          value={passwordRepeat}
+          onChange={(e) => setPasswordRepeat(e.target.value)}
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? "Actualizando..." : "Guardar Cambios"}
+        </button>
+        {mensaje && <p>{mensaje}</p>}
+      </form>
+      <Link to={`/restaurantPage/${encodeURIComponent(nombre)}`} className="edit-restaurant-volver-inicio">
+        Cancelar
+      </Link>
+
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => {
+          setShowSuccessModal(false);
+          navigate(`/restaurantPage/${encodeURIComponent(nombre)}`);
+        }}
+        title="✓ Éxito"
+        actions={[
+          {
+            label: "Aceptar",
+            onClick: () => {
+              setShowSuccessModal(false);
+              navigate(`/restaurantPage/${encodeURIComponent(nombre)}`);
+            },
+            className: "modal-action-button-primary"
+          }
+        ]}
+      >
+        <p>Restaurante actualizado exitosamente</p>
+      </Modal>
+    </div>
+  );
+};
+
+export default EditRestaurant;

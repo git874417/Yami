@@ -7,9 +7,11 @@ import ShopPage from "./pages/ShopPage.js";
 import CreateDish from "./pages/CreateDish.js";
 import RestaurantMain from "./pages/RestaurantMain.js";
 import ModDish from "./pages/ModDish.js";
+import EditRestaurant from "./pages/EditRestaurant.js";
 import Header from "./components/Header.js";
 import Login from "./pages/Login.js";
 import Register_Client from "./pages/Register_Client.js";
+import Register_Restaurant from "./pages/Register_Restaurant.js";
 import Footer from "./components/Footer.js";
 import { ModalProvider } from "./context/ModalContext";
 import "./App.css";
@@ -26,11 +28,13 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/inicio-sesion" element={<Login />} />
-          <Route path="/registro" element={<Register_Client />} />
+          <Route path="/registerClient" element={<Register_Client />} />
+          <Route path="/registerRestaurant" element={<Register_Restaurant />} />
           <Route path="/restaurants" element={<ShopPage />} />
           <Route path="/restaurants/:restaurantId/order/:dishName" element={<OrderDish />} />
           <Route path="/restaurants/:restaurantId" element={<RestaurantDishes />} />
           <Route path="/restaurantPage/:restaurantId" element={<RestaurantMain />} />
+          <Route path="/restaurantPage/:restaurantId/edit" element={<EditRestaurant />} />
           <Route path="/restaurantPage/:restaurantId/:dishName" element={<ModDish />} />
           <Route path="/restaurantPage/:restaurantId/createDish" element={<CreateDish />} />
         </Routes>

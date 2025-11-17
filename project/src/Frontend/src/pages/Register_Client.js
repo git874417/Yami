@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 import axios from "axios";
 import {Link, Links, useNavigate} from "react-router-dom";
+import "../css/Register_client.css";
 
 const Register_client = () => {
   const [mensaje, setMensaje] = useState("");
@@ -60,10 +61,9 @@ const Register_client = () => {
   };
 
   return (
-    <div>
-      <h2>¡Bienvenido!</h2>
-      <h3>Introduce tus datos para comenzar a usar Yami</h3>
+    <div className="register-container">
       <form onSubmit={handleRegister}>
+        <h2>¡Bienvenido! Introduce tus datos para comenzar a usar Yami</h2>
         <input
           type="text"
           placeholder="Nombre"
@@ -149,9 +149,9 @@ const Register_client = () => {
           required
         />
         <button type="submit">Registrarse</button>
+        {mensaje && <p>{mensaje}</p>}
       </form>
-      <p>{mensaje}</p>
-      <Link to="/" className="login-volver-inicio">
+      <Link to="/" className="register-volver-inicio">
         Volver
       </Link>
     </div>
