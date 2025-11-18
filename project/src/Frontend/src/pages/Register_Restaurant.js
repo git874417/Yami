@@ -211,7 +211,7 @@ const Register_Restaurant = () => {
         </button>
         {mensaje && <p>{mensaje}</p>}
       </form>
-      <Link to={`/restaurant/${encodeURIComponent(nombre)}`} className="register-restaurant-volver-inicio">
+      <Link to={"/"} className="register-restaurant-volver-inicio">
         Volver
       </Link>
 
