@@ -13,6 +13,7 @@ from project.db_utils.clientDAO import clientDAO
 from project.db_utils.dishDAO import dishDAO
 from project.db_utils.orderDAO import orderDAO
 from project.db_utils.orderedDishDAO import orderedDishDAO
+from project.db_utils.ratingDAO import ratingDAO
 from project.src.Backend import services
 from project.src.Backend.model import *
 import uvicorn
@@ -191,14 +192,45 @@ def create_order_endpoint(client_id: int, restaurant_id: int, order: OrderCreate
 @app.post("/api/create_rating/{client_id}/{restaurant_id}", status_code=201)
 def create_rating_endpoint(client_id: int, restaurant_id: int, rating: RatingCreate):
     """
-    Crea una nueva valoración para un restaurante por parte de un cliente.
+    Crea una nueva valoración o actualiza una existente para un restaurante por parte de un cliente.
     """
     try:
-        rating_id = services.create_new_rating(client_id, restaurant_id, rating)
-        if rating_id is None:
-            raise HTTPException(status_code=400, detail="No se pudo crear la valoración.")
-            
-        return {"message": "Valoración creada exitosamente", "rating_id": rating_id}
+        # Verificar si ya existe una valoración de este cliente para este restaurante
+        rating_dao = ratingDAO()
+        existing_rating = rating_dao.get_by_client_and_restaurant(client_id, restaurant_id)
+        
+        if existing_rating:
+            # Actualizar la valoración existente
+            rating_update = RatingUpdate(rating=rating.rating)
+            rating_id = services.update_existing_rating(existing_rating.id, rating_update)
+            return {"message": "Valoración actualizada exitosamente", "rating_id": rating_id, "updated": True}
+        else:
+            # Crear nueva valoración
+            rating_id = services.create_new_rating(client_id, restaurant_id, rating)
+            if rating_id is None:
+                raise HTTPException(status_code=400, detail="No se pudo crear la valoración.")
+            return {"message": "Valoración creada exitosamente", "rating_id": rating_id, "updated": False}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
+@app.get("/api/rating/{client_id}/{restaurant_id}", status_code=200)
+def get_rating_by_client_and_restaurant(client_id: int, restaurant_id: int):
+    """
+    Obtiene la valoración de un cliente específico para un restaurante.
+    """
+    try:
+        rating_dao = ratingDAO()
+        rating = rating_dao.get_by_client_and_restaurant(client_id, restaurant_id)
+        
+        if not rating:
+            return {"rating": None}
+        
+        return {
+            "id": rating.id,
+            "client_id": rating.client_id,
+            "restaurant_id": rating.restaurant_id,
+            "rating": rating.rating
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
     
@@ -717,15 +749,21 @@ def get_client_orders(client_id: int):
     try:
         
         order_dao = orderDAO()
+        restaurant_dao = restaurantDAO()
         orders = order_dao.get_by_client_id(client_id)
         
         # Convertir a diccionarios para la respuesta JSON
         orders_list = []
         for order in orders:
+            # Obtener el nombre del restaurante
+            restaurant = restaurant_dao.get_by_id(order.restaurant_id)
+            restaurant_name = restaurant.name if restaurant else "Desconocido"
+            
             orders_list.append({
                 "id": order.id,
                 "client_id": order.client_id,
                 "restaurant_id": order.restaurant_id,
+                "restaurant_name": restaurant_name,
                 "order_credits": order.order_credits,
                 "order_status": order.order_status
             })

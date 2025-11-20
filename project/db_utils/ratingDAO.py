@@ -57,3 +57,9 @@ class ratingDAO:
             if ratings:
                 return round(sum(ratings) / len(ratings), 2)
         return 0.0
+
+    def get_by_client_and_restaurant(self, client_id: int, restaurant_id: int):
+        res = self.supabase.table("Ratings").select("*").eq("client_id", client_id).eq("restaurant_id", restaurant_id).execute()
+        if res.data and len(res.data) > 0:
+            return ratingVO(**res.data[0])
+        return None

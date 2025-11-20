@@ -46,6 +46,12 @@ const RestaurantDishes = () => {
   const [cartItems, setCartItems] = useState([]);
   const [currentRestaurantId, setCurrentRestaurantId] = useState(null);
 
+  // Rating
+  const [userRating, setUserRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+  const [loadingRating, setLoadingRating] = useState(false);
+
   const normalizeUrl = (u) => {
     if (!u) return u;
     let url = u.replace(/([^:]\/)\/+/g, "$1");
@@ -249,6 +255,81 @@ const RestaurantDishes = () => {
     return () => window.removeEventListener("carritoActualizado", updateCart);
   }, [restaurant?.id]);
 
+  // Cargar el rating existente del usuario
+  useEffect(() => {
+    const fetchUserRating = async () => {
+      const clientId = sessionStorage.getItem("role_id");
+      const role = sessionStorage.getItem("role");
+      
+      if (!clientId || role !== "Client" || !restaurant?.id) {
+        return;
+      }
+
+      setLoadingRating(true);
+      try {
+        const url = `${API_BASE}/api/rating/${clientId}/${restaurant.id}`;
+        const response = await fetch(url);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.rating !== null) {
+            setUserRating(data.rating);
+          }
+        }
+      } catch (err) {
+        console.error("Error cargando rating del usuario:", err);
+      } finally {
+        setLoadingRating(false);
+      }
+    };
+
+    fetchUserRating();
+  }, [restaurant?.id, API_BASE]);
+
+  const handleRatingClick = async (rating) => {
+    const clientId = sessionStorage.getItem("role_id");
+    const role = sessionStorage.getItem("role");
+    
+    if (!clientId || role !== "Client") {
+      alert("Debes iniciar sesión como cliente para dejar una valoración");
+      return;
+    }
+
+    if (!restaurant?.id) {
+      alert("Error: No se pudo identificar el restaurante");
+      return;
+    }
+
+    setIsSubmittingRating(true);
+    try {
+      const url = `${API_BASE}/api/create_rating/${clientId}/${restaurant.id}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rating: rating,
+          comment: ""
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status} al enviar la valoración`);
+      }
+
+      const result = await response.json();
+      console.log("Valoración enviada:", result);
+      setUserRating(rating);
+      alert(`¡Gracias por tu valoración de ${rating} ${rating === 1 ? 'estrella' : 'estrellas'}!`);
+    } catch (err) {
+      console.error("Error enviando valoración:", err);
+      alert("Error al enviar la valoración. Por favor, intenta de nuevo.");
+    } finally {
+      setIsSubmittingRating(false);
+    }
+  };
+
   if (loading) {
     return <LoadingScreen message="Cargando platos..." />;
   }
@@ -420,7 +501,7 @@ const RestaurantDishes = () => {
             <div className="header-right">
               <h1 className="title">{restaurant?.name}</h1>
               <div className="header-meta">
-                <span className="rating">⭐ {restaurant?.rating ?? "-"}</span>
+                <span className="rating">⭐ {restaurant?.rating > 0 ? restaurant.rating : "-"}</span>
                 <span className="location">
                   {restaurant?.address}
                   {restaurant?.city && `, ${restaurant.city}`}
@@ -479,33 +560,71 @@ const RestaurantDishes = () => {
           </div>
         </section>
 
-        {/* Mini resumen del carrito */}
-        <aside className="cart-sidebar">
-          <h3 className="cart-title">📋 Tu Pedido</h3>
-          {cartItems.length === 0 ? (
-            <p className="empty-cart-message">Sin platos seleccionados</p>
-          ) : (
-            <div className="cart-summary">
-              <ul className="cart-items-list">
-                {cartItems.map((item) => (
-                  <li key={item.dishId} className="cart-item-mini">
-                    <span className="cart-item-name">{item.dishName}</span>
-                    <span className="cart-item-price">{item.credits} 🍽️</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="cart-total">
-                <strong>Total: {cartItems.reduce((sum, item) => sum + (item.credits || 0), 0)} 🍽️</strong>
+        {/* Columna derecha: carrito y rating */}
+        <div className="right-column">
+          {/* Mini resumen del carrito */}
+          <aside className="cart-sidebar">
+            <h3 className="cart-title">📋 Tu Pedido</h3>
+            {cartItems.length === 0 ? (
+              <p className="empty-cart-message">Sin platos seleccionados</p>
+            ) : (
+              <div className="cart-summary">
+                <ul className="cart-items-list">
+                  {cartItems.map((item) => (
+                    <li key={item.dishId} className="cart-item-mini">
+                      <span className="cart-item-name">{item.dishName}</span>
+                      <span className="cart-item-price">{item.credits} 🍽️</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="cart-total">
+                  <strong>Total: {cartItems.reduce((sum, item) => sum + (item.credits || 0), 0)} 🍽️</strong>
+                </div>
+                <button 
+                  className="btn-checkout"
+                  onClick={() => navigate("/carrito")}
+                >
+                  Ver Carrito →
+                </button>
               </div>
-              <button 
-                className="btn-checkout"
-                onClick={() => navigate("/carrito")}
-              >
-                Ver Carrito →
-              </button>
+            )}
+          </aside>
+
+          {/* Rating Section - Debajo del carrito */}
+          {sessionStorage.getItem("role") === "Client" && (
+            <div className="rating-section-sidebar">
+              <div className="rating-card">
+                <h3 className="rating-title">Valora este restaurante</h3>
+                {loadingRating ? (
+                  <p className="rating-loading">Cargando...</p>
+                ) : (
+                  <>
+                    <div className="stars-container">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          className={`star-button ${star <= (hoverRating || userRating) ? 'active' : ''}`}
+                          onClick={() => handleRatingClick(star)}
+                          onMouseEnter={() => setHoverRating(star)}
+                          onMouseLeave={() => setHoverRating(0)}
+                          disabled={isSubmittingRating}
+                          title={`${star} ${star === 1 ? 'estrella' : 'estrellas'}`}
+                        >
+                          ⭐
+                        </button>
+                      ))}
+                    </div>
+                    {userRating > 0 && (
+                      <p className="rating-message">
+                        Tu valoración: {userRating} {userRating === 1 ? 'estrella' : 'estrellas'}
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           )}
-        </aside>
+        </div>
       </div>
     </main>
   );

@@ -6,6 +6,7 @@ import "../css/ClientOrders.css";
 const ClientOrders = () => {
   const [ordersData, setOrdersData] = useState(null);
   const [expandedOrders, setExpandedOrders] = useState({});
+  const [loadingDetails, setLoadingDetails] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cancellingOrder, setCancellingOrder] = useState(null);
@@ -57,10 +58,19 @@ const ClientOrders = () => {
         ...prev,
         [orderId]: null,
       }));
+      setLoadingDetails((prev) => ({
+        ...prev,
+        [orderId]: false,
+      }));
       return;
     }
 
     // Si no, cargar los detalles del pedido
+    setLoadingDetails((prev) => ({
+      ...prev,
+      [orderId]: true,
+    }));
+    
     try {
       const url = `${API_BASE}/api/order/${orderId}/details`;
       console.log("Cargando detalles de orden:", url);
@@ -77,6 +87,11 @@ const ClientOrders = () => {
     } catch (err) {
       console.error("Error cargando detalles:", err);
       alert("Error al cargar los detalles del pedido");
+    } finally {
+      setLoadingDetails((prev) => ({
+        ...prev,
+        [orderId]: false,
+      }));
     }
   };
 
@@ -162,7 +177,7 @@ const ClientOrders = () => {
                   <div className="client-order-header-card">
                     <div className="client-order-info">
                       <h3>Pedido #{order.id}</h3>
-                      <p className="client-order-restaurant">Restaurante ID: {order.restaurant_id}</p>
+                      <p className="client-order-restaurant">{order.restaurant_name || "Restaurante desconocido"}</p>
                       <span className={`order-status-badge status-${order.order_status?.toLowerCase()}`}>
                         {order.order_status || "Desconocido"}
                       </span>
@@ -178,11 +193,27 @@ const ClientOrders = () => {
                   </div>
                 </button>
 
-                {expandedOrders[order.id] && (
+                {loadingDetails[order.id] && (
+                  <div className="client-order-details-expanded">
+                    <div className="order-skeleton">
+                      <div className="skeleton-line skeleton-line-long"></div>
+                      <div className="skeleton-line skeleton-line-medium"></div>
+                      <div className="skeleton-line skeleton-line-short"></div>
+                      <div className="skeleton-line skeleton-line-medium"></div>
+                      <div className="skeleton-dishes">
+                        <div className="skeleton-dish"></div>
+                        <div className="skeleton-dish"></div>
+                        <div className="skeleton-dish"></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!loadingDetails[order.id] && expandedOrders[order.id] && (
                   <div className="client-order-details-expanded">
                     <div className="client-order-details">
-                      <p><strong>ID Orden:</strong> {expandedOrders[order.id].order_id}</p>
-                      <p><strong>Restaurante ID:</strong> {expandedOrders[order.id].restaurant_id}</p>
+                      <p><strong>ID Pedido:</strong> {expandedOrders[order.id].order_id}</p>
+                      <p><strong>Restaurante:</strong> {order.restaurant_name || "Desconocido"}</p>
                       <p><strong>Total:</strong> {expandedOrders[order.id].order_credits} {expandedOrders[order.id].order_credits === 1 ? 'Yameat' : 'Yameats'}</p>
                       <p><strong>Estado:</strong> {order.order_status || "Desconocido"}</p>
                     </div>

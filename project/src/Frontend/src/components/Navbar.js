@@ -81,7 +81,7 @@ const Navbar = ({location}) => {
 
           {isLoggedIn && user?.role === "Client" && (
             <li>
-              <Link to="/mis-pedidos" className="nav-link-servicios">
+              <Link to="/mis-pedidos" className="nav-link-mis-pedidos">
                 Mis Pedidos
               </Link>
             </li>

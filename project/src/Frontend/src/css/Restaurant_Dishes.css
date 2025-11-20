@@ -290,6 +290,12 @@
 .btn.small { padding:6px 8px; font-size:0.9rem; background:#f3f4f6; border-radius:6px; }
 
 /* CART SIDEBAR */
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .cart-sidebar {
   background: var(--bg);
   padding: 20px;
@@ -386,6 +392,71 @@
 .btn-checkout:hover {
   box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
   transform: translateY(-2px);
+}
+
+/* Rating Section Sidebar */
+.rating-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  border: 1px solid #e0e0e0;
+}
+
+.rating-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #1a1a1a;
+}
+
+.rating-loading {
+  color: #666;
+  font-size: 0.95rem;
+  padding: 1rem 0;
+}
+
+.stars-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.star-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.25rem;
+  filter: grayscale(100%);
+  opacity: 0.4;
+}
+
+.star-button:hover:not(:disabled) {
+  transform: scale(1.15);
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
+.star-button.active {
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
+.star-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.rating-message {
+  font-size: 0.95rem;
+  color: #0f4b63;
+  font-weight: 500;
+  margin-top: 0.5rem;
 }
 
 /* Responsive */
