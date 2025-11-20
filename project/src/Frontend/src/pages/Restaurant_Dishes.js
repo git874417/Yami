@@ -1,12 +1,13 @@
 // ...existing code...
 import React, {useEffect, useState} from "react";
-import {Link, useParams, useLocation} from "react-router-dom";
+import {Link, useParams, useLocation, useNavigate} from "react-router-dom";
 import { useRestaurantCache } from "../context/RestaurantCacheContext";
 import "../css/Restaurant_Dishes.css";
 
 const RestaurantDishes = () => {
   const {restaurantId} = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState(location.state?.restaurant || null);
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(!location.state?.restaurant);
@@ -39,6 +40,10 @@ const RestaurantDishes = () => {
 
   // Búsqueda de platos
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Carrito
+  const [cartItems, setCartItems] = useState([]);
+  const [currentRestaurantId, setCurrentRestaurantId] = useState(null);
 
   const normalizeUrl = (u) => {
     if (!u) return u;
@@ -200,6 +205,48 @@ const RestaurantDishes = () => {
 
     load();
   }, [restaurantId, API_BASE, getRestaurantsListCache, cacheDishes, getCachedDishes]);
+
+  // Actualizar carrito cuando restaurant está disponible
+  useEffect(() => {
+    // Solo ejecutar cuando tenemos el ID del restaurante
+    if (!restaurant?.id) return;
+
+    const updateCart = () => {
+      const carrito = sessionStorage.getItem("carrito");
+      if (carrito) {
+        try {
+          const carritoObj = JSON.parse(carrito);
+          // Si el carrito pertenece a un restaurante DIFERENTE, vaciar
+          // Comparar por ID numérico del restaurante
+          if (carritoObj.restaurantId && carritoObj.restaurantId !== restaurant.id) {
+            console.log(
+              "Vaciando carrito: carrito de restaurante",
+              carritoObj.restaurantId,
+              "pero estamos en",
+              restaurant.id
+            );
+            sessionStorage.removeItem("carrito");
+            setCartItems([]);
+            window.dispatchEvent(new Event("carritoActualizado"));
+            return;
+          }
+          // Si el carrito es del mismo restaurante, mostrar los platos
+          setCartItems(carritoObj.dishes || []);
+        } catch (error) {
+          console.error("Error parsing cart:", error);
+          setCartItems([]);
+        }
+      } else {
+        setCartItems([]);
+      }
+    };
+
+    updateCart();
+
+    // Escuchar cambios en el carrito
+    window.addEventListener("carritoActualizado", updateCart);
+    return () => window.removeEventListener("carritoActualizado", updateCart);
+  }, [restaurant?.id]);
 
   return (
     <main className="restaurant-page">
@@ -426,6 +473,34 @@ const RestaurantDishes = () => {
               ))}
           </div>
         </section>
+
+        {/* Mini resumen del carrito */}
+        <aside className="cart-sidebar">
+          <h3 className="cart-title">📋 Tu Pedido</h3>
+          {cartItems.length === 0 ? (
+            <p className="empty-cart-message">Sin platos seleccionados</p>
+          ) : (
+            <div className="cart-summary">
+              <ul className="cart-items-list">
+                {cartItems.map((item) => (
+                  <li key={item.dishId} className="cart-item-mini">
+                    <span className="cart-item-name">{item.dishName}</span>
+                    <span className="cart-item-price">{item.credits} 🍽️</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="cart-total">
+                <strong>Total: {cartItems.reduce((sum, item) => sum + (item.credits || 0), 0)} 🍽️</strong>
+              </div>
+              <button 
+                className="btn-checkout"
+                onClick={() => navigate("/carrito")}
+              >
+                Ver Carrito →
+              </button>
+            </div>
+          )}
+        </aside>
       </div>
     </main>
   );

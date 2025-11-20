@@ -103,44 +103,91 @@ const OrderDish = () => {
     fetchOrderData();
   }, [dishFromState, dishName, restaurantNameUrl, API_BASE]);
 
-  const handleCreateOrder = async () => {
+  const handleAddToCart = () => {
     const clientId = sessionStorage.getItem("role_id");
     if (!clientId) {
       alert("Por favor, inicia sesión para realizar un pedido.");
       navigate("/inicio-sesion");
       return;
     }
-    const clientIdNumber = Number(clientId);
-    const restaurantId_numerico = Number(restaurantFromState?.id);
 
-    if (!clientIdNumber || !restaurantId_numerico || !orderData.dishId) {
-      alert("Error: Faltan datos clave (usuario, restaurante o plato) para crear el pedido.");
-      console.error("IDs faltantes:", {clientId: clientIdNumber, restaurantId_numerico, dishId: orderData.dishId});
+    if (!orderData.dishId || !restaurantFromState?.id) {
+      alert("Error: Faltan datos del plato o restaurante.");
       return;
     }
 
-    // Backend expects only the OrderCreate body: { dishes: [ { dish_id, instructions } ] }
-    const datosOrder = {
-      dishes: [
-        {
-          dish_id: Number(orderData.dishId),
-          instructions: orderData.instructions || "",
-        },
-      ],
-    };
-    const url = `http://127.0.0.1:8000/api/create_order/${clientId}/${restaurantId_numerico}`;
     try {
-      const response = await axios.post(url, datosOrder, {
-        headers: { "Content-Type": "application/json" },
+      // Obtener carrito actual
+      const carritoActual = JSON.parse(sessionStorage.getItem("carrito") || "{}");
+      
+      // Restaurante ID del carrito
+      const restaurantIdInCart = carritoActual.restaurantId;
+      
+      // Verificar si el carrito pertenece a otro restaurante
+      if (restaurantIdInCart && restaurantIdInCart !== restaurantFromState.id) {
+        const confirmChange = window.confirm(
+          "Ya tienes items de otro restaurante. Si cambias de restaurante, se vaciará el carrito actual. ¿Deseas continuar?"
+        );
+        if (!confirmChange) return;
+        
+        // Vaciar carrito y empezar uno nuevo
+        sessionStorage.setItem("carrito", JSON.stringify({
+          restaurantId: restaurantFromState.id,
+          restaurantName: restaurantFromState.name,
+          dishes: [
+            {
+              dishId: orderData.dishId,
+              dishName: orderData.dishName,
+              dishDescription: orderData.dishDescription,
+              credits: orderData.credits,
+              instructions: orderData.instructions,
+              dishImage: orderData.dishImage,
+              allergens: orderData.allergens,
+            },
+          ],
+        }));
+      } else {
+        // Agregar al carrito existente o crear uno nuevo
+        const nuevoCarrito = {
+          restaurantId: restaurantFromState.id,
+          restaurantName: restaurantFromState.name,
+          dishes: carritoActual.dishes || [],
+        };
+
+        // Verificar si el plato ya existe en el carrito
+        const indiceExistente = nuevoCarrito.dishes.findIndex((p) => p.dishId === orderData.dishId);
+
+        if (indiceExistente >= 0) {
+          // Si existe, actualizar instrucciones
+          nuevoCarrito.dishes[indiceExistente].instructions = orderData.instructions;
+          alert(`✓ ${orderData.dishName} actualizado en el carrito`);
+        } else {
+          // Si no existe, añadir nuevo
+          nuevoCarrito.dishes.push({
+            dishId: orderData.dishId,
+            dishName: orderData.dishName,
+            dishDescription: orderData.dishDescription,
+            credits: orderData.credits,
+            instructions: orderData.instructions,
+            dishImage: orderData.dishImage,
+            allergens: orderData.allergens,
+          });
+          alert(`✓ ${orderData.dishName} añadido al carrito`);
+        }
+
+        sessionStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
+      }
+
+      // Disparar evento para actualizar el Header (contador del carrito)
+      window.dispatchEvent(new Event("carritoActualizado"));
+
+      // Volver a Restaurant_Dishes del mismo restaurante
+      navigate(`/restaurants/${encodeURIComponent(restaurantFromState.name)}`, {
+        state: { restaurant: restaurantFromState }
       });
-
-      console.log("Pedido Creado:", response.data);
-      alert("¡Pedido realizado con éxito!");
-
-      navigate(`/restaurants/${restaurantNameUrl}`);
     } catch (error) {
-      console.error("Error al crear el pedido:", error.response?.data || error.message);
-      alert("Hubo un error al procesar tu pedido. Inténtalo de nuevo.");
+      console.error("Error adding to cart:", error);
+      alert("Error al añadir al carrito");
     }
   };
 
@@ -275,7 +322,7 @@ const OrderDish = () => {
           </div>
 
           {/* Botón añadir al carrito */}
-          <button className="btn-add-cart" onClick={handleCreateOrder}>
+          <button className="btn-add-cart" onClick={handleAddToCart}>
             Añadir al carrito
           </button>
 

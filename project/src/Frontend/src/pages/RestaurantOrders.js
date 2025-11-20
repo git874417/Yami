@@ -4,7 +4,8 @@ import "../css/RestaurantOrders.css";
 
 const RestaurantOrders = () => {
   const { restaurantId } = useParams();
-  const [orders, setOrders] = useState([]);
+  const [ordersData, setOrdersData] = useState(null);
+  const [expandedOrders, setExpandedOrders] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
@@ -35,9 +36,9 @@ const RestaurantOrders = () => {
           throw new Error(`Error ${response.status} al cargar los pedidos`);
         }
 
-        const ordersData = await response.json();
-        console.log("Pedidos recibidos:", ordersData);
-        setOrders(Array.isArray(ordersData) ? ordersData : []);
+        const data = await response.json();
+        console.log("Datos recibidos:", data);
+        setOrdersData(data);
       } catch (err) {
         console.error("Error:", err);
         setError(err.message);
@@ -49,41 +50,42 @@ const RestaurantOrders = () => {
     fetchOrders();
   }, [API_BASE]);
 
-  const getFilteredOrders = () => {
-    if (filterStatus === "all") {
-      return orders;
+  const toggleOrderDetails = async (orderId) => {
+    // Si ya está expandido, contraerlo
+    if (expandedOrders[orderId]) {
+      setExpandedOrders((prev) => ({
+        ...prev,
+        [orderId]: null,
+      }));
+      return;
     }
-    return orders.filter((order) => order.status === filterStatus);
-  };
 
-  const filteredOrders = getFilteredOrders();
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "pendiente":
-        return "#ffc107";
-      case "en_preparacion":
-        return "#17a2b8";
-      case "listo":
-        return "#28a745";
-      case "entregado":
-        return "#6c757d";
-      case "cancelado":
-        return "#dc3545";
-      default:
-        return "#666";
-    }
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "Fecha no disponible";
+    // Si no, cargar los detalles del pedido
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("es-ES") + " " + date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
-    } catch {
-      return dateString;
+      const url = `${API_BASE}/api/order/${orderId}/details`;
+      console.log("Cargando detalles de orden:", url);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Error ${response.status} al cargar los detalles`);
+      }
+      const orderDetails = await response.json();
+      console.log("Detalles cargados:", orderDetails);
+      setExpandedOrders((prev) => ({
+        ...prev,
+        [orderId]: orderDetails,
+      }));
+    } catch (err) {
+      console.error("Error cargando detalles:", err);
+      alert("Error al cargar los detalles del pedido");
     }
   };
+
+  const filteredOrders = !ordersData?.orders 
+    ? [] 
+    : ordersData.orders.filter((order) => {
+        if (filterStatus === "all") return true;
+        return order.status === filterStatus;
+      });
 
   return (
     <main className="orders-page">
@@ -96,6 +98,7 @@ const RestaurantOrders = () => {
             ← Volver
           </button>
           <h1>Pedidos del Restaurante</h1>
+          {ordersData && <p className="orders-count">Total: {ordersData.total_orders} pedidos</p>}
         </header>
 
         <div className="orders-controls">
@@ -146,37 +149,48 @@ const RestaurantOrders = () => {
           ) : (
             filteredOrders.map((order) => (
               <div key={order.id} className="order-card">
-                <div className="order-header-card">
-                  <div className="order-info">
-                    <h3>Pedido #{order.id}</h3>
-                    <p className="order-date">{formatDate(order.created_at)}</p>
+                <button
+                  className="order-card-button"
+                  onClick={() => toggleOrderDetails(order.id)}
+                >
+                  <div className="order-header-card">
+                    <div className="order-info">
+                      <h3>Pedido #{order.id}</h3>
+                      <p className="order-client">Cliente ID: {order.client_id}</p>
+                    </div>
+                    <div className="order-summary">
+                      <p className="order-credits">{order.order_credits} 🍽️</p>
+                      <span className="expand-icon">
+                        {expandedOrders[order.id] ? "▼" : "▶"}
+                      </span>
+                    </div>
                   </div>
-                  <div 
-                    className="order-status"
-                    style={{ backgroundColor: getStatusColor(order.status) }}
-                  >
-                    {order.status}
-                  </div>
-                </div>
+                </button>
 
-                <div className="order-details">
-                  <p><strong>Cliente:</strong> {order.client_name || "No disponible"}</p>
-                  <p><strong>Total:</strong> ${order.total || "0.00"}</p>
-                  {order.delivery_address && (
-                    <p><strong>Dirección:</strong> {order.delivery_address}</p>
-                  )}
-                </div>
+                {expandedOrders[order.id] && (
+                  <div className="order-details-expanded">
+                    <div className="order-details">
+                      <p><strong>ID Orden:</strong> {expandedOrders[order.id].order_id}</p>
+                      <p><strong>Cliente ID:</strong> {expandedOrders[order.id].client_id}</p>
+                      <p><strong>Restaurante ID:</strong> {expandedOrders[order.id].restaurant_id}</p>
+                      <p><strong>Total:</strong> {expandedOrders[order.id].order_credits} 🍽️</p>
+                    </div>
 
-                {order.items && order.items.length > 0 && (
-                  <div className="order-items">
-                    <h4>Productos:</h4>
-                    <ul>
-                      {order.items.map((item, index) => (
-                        <li key={index}>
-                          {item.dish_name} x{item.quantity} - ${item.price}
-                        </li>
-                      ))}
-                    </ul>
+                    {expandedOrders[order.id].dishes && expandedOrders[order.id].dishes.length > 0 && (
+                      <div className="order-items">
+                        <h4>Platos:</h4>
+                        <ul>
+                          {expandedOrders[order.id].dishes.map((dish, index) => (
+                            <li key={index} className="dish-item">
+                              <span className="dish-name">{dish.dish_name}</span>
+                              {dish.instructions && (
+                                <span className="dish-instructions">Instrucciones: {dish.instructions}</span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
