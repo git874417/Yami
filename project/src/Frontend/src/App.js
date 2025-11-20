@@ -25,7 +25,7 @@ import "./App.css";
 function AppContent() {
   const location = useLocation();
   useScrollToTop();
-  const noMostrarHeaderEn = ["/inicio-sesion", "/registro"];
+  const noMostrarHeaderEn = ["/inicio-sesion"];
   const mostrarHeader = !noMostrarHeaderEn.includes(location.pathname);
 
   return (

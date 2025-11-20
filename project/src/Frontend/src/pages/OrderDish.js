@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from "react";
 import {useParams, useNavigate, useLocation, data} from "react-router-dom";
+import Modal from "../components/Modal";
 import "../css/OrderDish.css";
 import axios from "axios";
 
@@ -38,6 +39,8 @@ const OrderDish = () => {
   const [loading, setLoading] = useState(!dishFromState);
   const [error, setError] = useState(null);
   const [availableCredits, setAvailableCredits] = useState(null);
+  const [modalState, setModalState] = useState({ isOpen: false, title: "", message: "" });
+  const [confirmState, setConfirmState] = useState({ isOpen: false, title: "", message: "", onConfirm: null });
 
   const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
 
@@ -123,13 +126,21 @@ const OrderDish = () => {
   const handleAddToCart = () => {
     const clientId = sessionStorage.getItem("role_id");
     if (!clientId) {
-      alert("Por favor, inicia sesión para realizar un pedido.");
-      navigate("/inicio-sesion");
+      setModalState({
+        isOpen: true,
+        title: "Información",
+        message: "Por favor, inicia sesión para realizar un pedido."
+      });
+      setTimeout(() => navigate("/inicio-sesion"), 1500);
       return;
     }
 
     if (!orderData.dishId || !restaurantFromState?.id) {
-      alert("Error: Faltan datos del plato o restaurante.");
+      setModalState({
+        isOpen: true,
+        title: "Error",
+        message: "Error: Faltan datos del plato o restaurante."
+      });
       return;
     }
 
@@ -142,69 +153,93 @@ const OrderDish = () => {
       
       // Verificar si el carrito pertenece a otro restaurante
       if (restaurantIdInCart && restaurantIdInCart !== restaurantFromState.id) {
-        const confirmChange = window.confirm(
-          "Ya tienes items de otro restaurante. Si cambias de restaurante, se vaciará el carrito actual. ¿Deseas continuar?"
-        );
-        if (!confirmChange) return;
-        
-        // Vaciar carrito y empezar uno nuevo
-        sessionStorage.setItem("carrito", JSON.stringify({
-          restaurantId: restaurantFromState.id,
-          restaurantName: restaurantFromState.name,
-          dishes: [
-            {
-              dishId: orderData.dishId,
-              dishName: orderData.dishName,
-              dishDescription: orderData.dishDescription,
-              credits: orderData.credits,
-              instructions: orderData.instructions,
-              dishImage: orderData.dishImage,
-              allergens: orderData.allergens,
-            },
-          ],
-        }));
-      } else {
-        // Agregar al carrito existente o crear uno nuevo
-        const nuevoCarrito = {
-          restaurantId: restaurantFromState.id,
-          restaurantName: restaurantFromState.name,
-          dishes: carritoActual.dishes || [],
-        };
+        setConfirmState({
+          isOpen: true,
+          title: "Cambiar restaurante",
+          message: "Ya tienes items de otro restaurante. Si cambias de restaurante, se vaciará el carrito actual. ¿Deseas continuar?",
+          onConfirm: async () => {
+            setConfirmState({ isOpen: false, title: "", message: "", onConfirm: null });
+            
+            // Vaciar carrito y empezar uno nuevo
+            sessionStorage.setItem("carrito", JSON.stringify({
+              restaurantId: restaurantFromState.id,
+              restaurantName: restaurantFromState.name,
+              dishes: [
+                {
+                  dishId: orderData.dishId,
+                  dishName: orderData.dishName,
+                  dishDescription: orderData.dishDescription,
+                  credits: orderData.credits,
+                  instructions: orderData.instructions,
+                  dishImage: orderData.dishImage,
+                  allergens: orderData.allergens,
+                },
+              ],
+            }));
 
-        // Verificar si el plato ya existe en el carrito
-        const indiceExistente = nuevoCarrito.dishes.findIndex((p) => p.dishId === orderData.dishId);
-
-        if (indiceExistente >= 0) {
-          // Si existe, actualizar instrucciones
-          nuevoCarrito.dishes[indiceExistente].instructions = orderData.instructions;
-          alert(`✓ ${orderData.dishName} actualizado en el carrito`);
-        } else {
-          // Si no existe, añadir nuevo
-          nuevoCarrito.dishes.push({
-            dishId: orderData.dishId,
-            dishName: orderData.dishName,
-            dishDescription: orderData.dishDescription,
-            credits: orderData.credits,
-            instructions: orderData.instructions,
-            dishImage: orderData.dishImage,
-            allergens: orderData.allergens,
-          });
-          alert(`✓ ${orderData.dishName} añadido al carrito`);
-        }
-
-        sessionStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
+            window.dispatchEvent(new Event("carritoActualizado"));
+            navigate(`/restaurants/${encodeURIComponent(restaurantFromState.name)}`, {
+              state: { restaurant: restaurantFromState }
+            });
+          }
+        });
+        return;
       }
+      
+      // Agregar al carrito existente o crear uno nuevo
+      const nuevoCarrito = {
+        restaurantId: restaurantFromState.id,
+        restaurantName: restaurantFromState.name,
+        dishes: carritoActual.dishes || [],
+      };
+
+      // Verificar si el plato ya existe en el carrito
+      const indiceExistente = nuevoCarrito.dishes.findIndex((p) => p.dishId === orderData.dishId);
+
+      if (indiceExistente >= 0) {
+        // Si existe, actualizar instrucciones
+        nuevoCarrito.dishes[indiceExistente].instructions = orderData.instructions;
+        setModalState({
+          isOpen: true,
+          title: "Éxito",
+          message: `✓ ${orderData.dishName} actualizado en el carrito`
+        });
+      } else {
+        // Si no existe, añadir nuevo
+        nuevoCarrito.dishes.push({
+          dishId: orderData.dishId,
+          dishName: orderData.dishName,
+          dishDescription: orderData.dishDescription,
+          credits: orderData.credits,
+          instructions: orderData.instructions,
+          dishImage: orderData.dishImage,
+          allergens: orderData.allergens,
+        });
+        setModalState({
+          isOpen: true,
+          title: "Éxito",
+          message: `✓ ${orderData.dishName} añadido al carrito`
+        });
+      }
+
+      sessionStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
 
       // Disparar evento para actualizar el Header (contador del carrito)
       window.dispatchEvent(new Event("carritoActualizado"));
 
-      // Volver a Restaurant_Dishes del mismo restaurante
-      navigate(`/restaurants/${encodeURIComponent(restaurantFromState.name)}`, {
-        state: { restaurant: restaurantFromState }
-      });
+      // Volver a Restaurant_Dishes del mismo restaurante después de 1.5 segundos
+      setTimeout(() => {
+        navigate(`/restaurants/${encodeURIComponent(restaurantFromState.name)}`, {
+          state: { restaurant: restaurantFromState }
+        });
+      }, 1500);
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert("Error al añadir al carrito");
+      setModalState({
+        isOpen: true,
+        title: "Error",
+        message: "Error al añadir al carrito"
+      });
     }
   };
 
@@ -300,6 +335,40 @@ const OrderDish = () => {
 
   return (
     <div className="order-dish-container">
+      <Modal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({ isOpen: false, title: "", message: "" })}
+        title={modalState.title}
+        actions={[
+          {
+            label: "Cerrar",
+            onClick: () => setModalState({ isOpen: false, title: "", message: "" })
+          }
+        ]}
+      >
+        <p>{modalState.message}</p>
+      </Modal>
+
+      <Modal
+        isOpen={confirmState.isOpen}
+        onClose={() => setConfirmState({ isOpen: false, title: "", message: "", onConfirm: null })}
+        title={confirmState.title}
+        actions={[
+          {
+            label: "Cancelar",
+            onClick: () => setConfirmState({ isOpen: false, title: "", message: "", onConfirm: null }),
+            className: "cancel"
+          },
+          {
+            label: "Confirmar",
+            onClick: confirmState.onConfirm,
+            className: "confirm"
+          }
+        ]}
+      >
+        <p>{confirmState.message}</p>
+      </Modal>
+
       {/* Main Content */}
       <div className="order-content">
         {/* Imagen del plato */}

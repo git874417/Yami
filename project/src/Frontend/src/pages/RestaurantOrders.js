@@ -8,6 +8,7 @@ const RestaurantOrders = () => {
   const { restaurantId } = useParams();
   const [ordersData, setOrdersData] = useState(null);
   const [expandedOrders, setExpandedOrders] = useState({});
+  const [loadingDetails, setLoadingDetails] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [processingOrder, setProcessingOrder] = useState(null);
@@ -78,10 +79,19 @@ const RestaurantOrders = () => {
         ...prev,
         [orderId]: null,
       }));
+      setLoadingDetails((prev) => ({
+        ...prev,
+        [orderId]: false,
+      }));
       return;
     }
 
     // Si no, cargar los detalles del pedido
+    setLoadingDetails((prev) => ({
+      ...prev,
+      [orderId]: true,
+    }));
+    
     try {
       const url = `${API_BASE}/api/order/${orderId}/details`;
       console.log("Cargando detalles de orden:", url);
@@ -102,6 +112,11 @@ const RestaurantOrders = () => {
         title: "Error",
         message: "Error al cargar los detalles del pedido"
       });
+    } finally {
+      setLoadingDetails((prev) => ({
+        ...prev,
+        [orderId]: false,
+      }));
     }
   };
 
@@ -348,7 +363,7 @@ const RestaurantOrders = () => {
                   <div className="restaurant-order-header-card">
                     <div className="restaurant-order-info">
                       <h3>Pedido #{order.id}</h3>
-                      <p className="restaurant-order-client">Cliente ID: {order.client_id}</p>
+                      <p className="restaurant-order-client">Cliente: {order.client_name || "Desconocido"}</p>
                       <span className={`order-status-badge status-${order.order_status?.toLowerCase().replace(/\s+/g, '-')}`}>
                         {order.order_status || "Desconocido"}
                       </span>
@@ -364,12 +379,28 @@ const RestaurantOrders = () => {
                   </div>
                 </button>
 
-                {expandedOrders[order.id] && (
+                {loadingDetails[order.id] && (
+                  <div className="restaurant-order-details-expanded">
+                    <div className="order-skeleton">
+                      <div className="skeleton-line skeleton-line-long"></div>
+                      <div className="skeleton-line skeleton-line-medium"></div>
+                      <div className="skeleton-line skeleton-line-short"></div>
+                      <div className="skeleton-line skeleton-line-medium"></div>
+                      <div className="skeleton-dishes">
+                        <div className="skeleton-dish"></div>
+                        <div className="skeleton-dish"></div>
+                        <div className="skeleton-dish"></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!loadingDetails[order.id] && expandedOrders[order.id] && (
                   <div className="restaurant-order-details-expanded">
                     <div className="restaurant-order-details">
                       <p><strong>ID Orden:</strong> {expandedOrders[order.id].order_id}</p>
-                      <p><strong>Cliente ID:</strong> {expandedOrders[order.id].client_id}</p>
-                      <p><strong>Restaurante ID:</strong> {expandedOrders[order.id].restaurant_id}</p>
+                      <p><strong>Cliente:</strong> {order.client_name || "Desconocido"}</p>
+                      <p><strong>Restaurante:</strong> {order.restaurant_name || "Desconocido"}</p>
                       <p><strong>Total:</strong> {expandedOrders[order.id].order_credits} 🍽️</p>
                       <p><strong>Estado:</strong> {order.order_status || "Desconocido"}</p>
                     </div>

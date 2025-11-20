@@ -92,10 +92,12 @@ const Register_Restaurant = () => {
         console.log("Logo uploaded successfully");
       }
 
-      localStorage.setItem("restaurant_id", restaurantId);
-      localStorage.setItem("role", "Restaurant");
-      localStorage.setItem("user_id", data.user_id);
-      localStorage.setItem("profile_picture", data.profile_picture || "");
+      // Guardar en sessionStorage para mantener la sesión
+      sessionStorage.setItem("restaurant_id", restaurantId);
+      sessionStorage.setItem("role_id", restaurantId);
+      sessionStorage.setItem("user_id", data.user_id);
+      sessionStorage.setItem("role", "Restaurant");
+      sessionStorage.setItem("profile_picture", data.profile_picture || "");
       setShowSuccessModal(true);
     } catch (error) {
       console.error("Error al crear el restaurante", error);

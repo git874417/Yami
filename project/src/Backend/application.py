@@ -788,21 +788,34 @@ def get_restaurant_orders(restaurant_id: int):
     try:
         
         order_dao = orderDAO()
+        client_dao = clientDAO()
+        restaurant_dao = restaurantDAO()
         orders = order_dao.get_by_restaurant_id(restaurant_id)
+        
+        # Obtener el nombre del restaurante
+        restaurant = restaurant_dao.get_by_id(restaurant_id)
+        restaurant_name = restaurant.name if restaurant else "Desconocido"
         
         # Convertir a diccionarios para la respuesta JSON
         orders_list = []
         for order in orders:
+            # Obtener el nombre del cliente
+            client = client_dao.get_by_id(order.client_id)
+            client_name = f"{client.name} {client.surname}" if client else "Desconocido"
+            
             orders_list.append({
                 "id": order.id,
                 "client_id": order.client_id,
+                "client_name": client_name,
                 "restaurant_id": order.restaurant_id,
+                "restaurant_name": restaurant_name,
                 "order_credits": order.order_credits,
                 "order_status": order.order_status
             })
         
         return {
             "restaurant_id": restaurant_id,
+            "restaurant_name": restaurant_name,
             "total_orders": len(orders_list),
             "orders": orders_list
         }

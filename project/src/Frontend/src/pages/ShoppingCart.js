@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Modal from "../components/Modal";
 import "../css/ShoppingCart.css";
 import axios from "axios";
 
 const ShoppingCart = () => {
   const [cartData, setCartData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [modalState, setModalState] = useState({ isOpen: false, title: "", message: "" });
   const navigate = useNavigate();
 
   const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
@@ -68,13 +70,21 @@ const ShoppingCart = () => {
   const handlePlaceOrder = async () => {
     const clientId = sessionStorage.getItem("role_id");
     if (!clientId) {
-      alert("Por favor, inicia sesión para realizar un pedido.");
-      navigate("/inicio-sesion");
+      setModalState({
+        isOpen: true,
+        title: "Información",
+        message: "Por favor, inicia sesión para realizar un pedido."
+      });
+      setTimeout(() => navigate("/inicio-sesion"), 1500);
       return;
     }
 
     if (!cartData || cartData.dishes.length === 0) {
-      alert("El carrito está vacío.");
+      setModalState({
+        isOpen: true,
+        title: "Información",
+        message: "El carrito está vacío."
+      });
       return;
     }
 
@@ -96,18 +106,28 @@ const ShoppingCart = () => {
       });
 
       console.log("Pedido Creado:", response.data);
-      alert("¡Pedido realizado con éxito!");
+      setModalState({
+        isOpen: true,
+        title: "Éxito",
+        message: "¡Pedido realizado con éxito!"
+      });
 
       // Vaciar carrito
       sessionStorage.removeItem("carrito");
       setCartData(null);
       window.dispatchEvent(new Event("carritoActualizado"));
 
-      // Navegar al restaurante
-      navigate(`/restaurants/${encodeURIComponent(cartData.restaurantName)}`);
+      // Navegar al restaurante después de cerrar el modal
+      setTimeout(() => {
+        navigate(`/restaurants/${encodeURIComponent(cartData.restaurantName)}`);
+      }, 1500);
     } catch (error) {
       console.error("Error al crear el pedido:", error.response?.data || error.message);
-      alert("Hubo un error al procesar tu pedido. Inténtalo de nuevo.");
+      setModalState({
+        isOpen: true,
+        title: "Error",
+        message: "Hubo un error al procesar tu pedido. Inténtalo de nuevo."
+      });
     } finally {
       setLoading(false);
     }
@@ -139,6 +159,19 @@ const ShoppingCart = () => {
 
   return (
     <div className="shopping-cart-container">
+      <Modal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({ isOpen: false, title: "", message: "" })}
+        title={modalState.title}
+        actions={[
+          {
+            label: "Cerrar",
+            onClick: () => setModalState({ isOpen: false, title: "", message: "" })
+          }
+        ]}
+      >
+        <p>{modalState.message}</p>
+      </Modal>
       <div className="cart-content">
         <h1>🛒 Resumen de tu pedido</h1>
 

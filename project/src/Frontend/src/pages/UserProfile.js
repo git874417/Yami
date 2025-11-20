@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../context/ModalContext";
+import Modal from "../components/Modal";
 import "../css/UserProfile.css";
 
 const UserProfile = () => {
@@ -14,6 +15,7 @@ const UserProfile = () => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const navigate = useNavigate();
   const { showModal } = useModal();
+  const [customModalState, setCustomModalState] = useState({ isOpen: false, title: "", message: "", onConfirm: null });
   const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
 
   useEffect(() => {
@@ -70,6 +72,49 @@ const UserProfile = () => {
     setNewPassword("");
     setConfirmPassword("");
     setIsChangingPassword(false);
+  };
+
+  const handleUnsubscribe = () => {
+    setCustomModalState({
+      isOpen: true,
+      title: "Confirmar darse de baja",
+      message: "¿Estás seguro de que deseas darte de baja? Esta acción no se puede deshacer.",
+      onConfirm: async () => {
+        setCustomModalState({ isOpen: false, title: "", message: "", onConfirm: null });
+        try {
+          const role = sessionStorage.getItem("role");
+          const role_id = sessionStorage.getItem("role_id");
+          
+          if (!role || !role_id) {
+            showModal("Error", "No se encontró información del usuario");
+            return;
+          }
+
+          const endpoint = role === "Client" 
+            ? `/api/delete_client/${role_id}`
+            : `/api/delete_restaurant/${role_id}`;
+
+          const response = await fetch(`${API_BASE}${endpoint}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error ${response.status} al darse de baja`);
+          }
+
+          showModal("Éxito", "Tu cuenta ha sido eliminada correctamente");
+          
+          // Limpiar sessionStorage y redirigir a inicio de sesión
+          setTimeout(() => {
+            sessionStorage.clear();
+            navigate("/");
+          }, 1500);
+        } catch (error) {
+          console.error("Error al darse de baja:", error);
+          showModal("Error", "Error al darse de baja. Por favor intenta de nuevo.");
+        }
+      }
+    });
   };
 
   const handleInputChange = (field, value) => {
@@ -190,6 +235,26 @@ const UserProfile = () => {
 
   return (
     <div className="profile-page">
+      <Modal
+        isOpen={customModalState.isOpen}
+        onClose={() => setCustomModalState({ isOpen: false, title: "", message: "", onConfirm: null })}
+        title={customModalState.title}
+        actions={[
+          {
+            label: "Cancelar",
+            onClick: () => setCustomModalState({ isOpen: false, title: "", message: "", onConfirm: null }),
+            className: "cancel"
+          },
+          {
+            label: "Confirmar",
+            onClick: customModalState.onConfirm,
+            className: "confirm"
+          }
+        ]}
+      >
+        <p>{customModalState.message}</p>
+      </Modal>
+
       <div className="profile-container">
         <div className="profile-header">
           <div className="profile-picture-large">
@@ -213,7 +278,14 @@ const UserProfile = () => {
         </div>
 
         <div className="profile-info">
-          <h2>Información del Perfil</h2>
+          <div className="profile-info-header">
+            <h2>Información del Perfil</h2>
+            {!isEditing && (
+              <button className="btn-unsubscribe-inline" onClick={handleUnsubscribe}>
+                Darse de Baja
+              </button>
+            )}
+          </div>
           <div className="info-grid">
 
             <div className="info-item">
@@ -343,12 +415,16 @@ const UserProfile = () => {
                 <div className="info-item">
                   <label>Plan de Suscripción:</label>
                   {isEditing ? (
-                    <input
-                      type="text"
-                      className="edit-input"
+                    <select
+                      className="edit-input edit-select"
                       value={editedData?.sub_plan || ""}
                       onChange={(e) => handleInputChange("sub_plan", e.target.value)}
-                    />
+                    >
+                      <option value="">Selecciona un plan</option>
+                      <option value="Basic">Basic</option>
+                      <option value="Plus">Plus</option>
+                      <option value="Deluxe">Deluxe</option>
+                    </select>
                   ) : (
                     <span>{user?.sub_plan || "No disponible"}</span>
                   )}

@@ -51,10 +51,12 @@ const Register_client = () => {
         return;
       }
 
-      localStorage.setItem("client_id", data.client_id);
-      localStorage.setItem("role", "Client");
-      localStorage.setItem("profile_picture", data.profile_picture || "");
-      localStorage.setItem("user_id", data.user_id);
+      // Guardar en sessionStorage para mantener la sesión
+      sessionStorage.setItem("client_id", data.client_id);
+      sessionStorage.setItem("role_id", data.client_id);
+      sessionStorage.setItem("user_id", data.user_id);
+      sessionStorage.setItem("role", "Client");
+      sessionStorage.setItem("profile_picture", data.profile_picture || "");
       navigate("/restaurants");
       console.log("Cliente creado con id", data.client_id);
     } catch (error) {

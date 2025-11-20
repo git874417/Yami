@@ -40,7 +40,7 @@ const Navbar = ({location}) => {
     // Escuchar cambios en el carrito
     window.addEventListener("carritoActualizado", updateCartCount);
     return () => window.removeEventListener("carritoActualizado", updateCartCount);
-  }, []);
+  }, [location]);
 
   const handleLogout = () => {
     sessionStorage.removeItem("user_id");
@@ -58,6 +58,7 @@ const Navbar = ({location}) => {
   const mostrarCarrito = inRestaurant && !pathname.includes("/restaurantPage/");
 
   const mostrarLoginButtons = !isLoggedIn && pathname === "/";
+  const mostrarLoginButton = !isLoggedIn && (pathname === "/" || pathname.includes("/register"));
   
   const handleCarritoClick = () => {
     navigate("/carrito");
@@ -87,19 +88,20 @@ const Navbar = ({location}) => {
             </li>
           )}
 
+          {mostrarLoginButton && (
+            <li>
+              <Link to="/inicio-sesion" className="navbar-button navbar-button-inicio-sesion">
+                Iniciar Sesión
+              </Link>
+            </li>
+          )}
+
           {mostrarLoginButtons && (
-            <>
-              <li>
-                <Link to="/inicio-sesion" className="navbar-button navbar-button-inicio-sesion">
-                  Iniciar Sesión
-                </Link>
-              </li>
-              <li>
-                <Link to="/registerClient" className="navbar-button navbar-button-registro">
-                  Registrarse
-                </Link>
-              </li>
-            </>
+            <li>
+              <Link to="/registerClient" className="navbar-button navbar-button-registro">
+                Registrarse
+              </Link>
+            </li>
           )}
   
           {mostrarCarrito && (
