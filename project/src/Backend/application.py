@@ -82,6 +82,9 @@ def login_endpoint(form_data: UserLogin):
                     detail="Cliente no encontrado para el usuario dado",
                 )
             return {"message": "Login exitoso", "user_id": user.id, "role": user.role, "role_id": client.id, "profile_picture": user.image_url}
+        
+        elif user.role == "Admin":
+            return {"message": "Login exitoso", "user_id": user.id, "role": user.role, "role_id": user.id, "profile_picture": user.image_url}
 
     except HTTPException:
         
@@ -212,28 +215,6 @@ def create_rating_endpoint(client_id: int, restaurant_id: int, rating: RatingCre
             return {"message": "Valoración creada exitosamente", "rating_id": rating_id, "updated": False}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
-
-@app.get("/api/rating/{client_id}/{restaurant_id}", status_code=200)
-def get_rating_by_client_and_restaurant(client_id: int, restaurant_id: int):
-    """
-    Obtiene la valoración de un cliente específico para un restaurante.
-    """
-    try:
-        rating_dao = ratingDAO()
-        rating = rating_dao.get_by_client_and_restaurant(client_id, restaurant_id)
-        
-        if not rating:
-            return {"rating": None}
-        
-        return {
-            "id": rating.id,
-            "client_id": rating.client_id,
-            "restaurant_id": rating.restaurant_id,
-            "rating": rating.rating
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
-    
     
 @app.patch("/api/update_user/{user_id}", status_code=200)
 def update_user_endpoint(user_id: int, user: UserUpdate):
@@ -548,6 +529,48 @@ def get_all_clients():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
+@app.get("/api/clients/full_info")
+def get_all_clients_full_info():
+    """
+    Obtiene una lista de todos los clientes con información completa del usuario y cliente.
+    """
+    try:
+        client_dao = clientDAO()
+        user_dao = userDAO()
+        
+        clients = client_dao.get_all()
+        clients_list = []
+        
+        for client in clients:
+            # Obtener la información del usuario asociado
+            user = user_dao.get_by_id(client.user_id)
+            
+            clients_list.append({
+                "client": {
+                    "id": client.id,
+                    "user_id": client.user_id,
+                    "sub_plan": client.sub_plan,
+                    "name": client.name,
+                    "surname": client.surname,
+                    "address": client.address,
+                    "city": client.city,
+                    "postal_code": client.postal_code,
+                    "dni": client.dni,
+                    "phone_number": client.phone_number,
+                    "available_credits": client.available_credits
+                },
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "role": user.role,
+                    "image_url": user.image_url
+                } if user else None
+            })
+        
+        return {"clients": clients_list}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
 @app.get("/restaurants/name/{restaurant_name}")
 def get_restaurant_by_name(restaurant_name: str):
     """
@@ -648,6 +671,57 @@ def get_all_restaurants():
                 "category": restaurant.category,
                 "image_url": restaurant.logo_url if restaurant.logo_url else None,
                 "rating": avg_rating
+            })
+        
+        return {"restaurants": restaurants_list}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
+@app.get("/api/restaurants/full_info")
+def get_all_restaurants_full_info():
+    """
+    Obtiene una lista de todos los restaurantes con información completa del usuario y restaurante.
+    """
+    try:
+        from project.db_utils.ratingDAO import ratingDAO
+        
+        restaurant_dao = restaurantDAO()
+        user_dao = userDAO()
+        rating_dao = ratingDAO()
+        
+        restaurants = restaurant_dao.get_all()
+        restaurants_list = []
+        
+        for restaurant in restaurants:
+            # Obtener la información del usuario asociado
+            user = user_dao.get_by_id(restaurant.user_id)
+            
+            # Obtener el rating promedio
+            try:
+                avg_rating = rating_dao.get_average_rating_by_restaurant(restaurant.id)
+            except Exception as rating_error:
+                print(f"Error obteniendo rating para restaurante {restaurant.id}: {rating_error}")
+                avg_rating = 0.0
+            
+            restaurants_list.append({
+                "restaurant": {
+                    "id": restaurant.id,
+                    "user_id": restaurant.user_id,
+                    "name": restaurant.name,
+                    "description": restaurant.description,
+                    "city": restaurant.city,
+                    "address": restaurant.address,
+                    "phone_number": restaurant.phone_number,
+                    "category": restaurant.category,
+                    "image_url": restaurant.logo_url if restaurant.logo_url else None,
+                    "rating": avg_rating
+                },
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "role": user.role,
+                    "image_url": user.image_url
+                } if user else None
             })
         
         return {"restaurants": restaurants_list}
@@ -870,6 +944,26 @@ def get_order_details(order_id: int):
             detail=f"Error obteniendo detalles del pedido: {e}"
         )
     
+@app.get("/api/rating/{client_id}/{restaurant_id}", status_code=200)
+def get_rating_by_client_and_restaurant(client_id: int, restaurant_id: int):
+    """
+    Obtiene la valoración de un cliente específico para un restaurante.
+    """
+    try:
+        rating_dao = ratingDAO()
+        rating = rating_dao.get_by_client_and_restaurant(client_id, restaurant_id)
+        
+        if not rating:
+            return {"rating": None}
+        
+        return {
+            "id": rating.id,
+            "client_id": rating.client_id,
+            "restaurant_id": rating.restaurant_id,
+            "rating": rating.rating
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 # Para ejecutar la app, usa el comando:
 # uvicorn project.src.Backend.application:app --reload
 if __name__ == "__main__":

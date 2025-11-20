@@ -36,7 +36,9 @@ const Login = () => {
       console.log("Login correcto:", data);
 
       // Redirigir según el rol del usuario
-      if (data.role === "Restaurant" || data.role === "restaurant") {
+      if (data.role === "Admin" || data.role === "admin") {
+        navigate("/admin");
+      } else if (data.role === "Restaurant" || data.role === "restaurant") {
         // Si es restaurante, obtenemos todos los restaurantes y buscamos por role_id
         try {
           const restaurantsResponse = await axios.get(`http://127.0.0.1:8000/api/restaurants`);

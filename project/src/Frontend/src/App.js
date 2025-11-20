@@ -12,6 +12,9 @@ import ClientOrders from "./pages/ClientOrders.js";
 import ModDish from "./pages/ModDish.js";
 import EditRestaurant from "./pages/EditRestaurant.js";
 import UserProfile from "./pages/UserProfile.js";
+import AdminDashboard from "./pages/AdminDashboard.js";
+import AdminClientOrders from "./pages/AdminClientOrders.js";
+import AdminRestaurantOrders from "./pages/AdminRestaurantOrders.js";
 import Header from "./components/Header.js";
 import Login from "./pages/Login.js";
 import Register_Client from "./pages/Register_Client.js";
@@ -25,8 +28,8 @@ import "./App.css";
 function AppContent() {
   const location = useLocation();
   useScrollToTop();
-  const noMostrarHeaderEn = ["/inicio-sesion"];
-  const mostrarHeader = !noMostrarHeaderEn.includes(location.pathname);
+  const noMostrarHeaderEn = ["/inicio-sesion", "/admin", "/admin/cliente", "/admin/restaurante"];
+  const mostrarHeader = !noMostrarHeaderEn.some(path => location.pathname.startsWith(path));
 
   return (
     <>
@@ -48,6 +51,9 @@ function AppContent() {
           <Route path="/restaurantPage/:restaurantId/edit" element={<EditRestaurant />} />
           <Route path="/restaurantPage/:restaurantId/:dishName" element={<ModDish />} />
           <Route path="/restaurantPage/:restaurantId/createDish" element={<CreateDish />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/cliente/:clientId/pedidos" element={<AdminClientOrders />} />
+          <Route path="/admin/restaurante/:restaurantId/pedidos" element={<AdminRestaurantOrders />} />
         </Routes>
       </div>
       <Footer />
