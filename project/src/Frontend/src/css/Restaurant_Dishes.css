@@ -285,7 +285,7 @@
   text-align: left;
 }
 
-.dish-price { font-weight: 800; color: #111; }
+.dish-price { font-weight: 400; color: #111; }
 .dish-rating { color: var(--muted); font-size: 0.95rem; }
 .btn.small { padding:6px 8px; font-size:0.9rem; background:#f3f4f6; border-radius:6px; }
 

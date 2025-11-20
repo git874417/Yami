@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRestaurantCache } from "../context/RestaurantCacheContext";
+import LoadingScreen from "../components/LoadingScreen";
 import "../css/ShopPage.css";
 
 const ShopPage = () => {
@@ -120,6 +121,10 @@ const ShopPage = () => {
   };
 
   const filteredRestaurants = getFilteredRestaurants();
+
+  if (loading) {
+    return <LoadingScreen message="Cargando restaurantes..." />;
+  }
 
   return (
     <main className="shop-page">

@@ -37,8 +37,25 @@ const OrderDish = () => {
 
   const [loading, setLoading] = useState(!dishFromState);
   const [error, setError] = useState(null);
+  const [availableCredits, setAvailableCredits] = useState(null);
 
   const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
+
+  // Obtener los créditos disponibles del cliente
+  useEffect(() => {
+    const fetchClientCredits = async () => {
+      const clientId = sessionStorage.getItem("role_id");
+      if (clientId) {
+        try {
+          const response = await axios.get(`${API_BASE}/api/client/${clientId}`);
+          setAvailableCredits(response.data.available_credits);
+        } catch (error) {
+          console.error("Error fetching client credits:", error);
+        }
+      }
+    };
+    fetchClientCredits();
+  }, [API_BASE]);
 
   // Cargar datos del plato desde el backend solo si no vienen del state
   useEffect(() => {
@@ -256,7 +273,7 @@ const OrderDish = () => {
           <p className="dish-description">{orderData.dishDescription}</p>
 
           <div className="dish-credits">
-            <strong>{orderData.credits} Yameats</strong>
+            {orderData.credits} {orderData.credits === 1 ? 'Yameat' : 'Yameats'} {availableCredits !== null && `(${availableCredits} ${availableCredits === 1 ? 'disponible' : 'disponibles'})`}
           </div>
 
           {/* Instrucciones */}

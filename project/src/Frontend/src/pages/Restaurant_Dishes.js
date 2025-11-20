@@ -2,6 +2,7 @@
 import React, {useEffect, useState} from "react";
 import {Link, useParams, useLocation} from "react-router-dom";
 import { useRestaurantCache } from "../context/RestaurantCacheContext";
+import LoadingScreen from "../components/LoadingScreen";
 import "../css/Restaurant_Dishes.css";
 
 const RestaurantDishes = () => {
@@ -200,6 +201,10 @@ const RestaurantDishes = () => {
 
     load();
   }, [restaurantId, API_BASE, getRestaurantsListCache, cacheDishes, getCachedDishes]);
+
+  if (loading) {
+    return <LoadingScreen message="Cargando platos..." />;
+  }
 
   return (
     <main className="restaurant-page">
@@ -417,7 +422,7 @@ const RestaurantDishes = () => {
                       <p className="dish-sub">{d.dish_type || d.subtitle || d.description || ""}</p>
                       <div className="dish-footer">
                         <span className="dish-price">
-                          {d.price ?? (d.credits ? `${d.credits} créditos` : "")}
+                          {d.price ?? (d.credits ? `${d.credits} ${d.credits === 1 ? 'Yameat' : 'Yameats'}` : "")}
                         </span>
                       </div>
                     </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useModal } from "../context/ModalContext";
 import { useRestaurantCache } from "../context/RestaurantCacheContext";
+import LoadingScreen from "../components/LoadingScreen";
 import "../css/RestaurantMain.css";
 
 const RestaurantMain = () => {
@@ -190,6 +191,10 @@ const RestaurantMain = () => {
 
     fetchData();
   }, [restaurantId, API_BASE, getRestaurantData, setRestaurantData]);
+
+  if (loading) {
+    return <LoadingScreen message="Cargando datos del restaurante..." />;
+  }
 
   return (
     <main className="shop-page">

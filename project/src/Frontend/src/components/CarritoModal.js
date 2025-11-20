@@ -180,7 +180,10 @@ const CarritoModal = ({isOpen, onClose, carrito, setCarrito}) => {
                       <button onClick={() => incrementarCantidad(index)}>+</button>
                     </div>
                     <p className="producto-precio">
-                      {(producto.credits || 0) * (producto.cantidad || 1)} Yameats
+                      {(() => {
+                        const totalCredits = (producto.credits || 0) * (producto.cantidad || 1);
+                        return `${totalCredits} ${totalCredits === 1 ? 'Yameat' : 'Yameats'}`;
+                      })()}
                     </p>
                     <button onClick={() => eliminarProducto(index)} className="btn-eliminar">
                       🗑️ Eliminar
@@ -193,7 +196,7 @@ const CarritoModal = ({isOpen, onClose, carrito, setCarrito}) => {
             <div className="carrito-footer">
               <div className="total-section">
                 <span className="total-label">Total:</span>
-                <span className="total-amount">{total} Yameats</span>
+                <span className="total-amount">{total} {total === 1 ? 'Yameat' : 'Yameats'}</span>
               </div>
               <button
                 className="btn-checkout"
