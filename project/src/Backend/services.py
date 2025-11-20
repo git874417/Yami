@@ -125,7 +125,7 @@ def send_order_confirmation_email(recipient_email: str, recipient_name: str, res
             <div class="dish-item">
                 <img src="{image_url}" alt="{dish['dish_name']}">
                 <div class="dish-info">
-                    <strong>{dish['dish_name']}</strong> ({dish['credits']} yameat/s)<br>
+                    <strong>{dish['dish_name']}</strong> ({dish['credits']} Yameat/s)<br>
                     <small>{dish['dish_type']}</small><br>
                     <em>Instrucciones: {dish.get('instructions', 'Ninguna')}</em>
                 </div>
@@ -158,7 +158,7 @@ def send_order_confirmation_email(recipient_email: str, recipient_name: str, res
                     <h3>Resumen de tu pedido:</h3>
                     {dishes_html}
                     <div class="total-cost">
-                        Total: {total_credits} yameat/s
+                        Total: {total_credits} Yameat/s
                     </div>
                     <p>Gracias por confiar en Yami.</p>
                 </div>
