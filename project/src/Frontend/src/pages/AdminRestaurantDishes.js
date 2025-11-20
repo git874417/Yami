@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import "../css/AdminOrders.css";
+import "../css/AdminRestaurantDishes.css";
 
 // Componente memoizado para la tarjeta de plato
 const DishCard = memo(({ dish, onDelete }) => {

@@ -1,0 +1,726 @@
+/* AdminRestaurantDishes.css - Styles for AdminRestaurantDishes component */
+
+.admin-orders-page {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.admin-orders-container {
+  max-width: 1400px;
+  width: 90%;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Header */
+.admin-orders-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.back-button {
+  padding: 10px 20px;
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background: #333;
+  transform: translateX(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.admin-orders-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.orders-count {
+  margin-left: auto;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+/* Error message */
+.error-message {
+  padding: 16px;
+  background: #fee;
+  color: #c33;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Orders list */
+.admin-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-order-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.admin-order-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.admin-order-card-button {
+  width: 100%;
+  padding: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.admin-order-card-button:hover {
+  background: #f9f9f9;
+}
+
+.admin-order-header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-order-info h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+}
+
+.admin-order-restaurant,
+.admin-order-client {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 4px 0;
+}
+
+/* Status badges */
+.order-status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 8px;
+  white-space: nowrap;
+}
+
+.status-encargado {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-en-preparacion {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.status-en-reparto {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-entregado {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* Order summary */
+.admin-order-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  min-width: fit-content;
+}
+
+.admin-order-credits {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ff6b35;
+  margin: 0;
+}
+
+.expand-icon {
+  font-size: 1rem;
+  color: #999;
+  transition: transform 0.2s ease;
+  font-weight: bold;
+}
+
+/* Expanded details */
+.admin-order-details-expanded {
+  padding: 0 16px 16px 16px;
+  border-top: 1px solid #e0e0e0;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 600px;
+  }
+}
+
+.admin-order-details {
+  margin-bottom: 16px;
+  padding: 12px 0;
+  display: grid;
+  gap: 10px;
+}
+
+.admin-order-details p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.admin-order-details strong {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+/* Order items */
+.admin-order-items {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.admin-order-items h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 12px 0;
+}
+
+.admin-order-items ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-dish-item {
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border-left: 3px solid #ff6b35;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-dish-name {
+  font-weight: 700;
+  color: #1a1a1a;
+  font-size: 0.95rem;
+}
+
+.admin-dish-instructions {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
+  padding-left: 8px;
+}
+
+/* Skeleton loading */
+.order-skeleton {
+  padding: 16px 0;
+}
+
+.skeleton-line {
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s infinite;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.skeleton-line-long {
+  width: 100%;
+}
+
+.skeleton-line-medium {
+  width: 80%;
+}
+
+.skeleton-line-short {
+  width: 60%;
+}
+
+.skeleton-dishes {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-dish {
+  height: 48px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeletonLoading 1.5s infinite;
+  border-radius: 6px;
+}
+
+@keyframes skeletonLoading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* No orders message */
+.no-orders-message {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.no-orders-message p {
+  font-size: 1.2rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-orders-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding-bottom: 15px;
+  }
+
+  .admin-orders-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .orders-count {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+
+  .admin-order-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .admin-order-summary {
+    width: 100%;
+    align-items: flex-start;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .admin-order-details {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-orders-list {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-orders-container {
+    padding: 0;
+  }
+
+  .admin-orders-header {
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .back-button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+
+  .admin-order-card {
+    border-radius: 6px;
+  }
+
+  .admin-order-card-button {
+    padding: 12px;
+  }
+
+  .admin-dish-item {
+    padding: 10px;
+    border-left-width: 2px;
+  }
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Dishes Styles */
+.dishes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  contain: layout;
+}
+
+.dish-card {
+  background: white;
+  border-radius: 8px;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  height: auto;
+  min-height: 160px;
+  overflow: visible;
+  width: 100%;
+  contain: layout style paint;
+}
+
+.dish-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.dish-image-container {
+  width: 240px;
+  min-width: 220px;
+  max-width: 240px;
+  height: 220px;
+  overflow: hidden;
+  background: #f5f5f5;
+  flex-shrink: 0;
+}
+
+.dish-right-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dish-top-section {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dish-bottom-section {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 12px;
+  min-height: 68px;
+  gap: 10px;
+}
+
+.dish-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  will-change: transform;
+}
+
+.dish-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  color: #999;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 10px;
+}
+
+.dish-info {
+  flex: 0 0 auto;
+  min-width: 160px;
+  max-width: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.dish-info h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: #1a1a1a;
+  word-break: break-word;
+}
+
+.dish-type {
+  font-size: 0.75rem;
+  color: #999;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dish-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-width: 150px;
+  max-width: 400px;
+}
+
+.dish-details p {
+  font-size: 0.8rem;
+  margin: 0 0 2px 0;
+  color: #666;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.dish-details .allergens {
+  font-size: 0.75rem;
+  margin-top: 2px;
+  color: #888;
+}
+
+.btn-delete {
+  padding: 12px 16px;
+  min-height: 44px;
+  background: #fdd;
+  color: #c33;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-delete:hover {
+  background: #fee;
+  color: #a22;
+  transform: scale(1.02);
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.no-data {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 1rem;
+  color: #999;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+/* Orders Header for both orders and dishes */
+.orders-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  padding: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.btn-back {
+  padding: 10px 20px;
+  background: #1a1a1a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+  background: #333;
+  transform: translateX(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.orders-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+@media (max-width: 768px) {
+  .admin-orders-container {
+    padding: 16px;
+  }
+
+  .dishes-list {
+    gap: 10px;
+  }
+
+  .dish-card {
+    min-height: 140px;
+  }
+
+  .dish-image-container {
+    width: 150px;
+    min-width: 150px;
+    height: 140px;
+  }
+
+  .dish-info {
+    min-width: 120px;
+    max-width: 180px;
+  }
+
+  .dish-info h3 {
+    font-size: 0.95rem;
+  }
+
+  .dish-type {
+    font-size: 0.7rem;
+  }
+
+  .dish-details {
+    min-width: 120px;
+    max-width: 300px;
+  }
+
+  .dish-details p {
+    font-size: 0.75rem;
+  }
+
+  .btn-delete {
+    padding: 12px 16px;
+    min-height: 44px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-orders-container {
+    padding: 12px;
+  }
+
+  .orders-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .orders-header h1 {
+    font-size: 1.4rem;
+  }
+
+  .dish-card {
+    flex-direction: column;
+    min-height: auto;
+    height: auto;
+  }
+
+  .dish-image-container {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    height: 120px;
+  }
+
+  .dish-right-section {
+    flex: 1;
+  }
+
+  .dish-top-section {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dish-info {
+    min-width: auto;
+    max-width: none;
+  }
+
+  .dish-info h3 {
+    font-size: 0.9rem;
+  }
+
+  .dish-type {
+    font-size: 0.65rem;
+  }
+
+  .dish-details {
+    min-width: auto;
+    max-width: none;
+  }
+
+  .dish-details p {
+    font-size: 0.7rem;
+  }
+
+  .dish-bottom-section {
+    min-height: 60px;
+  }
+
+  .btn-delete {
+    padding: 12px 16px;
+    min-height: 44px;
+    font-size: 0.95rem;
+  }
+}

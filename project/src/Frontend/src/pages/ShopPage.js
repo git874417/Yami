@@ -205,16 +205,13 @@ const ShopPage = () => {
           <section className="shop-main">
             {/* Barra de búsqueda y ordenar */}
             <div className="shop-controls">
-              <div className="search-wrapper">
-                <input
-                  type="text"
-                  className="search-input"
-                  placeholder="Buscar"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <button className="search-button">🔍</button>
-              </div>
+              <input
+                type="text"
+                className="shop-search-input"
+                placeholder="Buscar"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
               <button 
                 className={`sort-button rating-button ${sortByRating ? 'active' : ''}`}
                 onClick={() => setSortByRating(!sortByRating)}

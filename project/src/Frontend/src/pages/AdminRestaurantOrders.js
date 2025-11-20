@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import LoadingScreen from "../components/LoadingScreen";
 import Modal from "../components/Modal";
-import "../css/AdminOrders.css";
+import "../css/AdminRestaurantOrders.css";
 
 const AdminRestaurantOrders = () => {
   const { restaurantId } = useParams();
