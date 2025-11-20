@@ -1,3 +1,7 @@
+:root {
+  --cart-accent: #ff6b35;
+}
+
 .shopping-cart-container {
   min-height: calc(100vh - 200px);
   background-color: #f5f5f5;
@@ -25,7 +29,7 @@
   padding: 15px 20px;
   border-radius: 8px;
   margin-bottom: 30px;
-  border-left: 4px solid #ff6b35;
+  border-left: 4px solid var(--cart-accent);
 }
 
 .cart-restaurant h2 {
@@ -233,7 +237,7 @@
 }
 
 .btn-place-order {
-  background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
+  background: var(--cart-accent);
   color: white;
 }
 

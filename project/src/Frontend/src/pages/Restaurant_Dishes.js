@@ -537,14 +537,14 @@ const RestaurantDishes = () => {
                   className="card-link"
                 >
                   <article className="dish-card">
-                    <div
+                    <img
                       className="dish-img"
                       style={{
                         backgroundImage: d.image_url ? `url("${normalizeUrl(d.image_url)}")` : undefined,
                         backgroundSize: "cover",
                         backgroundPosition: "center",
                       }}
-                    />
+                    ></img>
                     <div className="dish-body">
                       <h3 className="dish-title">{d.name}</h3>
                       <p className="dish-sub">{d.dish_type || d.subtitle || d.description || ""}</p>
