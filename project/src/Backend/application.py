@@ -726,7 +726,8 @@ def get_client_orders(client_id: int):
                 "id": order.id,
                 "client_id": order.client_id,
                 "restaurant_id": order.restaurant_id,
-                "order_credits": order.order_credits
+                "order_credits": order.order_credits,
+                "order_status": order.order_status
             })
         
         return {

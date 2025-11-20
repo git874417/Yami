@@ -79,6 +79,14 @@ const Navbar = ({location}) => {
             </Link>
           </li>
 
+          {isLoggedIn && user?.role === "Client" && (
+            <li>
+              <Link to="/mis-pedidos" className="nav-link-servicios">
+                Mis Pedidos
+              </Link>
+            </li>
+          )}
+
           {mostrarLoginButtons && (
             <>
               <li>

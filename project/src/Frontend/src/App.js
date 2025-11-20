@@ -8,6 +8,7 @@ import ShoppingCart from "./pages/ShoppingCart.js";
 import CreateDish from "./pages/CreateDish.js";
 import RestaurantMain from "./pages/RestaurantMain.js";
 import RestaurantOrders from "./pages/RestaurantOrders.js";
+import ClientOrders from "./pages/ClientOrders.js";
 import ModDish from "./pages/ModDish.js";
 import EditRestaurant from "./pages/EditRestaurant.js";
 import UserProfile from "./pages/UserProfile.js";
@@ -39,6 +40,7 @@ function AppContent() {
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/restaurants" element={<ShopPage />} />
           <Route path="/carrito" element={<ShoppingCart />} />
+          <Route path="/mis-pedidos" element={<ClientOrders />} />
           <Route path="/restaurants/:restaurantId/order/:dishName" element={<OrderDish />} />
           <Route path="/restaurants/:restaurantId" element={<RestaurantDishes />} />
           <Route path="/restaurantPage/:restaurantId" element={<RestaurantMain />} />
