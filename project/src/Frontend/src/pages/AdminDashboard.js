@@ -7,9 +7,13 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("clientes"); // "clientes" o "restaurantes"
   const [clientes, setClientes] = useState([]);
   const [restaurantes, setRestaurantes] = useState([]);
+  const [clientesOriginales, setClientesOriginales] = useState([]);
+  const [restaurantesOriginales, setRestaurantesOriginales] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalState, setModalState] = useState({ isOpen: false, title: "", message: "" });
   const [confirmState, setConfirmState] = useState({ isOpen: false, title: "", message: "", onConfirm: null });
+  const [adminName, setAdminName] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
 
@@ -19,6 +23,21 @@ const AdminDashboard = () => {
     if (role !== "Admin" && role !== "admin") {
       navigate("/");
       return;
+    }
+    
+    // Obtener el nombre del admin del email
+    const email = sessionStorage.getItem("email");
+    console.log("Email from sessionStorage:", email);
+    
+    if (email) {
+      // Formato: nombre.apellido@yami.com -> extraer "nombre"
+      const adminNameFromEmail = email.split("@")[0].split(".")[0];
+      const capitalizedName = adminNameFromEmail.charAt(0).toUpperCase() + adminNameFromEmail.slice(1).toLowerCase();
+      console.log("Admin name:", capitalizedName);
+      setAdminName(capitalizedName);
+    } else {
+      console.log("No email found in sessionStorage");
+      setAdminName("Admin");
     }
     
     fetchData();
@@ -34,12 +53,16 @@ const AdminDashboard = () => {
 
       if (clientsRes.ok) {
         const clientsData = await clientsRes.json();
-        setClientes(clientsData.clients || []);
+        const clientsList = clientsData.clients || [];
+        setClientes(clientsList);
+        setClientesOriginales(clientsList);
       }
 
       if (restaurantsRes.ok) {
         const restaurantsData = await restaurantsRes.json();
-        setRestaurantes(restaurantsData.restaurants || []);
+        const restaurantsList = restaurantsData.restaurants || [];
+        setRestaurantes(restaurantsList);
+        setRestaurantesOriginales(restaurantsList);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -50,6 +73,46 @@ const AdminDashboard = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    const search = e.target.value.toLowerCase();
+    setSearchTerm(search);
+
+    if (activeTab === "clientes") {
+      if (!search) {
+        setClientes(clientesOriginales);
+      } else {
+        const filtered = clientesOriginales.filter(
+          (item) =>
+            item.client.name.toLowerCase().includes(search) ||
+            item.client.surname.toLowerCase().includes(search) ||
+            item.user?.email.toLowerCase().includes(search)
+        );
+        setClientes(filtered);
+      }
+    } else {
+      if (!search) {
+        setRestaurantes(restaurantesOriginales);
+      } else {
+        const filtered = restaurantesOriginales.filter(
+          (item) =>
+            item.restaurant.name.toLowerCase().includes(search) ||
+            item.user?.email.toLowerCase().includes(search)
+        );
+        setRestaurantes(filtered);
+      }
+    }
+  };
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSearchTerm("");
+    if (tab === "clientes") {
+      setClientes(clientesOriginales);
+    } else {
+      setRestaurantes(restaurantesOriginales);
     }
   };
 
@@ -174,7 +237,10 @@ const AdminDashboard = () => {
 
       <div className="admin-container">
         <header className="admin-header">
-          <h1>Panel de Administración</h1>
+          <div className="header-content">
+            <h1>Panel de Administración</h1>
+            <p className="welcome-message">Bienvenido, {adminName}</p>
+          </div>
           <button className="btn-logout" onClick={handleLogout}>
             Cerrar Sesión
           </button>
@@ -183,15 +249,15 @@ const AdminDashboard = () => {
         <div className="admin-tabs">
           <button
             className={`tab-button ${activeTab === "clientes" ? "active" : ""}`}
-            onClick={() => setActiveTab("clientes")}
+            onClick={() => handleTabChange("clientes")}
           >
-            Clientes ({clientes.length})
+            Clientes ({clientesOriginales.length})
           </button>
           <button
             className={`tab-button ${activeTab === "restaurantes" ? "active" : ""}`}
-            onClick={() => setActiveTab("restaurantes")}
+            onClick={() => handleTabChange("restaurantes")}
           >
-            Restaurantes ({restaurantes.length})
+            Restaurantes ({restaurantesOriginales.length})
           </button>
         </div>
 
@@ -199,6 +265,13 @@ const AdminDashboard = () => {
           {activeTab === "clientes" && (
             <div className="clients-section">
               <h2>Gestión de Clientes</h2>
+              <input
+                type="text"
+                placeholder="Buscar por nombre o correo electrónico..."
+                className="search-input"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
               {clientes.length === 0 ? (
                 <p className="no-data">No hay clientes registrados</p>
               ) : (
@@ -239,6 +312,13 @@ const AdminDashboard = () => {
           {activeTab === "restaurantes" && (
             <div className="restaurants-section">
               <h2>Gestión de Restaurantes</h2>
+              <input
+                type="text"
+                placeholder="Buscar por nombre o correo electrónico..."
+                className="search-input"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
               {restaurantes.length === 0 ? (
                 <p className="no-data">No hay restaurantes registrados</p>
               ) : (
@@ -261,6 +341,12 @@ const AdminDashboard = () => {
                           onClick={() => navigate(`/admin/restaurante/${item.restaurant.id}/pedidos`)}
                         >
                           Ver Pedidos
+                        </button>
+                        <button
+                          className="btn-view-orders"
+                          onClick={() => navigate(`/admin/restaurante/${item.restaurant.id}/platos`)}
+                        >
+                          Ver Platos
                         </button>
                         <button
                           className="btn-delete"

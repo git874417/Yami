@@ -784,6 +784,7 @@ def get_all_dishes(restaurant_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
 
+
 @app.get("/api/dish/{dish_id}")
 def get_dish_by_id(dish_id: int):
     """

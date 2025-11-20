@@ -15,6 +15,7 @@ import UserProfile from "./pages/UserProfile.js";
 import AdminDashboard from "./pages/AdminDashboard.js";
 import AdminClientOrders from "./pages/AdminClientOrders.js";
 import AdminRestaurantOrders from "./pages/AdminRestaurantOrders.js";
+import AdminRestaurantDishes from "./pages/AdminRestaurantDishes.js";
 import Header from "./components/Header.js";
 import Login from "./pages/Login.js";
 import Register_Client from "./pages/Register_Client.js";
@@ -54,6 +55,7 @@ function AppContent() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/cliente/:clientId/pedidos" element={<AdminClientOrders />} />
           <Route path="/admin/restaurante/:restaurantId/pedidos" element={<AdminRestaurantOrders />} />
+          <Route path="/admin/restaurante/:restaurantId/platos" element={<AdminRestaurantDishes />} />
         </Routes>
       </div>
       <Footer />
