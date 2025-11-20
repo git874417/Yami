@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useRestaurantCache } from "../context/RestaurantCacheContext";
 import "../css/ShopPage.css";
 
 const ShopPage = () => {
@@ -10,6 +11,7 @@ const ShopPage = () => {
   const [sortByRating, setSortByRating] = useState(false);
   const navigate = useNavigate();
   const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
+  const { getRestaurantsListCache, setRestaurantsListCache } = useRestaurantCache();
 
   // Filtros de tipo de comida
   const [filterTipoComida, setFilterTipoComida] = useState({
@@ -23,6 +25,14 @@ const ShopPage = () => {
   });
 
   const fetchRestaurantes = async () => {
+    // Verificar si tenemos datos en caché
+    const cachedRestaurants = getRestaurantsListCache();
+    if (cachedRestaurants && cachedRestaurants.length > 0) {
+      setRestaurantes(cachedRestaurants);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -31,7 +41,10 @@ const ShopPage = () => {
         throw new Error(`Error: ${response.status}`);
       }
       const data = await response.json();
-      setRestaurantes(data.restaurants || []);
+      const restaurants = data.restaurants || [];
+      setRestaurantes(restaurants);
+      // Cachear la lista de restaurantes
+      setRestaurantsListCache(restaurants);
     } catch (err) {
       console.error("Error fetching restaurants:", err);
       setError(err.message);

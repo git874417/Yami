@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useModal } from "../context/ModalContext";
-import "../css/ShopPage.css";
+import { useRestaurantCache } from "../context/RestaurantCacheContext";
+import "../css/RestaurantMain.css";
 
 const RestaurantMain = () => {
   const { restaurantId } = useParams();
   const { showModal, hideModal } = useModal();
+  const { getRestaurantData, setRestaurantData } = useRestaurantCache();
   const [restaurant, setRestaurant] = useState(null);
   const [dishes, setDishes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +22,7 @@ const RestaurantMain = () => {
     entrante: false,
     principal: false,
     postre: false,
+    bebida: false,
   });
 
   const normalizeUrl = (url) => {
@@ -35,25 +38,46 @@ const RestaurantMain = () => {
     entrante: ["entrante", "entrada", "starter", "aperitivo", "appetizer"],
     principal: ["principal", "main", "plato principal", "segundo"],
     postre: ["postre", "dessert", "dulce"],
+    bebida: ["bebida", "drink", "beverage", "refresco", "drink"]
   };
 
   // Función para filtrar platos
   const getFilteredDishes = () => {
-    return dishes.filter((dish) => {
-      // Filtro de tipo de plato
-      const activeDishTypes = Object.keys(filterPlato).filter((key) => filterPlato[key]);
+    // Copia de la lista
+    let results = Array.isArray(dishes) ? [...dishes] : [];
 
-      // Si ninguno está activo, no filtrar por tipo (mostrar todos)
-      const dishTypeMatch =
-        activeDishTypes.length === 0 ||
-        activeDishTypes.some((filterKey) => {
+    // 1) Filtrar por tipo si hay filtros activos
+    const activeDishTypes = Object.keys(filterPlato).filter((key) => filterPlato[key]);
+    if (activeDishTypes.length > 0) {
+      results = results.filter((dish) => {
+        const dishType = (dish.dish_type || "").toLowerCase();
+        return activeDishTypes.some((filterKey) => {
           const typeVariants = dishTypeMapping[filterKey] || [];
-          const dishType = (dish.dish_type || "").toLowerCase();
           return typeVariants.some((variant) => dishType.includes(variant.toLowerCase()));
         });
+      });
+    }
 
-      return dishTypeMatch;
-    });
+    // 2) Filtrar por término de búsqueda
+    if (searchTerm && searchTerm.trim() !== "") {
+      const q = searchTerm.trim().toLowerCase();
+      results = results.filter((dish) => {
+        return (
+          (dish.name || "").toLowerCase().includes(q) ||
+          (dish.description || "").toLowerCase().includes(q) ||
+          (dish.dish_type || "").toLowerCase().includes(q)
+        );
+      });
+    }
+
+    // 3) Ordenar según la opción seleccionada
+    if (sortOption === "rating_desc") {
+      results.sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
+    } else if (sortOption === "rating_asc") {
+      results.sort((a, b) => (Number(a.rating) || 0) - (Number(b.rating) || 0));
+    }
+
+    return results;
   };
 
   const filteredDishes = getFilteredDishes();
@@ -111,9 +135,28 @@ const RestaurantMain = () => {
     });
   };
 
+  // Toggle type filter (entrante/principal/postre/bebida)
+  const handleToggleFilter = (type) => {
+    setFilterPlato((prev) => ({ ...prev, [type]: !prev[type] }));
+  };
+
+  // Toggle sort by rating (desc). Re-click to disable.
+  const handleSortByRating = () => {
+    setSortOption((prev) => (prev === "rating_desc" ? "newest" : "rating_desc"));
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       if (!restaurantId) return;
+      
+      // Intentar obtener datos del caché
+      const cachedData = getRestaurantData(restaurantId);
+      if (cachedData.restaurant && cachedData.dishes) {
+        setRestaurant(cachedData.restaurant);
+        setDishes(Array.isArray(cachedData.dishes) ? cachedData.dishes : []);
+        setLoading(false);
+        return;
+      }
       
       setLoading(true);
       setError(null);
@@ -134,6 +177,9 @@ const RestaurantMain = () => {
 
         setRestaurant(restaurantData);
         setDishes(Array.isArray(dishesData) ? dishesData : []);
+        
+        // Guardar en caché
+        setRestaurantData(restaurantId, restaurantData, dishesData);
       } catch (err) {
         console.error('Error:', err);
         setError(err.message);
@@ -143,7 +189,7 @@ const RestaurantMain = () => {
     };
 
     fetchData();
-  }, [restaurantId, API_BASE]);
+  }, [restaurantId, API_BASE, getRestaurantData, setRestaurantData]);
 
   return (
     <main className="shop-page">
@@ -158,8 +204,8 @@ const RestaurantMain = () => {
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant?.name || "R")}`;
-                }}
-              />
+                  }}
+                />
             ) : (
               <img
                 src={`https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant?.name || "R")}`}
@@ -216,6 +262,32 @@ const RestaurantMain = () => {
             <p style={{ fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
               {restaurant?.description || "Descripción"}
             </p>
+            
+            <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #e0e0e0' }}>
+              <button
+                onClick={() => navigate(`/restaurantPage/${encodeURIComponent(restaurantId)}/orders`)}
+                style={{
+                  width: '100%',
+                  padding: '10px 16px',
+                  background: '#1a1a1a',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                  fontWeight: '500',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#333';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#1a1a1a';
+                }}
+              >
+                📋 Pedidos
+              </button>
+            </div>
           </aside>
 
           {/* Contenido principal */}
@@ -233,10 +305,36 @@ const RestaurantMain = () => {
                 <button className="search-button">🔍</button>
               </div>
 
-              <button className="sort-button active">✓ Nuevo</button>
-              <button className="sort-button">Precio ascendente</button>
-              <button className="sort-button">Precio descendente</button>
-              <button className="sort-button rating-button">⭐ Valoración</button>
+              <button 
+                className={`sort-button rating-button ${sortOption === "rating_desc" ? "active" : ""}`}
+                onClick={handleSortByRating}
+              >
+                Mayor Valoración
+              </button>
+              <button 
+                className={`sort-button ${filterPlato.entrante ? "active" : ""}`}
+                onClick={() => handleToggleFilter("entrante")}
+              >
+                Entrante
+              </button>
+              <button 
+                className={`sort-button ${filterPlato.principal ? "active" : ""}`}
+                onClick={() => handleToggleFilter("principal")}
+              >
+                Principal
+              </button>
+              <button 
+                className={`sort-button ${filterPlato.postre ? "active" : ""}`}
+                onClick={() => handleToggleFilter("postre")}
+              >
+                Postre
+              </button>
+              <button 
+                className={`sort-button ${filterPlato.bebida ? "active" : ""}`}
+                onClick={() => handleToggleFilter("bebida")}
+              >
+                Bebida
+              </button>
             </div>
 
             {/* Mensajes de estado */}
@@ -277,7 +375,6 @@ const RestaurantMain = () => {
                         <span className="star">⭐</span>
                         <span className="rating-value">{dish.rating || "5"}</span>
                       </div>
-                      <p className="restaurant-label">{dish.dish_type || "Nombre del plato"}</p>
                       <h3 className="restaurant-name">{dish.name}</h3>
                       <p className="restaurant-category">{dish.dish_type || "Tipo de plato"}</p>
                       <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
@@ -286,15 +383,7 @@ const RestaurantMain = () => {
                             e.stopPropagation();
                             handleEditDish(dish);
                           }}
-                          style={{
-                            padding: '6px 12px',
-                            background: '#ff6b35',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '0.85rem'
-                          }}
+                          className="button-edit"
                         >
                           Editar
                         </button>
@@ -303,17 +392,9 @@ const RestaurantMain = () => {
                             e.stopPropagation();
                             handleDeleteDish(dish.id);
                           }}
-                          style={{
-                            padding: '6px 12px',
-                            background: 'transparent',
-                            color: '#333',
-                            border: '1px solid #ddd',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '1.2rem'
-                          }}
+                          className="button-delete"
                         >
-                          🗑️
+                          Borrar
                         </button>
                       </div>
                     </div>

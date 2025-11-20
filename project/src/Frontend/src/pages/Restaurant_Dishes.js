@@ -1,6 +1,7 @@
 // ...existing code...
 import React, {useEffect, useState} from "react";
 import {Link, useParams, useLocation} from "react-router-dom";
+import { useRestaurantCache } from "../context/RestaurantCacheContext";
 import "../css/Restaurant_Dishes.css";
 
 const RestaurantDishes = () => {
@@ -11,6 +12,7 @@ const RestaurantDishes = () => {
   const [loading, setLoading] = useState(!location.state?.restaurant);
   const [error, setError] = useState(null);
   const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
+  const { getRestaurantsListCache, cacheDishes, getCachedDishes } = useRestaurantCache();
 
   // Filtros de tipo de plato
   const [filterPlato, setFilterPlato] = useState({
@@ -34,6 +36,9 @@ const RestaurantDishes = () => {
     dioxidoAzufre: false,
     crustaceos: false,
   });
+
+  // Búsqueda de platos
+  const [searchTerm, setSearchTerm] = useState("");
 
   const normalizeUrl = (u) => {
     if (!u) return u;
@@ -73,6 +78,15 @@ const RestaurantDishes = () => {
   // Función para filtrar platos
   const getFilteredDishes = () => {
     return dishes.filter((dish) => {
+      // Filtro de búsqueda
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = !searchTerm || 
+        (dish.name || "").toLowerCase().includes(searchLower) ||
+        (dish.description || "").toLowerCase().includes(searchLower) ||
+        (dish.dish_type || "").toLowerCase().includes(searchLower);
+
+      if (!matchesSearch) return false;
+
       // Filtro de tipo de plato
       const activeDishTypes = Object.keys(filterPlato).filter((key) => filterPlato[key]);
 
@@ -128,38 +142,52 @@ const RestaurantDishes = () => {
 
     async function load() {
       setError(null);
-      setLoading(true);
+      
       try {
         const encodedName = encodeURIComponent(restaurantId);
 
-        // Si ya tenemos los datos del restaurante del state, solo cargamos los platos
-        if (location.state?.restaurant) {
-          console.log("Using restaurant data from state:", location.state.restaurant);
-          const dRes = await fetch(`${API_BASE}/restaurants/name/${encodedName}/dishes`);
-          if (!dRes.ok) throw new Error(`Error fetching dishes: ${dRes.status}`);
-          const dJson = await dRes.json();
-          console.log("Dishes from API:", dJson);
-          setDishes(Array.isArray(dJson) ? dJson : []);
-        } else {
-          // Si no tenemos los datos, cargamos todo usando el endpoint por nombre
-          console.log("Fetching all data for restaurant:", restaurantId);
-          const [rRes, dRes] = await Promise.all([
-            fetch(`${API_BASE}/restaurants/name/${encodedName}`),
-            fetch(`${API_BASE}/restaurants/name/${encodedName}/dishes`),
-          ]);
+        // Intentar obtener restaurante del state o caché
+        let restaurantData = location.state?.restaurant;
+        
+        if (!restaurantData) {
+          const cachedRestaurants = getRestaurantsListCache();
+          if (cachedRestaurants && cachedRestaurants.length > 0) {
+            restaurantData = cachedRestaurants.find(r => r.name === restaurantId);
+            if (restaurantData) {
+              console.log("Using restaurant data from cache:", restaurantData);
+              setRestaurant(restaurantData);
+            }
+          }
 
-          if (!rRes.ok) throw new Error(`Error fetching restaurant: ${rRes.status}`);
-          if (!dRes.ok) throw new Error(`Error fetching dishes: ${dRes.status}`);
-
-          const rJson = await rRes.json();
-          const dJson = await dRes.json();
-
-          console.log("Restaurant from API:", rJson);
-          console.log("Dishes from API:", dJson);
-
-          setRestaurant(rJson);
-          setDishes(Array.isArray(dJson) ? dJson : []);
+          if (!restaurantData) {
+            console.log("Fetching restaurant from API:", restaurantId);
+            const rRes = await fetch(`${API_BASE}/restaurants/name/${encodedName}`);
+            if (!rRes.ok) throw new Error(`Error fetching restaurant: ${rRes.status}`);
+            const rJson = await rRes.json();
+            console.log("Restaurant from API:", rJson);
+            setRestaurant(rJson);
+          }
         }
+
+        // Intentar obtener platos del caché
+        const cachedDishes = getCachedDishes(restaurantId);
+        if (cachedDishes && cachedDishes.length > 0) {
+          console.log("Using dishes from cache:", cachedDishes);
+          setDishes(cachedDishes);
+          setLoading(false);
+          return;
+        }
+
+        // Si no están en caché, cargar del API
+        setLoading(true);
+        const dRes = await fetch(`${API_BASE}/restaurants/name/${encodedName}/dishes`);
+        if (!dRes.ok) throw new Error(`Error fetching dishes: ${dRes.status}`);
+        const dJson = await dRes.json();
+        console.log("Dishes from API:", dJson);
+        const dishesArray = Array.isArray(dJson) ? dJson : [];
+        setDishes(dishesArray);
+        // Cachear los platos
+        cacheDishes(restaurantId, dishesArray);
 
         console.log("Dishes loaded successfully");
       } catch (err) {
@@ -171,7 +199,7 @@ const RestaurantDishes = () => {
     }
 
     load();
-  }, [restaurantId, API_BASE]);
+  }, [restaurantId, API_BASE, getRestaurantsListCache, cacheDishes, getCachedDishes]);
 
   return (
     <main className="restaurant-page">
@@ -312,7 +340,6 @@ const RestaurantDishes = () => {
         </aside>
 
         <section className="content">
-          {loading && <p>Loading...</p>}
           {error && <p style={{color: "crimson"}}>Error: {error}</p>}
           <header className="restaurant-header">
             <div className="header-left">
@@ -352,22 +379,21 @@ const RestaurantDishes = () => {
           </header>
 
           <div className="controls">
-            <input className="search" placeholder="Buscar plato..." />
-            <select className="filter">
-              <option>Todos</option>
-              <option>Entrantes</option>
-              <option>Platos principales</option>
-              <option>Postres</option>
-            </select>
-            <button className="btn btn-outline">Ordenar</button>
+            <input 
+              className="search" 
+              placeholder="Buscar plato..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
 
           <div className="dishes-list">
-            {dishes.length === 0 && !loading && <p>No hay platos para este restaurante.</p>}
-            {dishes.length > 0 && filteredDishes.length === 0 && !loading && (
+            {loading && <p>Cargando platos...</p>}
+            {!loading && dishes.length === 0 && <p>No hay platos para este restaurante.</p>}
+            {!loading && dishes.length > 0 && filteredDishes.length === 0 && (
               <p className="no-results">No hay platos que coincidan con los filtros seleccionados.</p>
             )}
-            {filteredDishes.length > 0 &&
+            {!loading && filteredDishes.length > 0 &&
               filteredDishes.map((d) => (
                 <Link
                   key={d.id}

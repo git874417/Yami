@@ -3,10 +3,15 @@
   --azul-yami: #0f4c75;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 #root {
   max-width: 1280px auto;
   padding: 0rem;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 body {
@@ -14,6 +19,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 .main-page {
@@ -21,4 +27,5 @@ body {
   display: flex;
   flex-direction: column;
   flex: 1;
+  overflow-x: hidden;
 }

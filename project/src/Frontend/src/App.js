@@ -6,6 +6,7 @@ import RestaurantDishes from "./pages/Restaurant_Dishes.js";
 import ShopPage from "./pages/ShopPage.js";
 import CreateDish from "./pages/CreateDish.js";
 import RestaurantMain from "./pages/RestaurantMain.js";
+import RestaurantOrders from "./pages/RestaurantOrders.js";
 import ModDish from "./pages/ModDish.js";
 import EditRestaurant from "./pages/EditRestaurant.js";
 import UserProfile from "./pages/UserProfile.js";
@@ -15,10 +16,13 @@ import Register_Client from "./pages/Register_Client.js";
 import Register_Restaurant from "./pages/Register_Restaurant.js";
 import Footer from "./components/Footer.js";
 import { ModalProvider } from "./context/ModalContext";
+import { RestaurantCacheProvider } from "./context/RestaurantCacheContext";
+import { useScrollToTop } from "./hooks/useScrollToTop.js";
 import "./App.css";
 
 function AppContent() {
   const location = useLocation();
+  useScrollToTop();
   const noMostrarHeaderEn = ["/inicio-sesion", "/registro"];
   const mostrarHeader = !noMostrarHeaderEn.includes(location.pathname);
 
@@ -36,6 +40,7 @@ function AppContent() {
           <Route path="/restaurants/:restaurantId/order/:dishName" element={<OrderDish />} />
           <Route path="/restaurants/:restaurantId" element={<RestaurantDishes />} />
           <Route path="/restaurantPage/:restaurantId" element={<RestaurantMain />} />
+          <Route path="/restaurantPage/:restaurantId/orders" element={<RestaurantOrders />} />
           <Route path="/restaurantPage/:restaurantId/edit" element={<EditRestaurant />} />
           <Route path="/restaurantPage/:restaurantId/:dishName" element={<ModDish />} />
           <Route path="/restaurantPage/:restaurantId/createDish" element={<CreateDish />} />
@@ -50,9 +55,11 @@ function App() {
   return (
     <Router>
       <ModalProvider>
-        <div className="App">
-          <AppContent />
-        </div>
+        <RestaurantCacheProvider>
+          <div className="App">
+            <AppContent />
+          </div>
+        </RestaurantCacheProvider>
       </ModalProvider>
     </Router>
   );
