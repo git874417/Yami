@@ -22,13 +22,34 @@
   gap: 1rem;
 }
 
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.logo-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  transition: all 0.3s ease;
+}
+
+.logo-button:hover .logo-img {
+  transform: scale(1.08);
+}
+
 .logo {
   display: flex;
   align-items: center;
   gap: 1rem;
   text-decoration: none;
   color: inherit;
-  justify-content: flex-start;
 }
 
 .logo h1 {
@@ -37,6 +58,12 @@
   color: var(--accent);
   margin: 0;
   letter-spacing: -0.5px;
+  transition: color 0.2s ease, font-size 0.2s ease;
+}
+
+.logo-button:hover .logo h1 {
+  color: var(--accent-hover);
+  font-size: 1.95rem;
 }
 
 .logo-img {
@@ -44,11 +71,7 @@
   height: 70px;
   object-fit: contain;
   border-radius: 8px;
-  transition: transform 0.2s;
-}
-
-.logo-img:hover {
-  transform: scale(1.05);
+  transition: transform 0.2s ease;
 }
 
 .header-spacer {
@@ -73,8 +96,23 @@
     padding: 1rem;
   }
 
+  .header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .logo-button {
+    width: 100%;
+  }
+
   .logo h1 {
     font-size: 1.5rem;
+    transition: color 0.2s ease, font-size 0.2s ease;
+  }
+
+  .logo-button:hover .logo h1 {
+    font-size: 1.65rem;
   }
 
   .logo-img {

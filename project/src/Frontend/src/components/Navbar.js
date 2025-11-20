@@ -4,9 +4,10 @@ import React, {useState, useEffect} from "react";
 import "./../css/Navbar.css";
 import {Link, useNavigate} from "react-router-dom";
 
-const Navbar = ({onCarritoClick, carritoCount = 0, location}) => {
+const Navbar = ({location}) => {
   const [user, setUser] = useState(null);
   const [profilePicture, setProfilePicture] = useState(null);
+  const [cartCount, setCartCount] = useState(0);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -18,6 +19,27 @@ const Navbar = ({onCarritoClick, carritoCount = 0, location}) => {
       setUser({ id: userId, role });
       setProfilePicture(profilePic);
     }
+
+    // Cargar contador del carrito
+    const updateCartCount = () => {
+      const carrito = sessionStorage.getItem("carrito");
+      if (carrito) {
+        try {
+          const carritoObj = JSON.parse(carrito);
+          setCartCount(carritoObj.dishes?.length || 0);
+        } catch (error) {
+          setCartCount(0);
+        }
+      } else {
+        setCartCount(0);
+      }
+    };
+
+    updateCartCount();
+
+    // Escuchar cambios en el carrito
+    window.addEventListener("carritoActualizado", updateCartCount);
+    return () => window.removeEventListener("carritoActualizado", updateCartCount);
   }, []);
 
   const handleLogout = () => {
@@ -30,11 +52,16 @@ const Navbar = ({onCarritoClick, carritoCount = 0, location}) => {
     navigate("/");
   };
 
-  const pathname = location?.pathname || "/"; // Obtenemos la ruta actual
-  const isLoggedIn = !!user; // Convertimos 'user' a booleano (true si existe, false si es null)
-  const mostrarCarrito = isLoggedIn && pathname.startsWith("/restaurants/");
+  const pathname = location?.pathname || "/";
+  const isLoggedIn = !!user;
+  const inRestaurant = isLoggedIn && pathname.includes("/restaurants/");
+  const mostrarCarrito = inRestaurant && !pathname.includes("/restaurantPage/");
 
-  const mostrarLoginButtons = !isLoggedIn && pathname === "/"; //solo en home
+  const mostrarLoginButtons = !isLoggedIn && pathname === "/";
+  
+  const handleCarritoClick = () => {
+    navigate("/carrito");
+  };
 
   return (
     <nav className="navbar">
@@ -69,10 +96,9 @@ const Navbar = ({onCarritoClick, carritoCount = 0, location}) => {
   
           {mostrarCarrito && (
             <li>
-              <button onClick={onCarritoClick} className="navbar-button carrito-button">
+              <button onClick={handleCarritoClick} className="navbar-button carrito-button">
                 🛒
-                <i className="fas fa-shopping-cart"></i>
-                {carritoCount > 0 && <span className="cart-count">{carritoCount}</span>}
+                <span className="cart-count">{cartCount}</span>
               </button>
             </li>
           )}

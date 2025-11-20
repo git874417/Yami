@@ -44,6 +44,13 @@
   color: #1a1a1a;
 }
 
+.orders-count {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+  margin-left: auto;
+}
+
 /* Controls */
 .orders-controls {
   display: flex;
@@ -111,7 +118,7 @@
 .order-card {
   background: white;
   border-radius: 8px;
-  padding: 20px;
+  overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
 }
@@ -120,13 +127,25 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.order-card-button {
+  background: none;
+  border: none;
+  width: 100%;
+  padding: 20px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.order-card-button:hover {
+  background: #f9f9f9;
+}
+
 .order-header-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 16px;
+  gap: 16px;
 }
 
 .order-info h3 {
@@ -136,30 +155,49 @@
   color: #1a1a1a;
 }
 
-.order-date {
+.order-client {
   font-size: 0.85rem;
   color: #666;
   margin: 0;
 }
 
-.order-status {
-  padding: 6px 12px;
-  border-radius: 20px;
-  color: white;
-  font-size: 0.85rem;
+.order-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.order-credits {
+  font-size: 1rem;
   font-weight: 600;
-  text-transform: capitalize;
+  color: #ff6b35;
+  margin: 0;
+}
+
+.expand-icon {
+  font-size: 0.8rem;
+  color: #999;
+  transition: all 0.2s ease;
+}
+
+.order-details-expanded {
+  padding: 0 20px 20px 20px;
+  border-top: 1px solid #eee;
 }
 
 /* Order details */
 .order-details {
   margin-bottom: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
 }
 
 .order-details p {
-  margin: 8px 0;
-  font-size: 0.95rem;
+  margin: 0;
+  font-size: 0.9rem;
   color: #333;
+  padding: 8px 0;
 }
 
 .order-details strong {
@@ -186,15 +224,27 @@
   margin: 0;
 }
 
-.order-items li {
-  padding: 6px 0;
-  font-size: 0.9rem;
-  color: #555;
-  border-bottom: 1px solid #f5f5f5;
+.dish-item {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: #f9f9f9;
+  border-left: 3px solid #ff6b35;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.order-items li:last-child {
-  border-bottom: none;
+.dish-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.dish-instructions {
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
 }
 
 /* Responsive */
