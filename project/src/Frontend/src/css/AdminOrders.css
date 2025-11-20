@@ -403,6 +403,7 @@
   flex-direction: column;
   gap: 12px;
   margin-top: 20px;
+  contain: layout;
 }
 
 .dish-card {
@@ -418,6 +419,7 @@
   min-height: 160px;
   overflow: visible;
   width: 100%;
+  contain: layout style paint;
 }
 
 .dish-card:hover {
@@ -464,6 +466,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+  will-change: transform;
 }
 
 .dish-image-placeholder {

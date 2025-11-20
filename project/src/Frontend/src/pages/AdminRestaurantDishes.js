@@ -1,6 +1,72 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../css/AdminOrders.css";
+
+// Componente memoizado para la tarjeta de plato
+const DishCard = memo(({ dish, onDelete }) => {
+  const [imageSrc, setImageSrc] = useState(null);
+  const [imageRef, setImageRef] = useState(null);
+
+  // Intersection Observer para lazy loading
+  useEffect(() => {
+    if (!imageRef || !dish.image_url) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setImageSrc(dish.image_url);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: "50px" } // Cargar 50px antes de entrar al viewport
+    );
+
+    observer.observe(imageRef);
+    return () => observer.disconnect();
+  }, [imageRef, dish.image_url]);
+
+  return (
+    <div className="dish-card">
+      <div className="dish-image-container">
+        {dish.image_url ? (
+          <img
+            ref={setImageRef}
+            src={imageSrc || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Crect fill='%23f5f5f5' width='100%25' height='100%25'/%3E%3C/svg%3E"}
+            alt={dish.name}
+            className="dish-image"
+            loading="lazy"
+          />
+        ) : (
+          <div className="dish-image-placeholder">Sin imagen</div>
+        )}
+      </div>
+      <div className="dish-right-section">
+        <div className="dish-top-section">
+          <div className="dish-info">
+            <h3>{dish.name}</h3>
+            <p className="dish-type">{dish.dish_type}</p>
+          </div>
+          <div className="dish-details">
+            <p>{dish.description}</p>
+            <p className="allergens"><strong>Alérgenos:</strong> {dish.allergens || "Ninguno"}</p>
+          </div>
+        </div>
+        <div className="dish-bottom-section">
+          <button
+            className="btn-delete"
+            onClick={() => onDelete(dish.id, dish.name)}
+          >
+            Eliminar Plato
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+DishCard.displayName = "DishCard";
 
 const AdminRestaurantDishes = () => {
   const { restaurantId } = useParams();
@@ -42,14 +108,14 @@ const AdminRestaurantDishes = () => {
     }
   };
 
-  const handleDeleteDish = (dishId, dishName) => {
+  const handleDeleteDish = useCallback((dishId, dishName) => {
     setConfirmState({
       isOpen: true,
       title: "Confirmar eliminación",
       message: `¿Estás seguro de que deseas eliminar el plato "${dishName}"?`,
       onConfirm: () => confirmDeleteDish(dishId)
     });
-  };
+  }, []);
 
   const confirmDeleteDish = async (dishId) => {
     try {
@@ -150,35 +216,11 @@ const AdminRestaurantDishes = () => {
       ) : (
         <div className="dishes-list">
           {dishes.map((dish) => (
-            <div key={dish.id} className="dish-card">
-              <div className="dish-image-container">
-                {dish.image_url ? (
-                  <img src={dish.image_url} alt={dish.name} className="dish-image" />
-                ) : (
-                  <div className="dish-image-placeholder">Sin imagen</div>
-                )}
-              </div>
-              <div className="dish-right-section">
-                <div className="dish-top-section">
-                  <div className="dish-info">
-                    <h3>{dish.name}</h3>
-                    <p className="dish-type">{dish.dish_type}</p>
-                  </div>
-                  <div className="dish-details">
-                    <p>{dish.description}</p>
-                    <p className="allergens"><strong>Alérgenos:</strong> {dish.allergens || "Ninguno"}</p>
-                  </div>
-                </div>
-                <div className="dish-bottom-section">
-                  <button
-                    className="btn-delete"
-                    onClick={() => handleDeleteDish(dish.id, dish.name)}
-                  >
-                    Eliminar Plato
-                  </button>
-                </div>
-              </div>
-            </div>
+            <DishCard 
+              key={dish.id} 
+              dish={dish}
+              onDelete={handleDeleteDish}
+            />
           ))}
         </div>
       )}
