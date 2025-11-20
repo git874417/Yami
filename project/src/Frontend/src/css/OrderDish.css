@@ -42,7 +42,7 @@
 }
 
 /* Imagen del plato */
-.dish-image-container {
+.order-dish-container .dish-image-container {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,6 +50,10 @@
   border-radius: 12px;
   overflow: hidden;
   max-height: 500px;
+  width: auto !important;
+  min-width: auto !important;
+  max-width: none !important;
+  height: auto !important;
 }
 
 .dish-image {

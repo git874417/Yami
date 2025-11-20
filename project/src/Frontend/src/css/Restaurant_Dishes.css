@@ -232,6 +232,19 @@
   box-shadow: 0 10px 28px rgba(0,0,0,0.12);
 }
 
+.card-link .dish-card {
+  display: flex;
+  flex-direction: column !important;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  will-change: box-shadow;
+  contain: layout style paint;
+  height: 100%;
+  width: 100%;
+}
+
 .dish-card {
   display: flex;
   flex-direction: column;
