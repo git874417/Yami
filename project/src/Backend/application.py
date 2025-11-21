@@ -53,13 +53,28 @@ def login_endpoint(form_data: UserLogin):
     try:
         user_dao = userDAO()
         
-        user = user_dao.get_by_email(form_data.email)
+        try:
+            user = user_dao.get_by_email(form_data.email)
+        except Exception as e:
+            # Si hay error al buscar el usuario (como PGRST116), significa que no existe
+            error_str = str(e)
+            if "PGRST116" in error_str or "0 rows" in error_str or "single" in error_str.lower():
+                raise HTTPException(
+                    status_code=404,
+                    detail="No existe un usuario con ese correo"
+                )
+            raise
         
+        if not user:
+            raise HTTPException(
+                status_code=404,
+                detail="No existe un usuario con ese correo"
+            )
         
-        if not user or not services.verify_password(form_data.password, user.password):
+        if not services.verify_password(form_data.password, user.password):
             raise HTTPException(
                 status_code=401,
-                detail="Email o contraseña incorrectos",
+                detail="La contraseña es incorrecta",
                 headers={"WWW-Authenticate": "Bearer"},
             )
             

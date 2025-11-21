@@ -3,11 +3,13 @@ import axios from "axios";
 import {Link, useNavigate} from "react-router-dom";
 import "./../css/Login.css";
 import ShopPage from "./ShopPage";
+import LoadingScreen from "../components/LoadingScreen";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mensaje, setMensaje] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -17,6 +19,9 @@ const Login = () => {
       setMensaje("Por favor, completa todos los campos");
       return;
     }
+
+    setIsLoading(true);
+    setMensaje("");
 
     try {
       //Data es un mensaje de tipo:
@@ -61,12 +66,20 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Error en el login", error);
-      setMensaje("No se pudo hacer login");
+      // Capturar el mensaje específico del backend
+      if (error.response?.data?.detail) {
+        setMensaje(error.response.data.detail);
+      } else {
+        setMensaje("No se pudo hacer login");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <body>
+      {isLoading && <LoadingScreen />}
       <div className="login-container">
         <h2>¡Bienvenido de vuelta!</h2>
         <form onSubmit={handleLogin}>
