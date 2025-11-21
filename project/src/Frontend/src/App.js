@@ -16,6 +16,7 @@ import AdminDashboard from "./pages/AdminDashboard.js";
 import AdminClientOrders from "./pages/AdminClientOrders.js";
 import AdminRestaurantOrders from "./pages/AdminRestaurantOrders.js";
 import AdminRestaurantDishes from "./pages/AdminRestaurantDishes.js";
+import AdminStats from "./pages/AdminStats.js";
 import Header from "./components/Header.js";
 import Login from "./pages/Login.js";
 import Register_Client from "./pages/Register_Client.js";
@@ -53,6 +54,7 @@ function AppContent() {
           <Route path="/restaurantPage/:restaurantId/:dishName" element={<ModDish />} />
           <Route path="/restaurantPage/:restaurantId/createDish" element={<CreateDish />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/estadisticas" element={<AdminStats />} />
           <Route path="/admin/cliente/:clientId/pedidos" element={<AdminClientOrders />} />
           <Route path="/admin/restaurante/:restaurantId/pedidos" element={<AdminRestaurantOrders />} />
           <Route path="/admin/restaurante/:restaurantId/platos" element={<AdminRestaurantDishes />} />

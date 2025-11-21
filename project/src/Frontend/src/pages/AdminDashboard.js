@@ -302,6 +302,12 @@ const AdminDashboard = () => {
           >
             Restaurantes ({restaurantesOriginales.length})
           </button>
+          <button
+            className={`tab-button ${activeTab === "estadisticas" ? "active" : ""}`}
+            onClick={() => navigate("/admin/estadisticas")}
+          >
+            📊 Estadísticas
+          </button>
         </div>
 
         <div className="admin-content">

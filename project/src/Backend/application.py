@@ -980,6 +980,120 @@ def get_rating_by_client_and_restaurant(client_id: int, restaurant_id: int):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {e}")
+
+@app.get("/api/admin/stats", status_code=200)
+def get_admin_stats():
+    """
+    Obtiene estadísticas completas de la plataforma para el panel de administración.
+    Incluye: GMV, tasa de conversión, top restaurantes, estado de pedidos, ticket medio.
+    """
+    try:
+        from datetime import datetime, timedelta
+        
+        order_dao = orderDAO()
+        client_dao = clientDAO()
+        restaurant_dao = restaurantDAO()
+        
+        # Obtener todos los pedidos
+        all_orders = order_dao.get_all()
+        
+        # GMV Total (Gross Merchandise Value)
+        total_gmv = sum(order.order_credits for order in all_orders)
+        
+        # GMV Timeline (últimos 30 días)
+        gmv_timeline = []
+        today = datetime.now()
+        for i in range(29, -1, -1):
+            date = today - timedelta(days=i)
+            date_str = date.strftime("%d/%m")
+            # Filtrar pedidos de ese día (simulado, ya que no tenemos timestamps en el modelo)
+            # En producción, deberías filtrar por created_at
+            gmv_timeline.append({
+                "date": date_str,
+                "value": total_gmv / 30  # Simplificación: distribuir uniformemente
+            })
+        
+        # Estado de pedidos
+        completed_orders = sum(1 for order in all_orders if order.order_status == "Entregado")
+        cancelled_orders = sum(1 for order in all_orders if order.order_status == "Cancelado")
+        in_progress_orders = sum(1 for order in all_orders if order.order_status in ["Encargado", "En preparacion", "En reparto"])
+        
+        # Tasa de conversión (pedidos completados / total pedidos)
+        conversion_rate = (completed_orders / len(all_orders) * 100) if len(all_orders) > 0 else 0
+        
+        # Ticket medio (AOV - Average Order Value)
+        average_order_value = total_gmv / len(all_orders) if len(all_orders) > 0 else 0
+        
+        # Funnel de conversión
+        all_clients = client_dao.get_all()
+        total_users = len(all_clients)
+        users_with_orders = len(set(order.client_id for order in all_orders))
+        
+        funnel = {
+            "total_users": total_users,
+            "added_to_cart": users_with_orders,  # Usuarios que han hecho al menos un pedido
+            "paid": users_with_orders,  # Todos los pedidos implican pago
+            "delivered": completed_orders
+        }
+        
+        # Top restaurantes por pedidos completados
+        restaurant_orders = {}
+        for order in all_orders:
+            if order.order_status == "Entregado":
+                if order.restaurant_id not in restaurant_orders:
+                    restaurant_orders[order.restaurant_id] = 0
+                restaurant_orders[order.restaurant_id] += 1
+        
+        # Obtener nombres de restaurantes
+        restaurants = restaurant_dao.get_all()
+        restaurant_names = {r.id: r.name for r in restaurants}
+        
+        # Crear lista de restaurantes con stats
+        restaurants_stats = []
+        for restaurant_id, count in restaurant_orders.items():
+            restaurants_stats.append({
+                "id": restaurant_id,
+                "name": restaurant_names.get(restaurant_id, "Desconocido"),
+                "completed_orders": count
+            })
+        
+        # Añadir restaurantes sin pedidos
+        for restaurant in restaurants:
+            if restaurant.id not in restaurant_orders:
+                restaurants_stats.append({
+                    "id": restaurant.id,
+                    "name": restaurant.name,
+                    "completed_orders": 0
+                })
+        
+        # Ordenar por pedidos completados
+        restaurants_stats.sort(key=lambda x: x["completed_orders"], reverse=True)
+        
+        top_restaurants = restaurants_stats[:5]
+        bottom_restaurants = restaurants_stats[-5:] if len(restaurants_stats) > 5 else []
+        bottom_restaurants.reverse()  # Mostrar el peor primero
+        
+        return {
+            "total_gmv": total_gmv,
+            "gmv_timeline": gmv_timeline,
+            "conversion_rate": round(conversion_rate, 2),
+            "average_order_value": average_order_value,
+            "orders_status": {
+                "completed": completed_orders,
+                "cancelled": cancelled_orders,
+                "in_progress": in_progress_orders
+            },
+            "funnel": funnel,
+            "top_restaurants": top_restaurants,
+            "bottom_restaurants": bottom_restaurants
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error obteniendo estadísticas: {e}"
+        )
+
 # Para ejecutar la app, usa el comando:
 # uvicorn project.src.Backend.application:app --reload
 if __name__ == "__main__":
