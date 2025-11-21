@@ -3,6 +3,7 @@ import React, {useEffect, useState} from "react";
 import {Link, useParams, useLocation, useNavigate} from "react-router-dom";
 import { useRestaurantCache } from "../context/RestaurantCacheContext";
 import LoadingScreen from "../components/LoadingScreen";
+import Modal from "../components/Modal";
 import "../css/Restaurant_Dishes.css";
 
 const RestaurantDishes = () => {
@@ -49,6 +50,9 @@ const RestaurantDishes = () => {
   // Rating
   const [userRating, setUserRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
+  
+  // Modal
+  const [modalState, setModalState] = useState({isOpen: false, title: "", message: ""});
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const [loadingRating, setLoadingRating] = useState(false);
 
@@ -291,12 +295,12 @@ const RestaurantDishes = () => {
     const role = sessionStorage.getItem("role");
     
     if (!clientId || role !== "Client") {
-      alert("Debes iniciar sesión como cliente para dejar una valoración");
+      setModalState({isOpen: true, title: "Error", message: "Debes iniciar sesión como cliente para dejar una valoración"});
       return;
     }
 
     if (!restaurant?.id) {
-      alert("Error: No se pudo identificar el restaurante");
+      setModalState({isOpen: true, title: "Error", message: "No se pudo identificar el restaurante"});
       return;
     }
 
@@ -321,10 +325,10 @@ const RestaurantDishes = () => {
       const result = await response.json();
       console.log("Valoración enviada:", result);
       setUserRating(rating);
-      alert(`¡Gracias por tu valoración de ${rating} ${rating === 1 ? 'estrella' : 'estrellas'}!`);
+      setModalState({isOpen: true, title: "¡Gracias!", message: `Tu valoración de ${rating} ${rating === 1 ? 'estrella' : 'estrellas'} ha sido registrada`});
     } catch (err) {
       console.error("Error enviando valoración:", err);
-      alert("Error al enviar la valoración. Por favor, intenta de nuevo.");
+      setModalState({isOpen: true, title: "Error", message: "Error al enviar la valoración. Por favor, intenta de nuevo."});
     } finally {
       setIsSubmittingRating(false);
     }
@@ -336,6 +340,20 @@ const RestaurantDishes = () => {
 
   return (
     <main className="restaurant-page">
+      <Modal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({isOpen: false, title: "", message: ""})}
+        title={modalState.title}
+        actions={[
+          {
+            label: "Cerrar",
+            onClick: () => setModalState({isOpen: false, title: "", message: ""}),
+          },
+        ]}
+      >
+        <p>{modalState.message}</p>
+      </Modal>
+      
       <div className="page-inner">
         {/* Sidebar con filtros */}
         <aside className="sidebar">

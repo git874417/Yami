@@ -1,9 +1,11 @@
 import React, {useState, useEffect} from "react";
+import Modal from "./Modal";
 import "./../css/CarritoModal.css";
 
 const CarritoModal = ({isOpen, onClose, carrito, setCarrito}) => {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [carritoConDetalles, setCarritoConDetalles] = useState([]);
+  const [modalState, setModalState] = useState({isOpen: false, title: "", message: ""});
   const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
 
   // Cargar detalles de los platos cuando se abre el modal
@@ -93,7 +95,7 @@ const CarritoModal = ({isOpen, onClose, carrito, setCarrito}) => {
 
       const userSession = sessionStorage.getItem("user");
       if (!userSession) {
-        alert("Por favor, inicia sesión para realizar el pedido");
+        setModalState({isOpen: true, title: "Error", message: "Por favor, inicia sesión para realizar el pedido"});
         return;
       }
 
@@ -109,7 +111,7 @@ const CarritoModal = ({isOpen, onClose, carrito, setCarrito}) => {
       const restaurantId = carritoConDetalles[0]?.restaurant_id;
 
       if (!restaurantId) {
-        alert("Error: No hay restaurante asociado al carrito");
+        setModalState({isOpen: true, title: "Error", message: "No hay restaurante asociado al carrito"});
         return;
       }
 
@@ -123,11 +125,19 @@ const CarritoModal = ({isOpen, onClose, carrito, setCarrito}) => {
 
       if (!orderRes.ok) {
         const error = await orderRes.json();
-        throw new Error(error.detail || "Error al crear el pedido");
+        const errorDetail = error.detail || "Error al crear el pedido";
+        
+        // Verificar si el error es por créditos insuficientes
+        if (errorDetail.toLowerCase().includes("Insufficient credits") || 
+            errorDetail.toLowerCase().includes("créditos insuficientes")) {
+          throw new Error("No tienes suficientes Yameats para realizar este pedido");
+        }
+        
+        throw new Error(errorDetail);
       }
 
       const response = await orderRes.json();
-      alert(`✓ Pedido creado exitosamente. ID: ${response.order_id}`);
+      setModalState({isOpen: true, title: "¡Éxito!", message: `Pedido creado exitosamente. ID: ${response.order_id}`});
 
       setCarrito([]);
       setCarritoConDetalles([]);
@@ -135,7 +145,7 @@ const CarritoModal = ({isOpen, onClose, carrito, setCarrito}) => {
       onClose();
     } catch (error) {
       console.error("Error en checkout:", error);
-      alert(`Error: ${error.message}`);
+      setModalState({isOpen: true, title: "Error", message: error.message});
     } finally {
       setIsCheckingOut(false);
     }
@@ -146,8 +156,23 @@ const CarritoModal = ({isOpen, onClose, carrito, setCarrito}) => {
   const total = calcularTotal();
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
+    <>
+      <Modal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({isOpen: false, title: "", message: ""})}
+        title={modalState.title}
+        actions={[
+          {
+            label: "Cerrar",
+            onClick: () => setModalState({isOpen: false, title: "", message: ""}),
+          },
+        ]}
+      >
+        <p>{modalState.message}</p>
+      </Modal>
+      
+      <div className="modal-overlay">
+        <div className="modal-content">
         <button onClick={onClose} className="close-button">
           ✕
         </button>
@@ -210,6 +235,7 @@ const CarritoModal = ({isOpen, onClose, carrito, setCarrito}) => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

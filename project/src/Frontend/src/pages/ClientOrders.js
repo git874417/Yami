@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingScreen from "../components/LoadingScreen";
+import Modal from "../components/Modal";
 import "../css/ClientOrders.css";
 
 const ClientOrders = () => {
@@ -10,6 +11,8 @@ const ClientOrders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cancellingOrder, setCancellingOrder] = useState(null);
+  const [modalState, setModalState] = useState({isOpen: false, title: "", message: ""});
+  const [confirmState, setConfirmState] = useState({isOpen: false, title: "", message: "", onConfirm: null});
   const navigate = useNavigate();
   const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000";
 
@@ -86,7 +89,7 @@ const ClientOrders = () => {
       }));
     } catch (err) {
       console.error("Error cargando detalles:", err);
-      alert("Error al cargar los detalles del pedido");
+      setModalState({isOpen: true, title: "Error", message: "Error al cargar los detalles del pedido"});
     } finally {
       setLoadingDetails((prev) => ({
         ...prev,
@@ -97,12 +100,20 @@ const ClientOrders = () => {
 
   const handleCancelOrder = async (orderId, orderStatus) => {
     if (orderStatus !== "Encargado") {
-      alert("Solo se pueden cancelar pedidos en estado 'Encargado'");
+      setModalState({isOpen: true, title: "Error", message: "Solo se pueden cancelar pedidos en estado 'Encargado'"});
       return;
     }
 
-    const confirmed = window.confirm("¿Estás seguro de que deseas cancelar este pedido?");
-    if (!confirmed) return;
+    setConfirmState({
+      isOpen: true,
+      title: "Confirmar cancelación",
+      message: "¿Estás seguro de que deseas cancelar este pedido?",
+      onConfirm: () => executeCancelOrder(orderId)
+    });
+  };
+
+  const executeCancelOrder = async (orderId) => {
+    setConfirmState({isOpen: false, title: "", message: "", onConfirm: null});
 
     setCancellingOrder(orderId);
     try {
@@ -127,10 +138,10 @@ const ClientOrders = () => {
         ),
       }));
 
-      alert("Pedido cancelado exitosamente");
+      setModalState({isOpen: true, title: "Éxito", message: "Pedido cancelado exitosamente"});
     } catch (err) {
       console.error("Error cancelando pedido:", err);
-      alert("Error al cancelar el pedido. Por favor, intenta de nuevo.");
+      setModalState({isOpen: true, title: "Error", message: "Error al cancelar el pedido. Por favor, intenta de nuevo."});
     } finally {
       setCancellingOrder(null);
     }
@@ -142,6 +153,40 @@ const ClientOrders = () => {
 
   return (
     <main className="client-orders-page">
+      <Modal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({isOpen: false, title: "", message: ""})}
+        title={modalState.title}
+        actions={[
+          {
+            label: "Cerrar",
+            onClick: () => setModalState({isOpen: false, title: "", message: ""}),
+          },
+        ]}
+      >
+        <p>{modalState.message}</p>
+      </Modal>
+
+      <Modal
+        isOpen={confirmState.isOpen}
+        onClose={() => setConfirmState({isOpen: false, title: "", message: "", onConfirm: null})}
+        title={confirmState.title}
+        actions={[
+          {
+            label: "Cancelar",
+            onClick: () => setConfirmState({isOpen: false, title: "", message: "", onConfirm: null}),
+            className: "cancel",
+          },
+          {
+            label: "Confirmar",
+            onClick: confirmState.onConfirm,
+            className: "confirm",
+          },
+        ]}
+      >
+        <p>{confirmState.message}</p>
+      </Modal>
+      
       <div className="client-orders-container">
         <header className="client-orders-header">
           <button 
