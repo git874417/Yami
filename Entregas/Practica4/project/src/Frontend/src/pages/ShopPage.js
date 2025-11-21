@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
 import "../css/ShopPage.css";
 
 const ShopPage = () => {
@@ -46,48 +46,46 @@ const ShopPage = () => {
 
   const handleRestaurantClick = (restaurant) => {
     navigate(`/restaurants/${encodeURIComponent(restaurant.name)}`, {
-      state: { restaurant }
+      state: {restaurant},
     });
   };
 
   const normalizeUrl = (url) => {
     if (!url) return null;
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    if (url.startsWith('//')) return window.location.protocol + url;
-    if (url.startsWith('/')) return API_BASE.replace(/\/$/, '') + url;
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    if (url.startsWith("//")) return window.location.protocol + url;
+    if (url.startsWith("/")) return API_BASE.replace(/\/$/, "") + url;
     return url;
   };
 
   // Mapeo de categorías del filtro a las categorías de la base de datos
   const categoryMapping = {
-    mexicano: ['Mexicano', 'Mexican'],
-    asiatico: ['Asiático', 'Asiatico', 'Asian', 'Chino', 'Japonés', 'Japonesa', 'Tailandés'],
-    italiano: ['Italiano', 'Italian', 'Pizza', 'Pasta'],
-    fast_food: ['Fast Food', 'FastFood', 'Hamburguesería', 'Hamburguesas'],
-    asador: ['Asador', 'Carne', 'Parrilla', 'Steakhouse'],
-    griego: ['Griego', 'Greek'],
-    indio: ['Indio', 'Indian', 'Hindú']
+    mexicano: ["Mexicano", "Mexican"],
+    asiatico: ["Asiático", "Asiatico", "Asian", "Chino", "Japonés", "Japonesa", "Tailandés"],
+    italiano: ["Italiano", "Italian", "Pizza", "Pasta"],
+    fast_food: ["Fast Food", "FastFood", "Hamburguesería", "Hamburguesas"],
+    asador: ["Asador", "Carne", "Parrilla", "Steakhouse"],
+    griego: ["Griego", "Greek"],
+    indio: ["Indio", "Indian", "Hindú"],
   };
 
   // Función para filtrar restaurantes
   const getFilteredRestaurants = () => {
-    return restaurantes.filter(restaurant => {
-      // Obtenemos las categorías marcadas 
-      const activeCategories = Object.keys(filterTipoComida).filter(key => filterTipoComida[key]);
-      
+    return restaurantes.filter((restaurant) => {
+      // Obtenemos las categorías marcadas
+      const activeCategories = Object.keys(filterTipoComida).filter((key) => filterTipoComida[key]);
+
       // Si ninguna categoría está activa, mostramos todos
       if (activeCategories.length === 0) {
         return true;
       }
-      
+
       // Verificamos si la categoría de los restaurantes coincide con las marcadas
-      const restaurantCategory = restaurant.category?.toLowerCase() || '';
-      
-      return activeCategories.some(filterKey => {
+      const restaurantCategory = restaurant.category?.toLowerCase() || "";
+
+      return activeCategories.some((filterKey) => {
         const categoryVariants = categoryMapping[filterKey] || [];
-        return categoryVariants.some(variant => 
-          restaurantCategory.includes(variant.toLowerCase())
-        );
+        return categoryVariants.some((variant) => restaurantCategory.includes(variant.toLowerCase()));
       });
     });
   };
@@ -114,7 +112,7 @@ const ShopPage = () => {
                 <input
                   type="checkbox"
                   checked={filterTipoComida.mexicano}
-                  onChange={(e) => setFilterTipoComida({ ...filterTipoComida, mexicano: e.target.checked })}
+                  onChange={(e) => setFilterTipoComida({...filterTipoComida, mexicano: e.target.checked})}
                 />
                 Mexicano
               </label>
@@ -122,7 +120,7 @@ const ShopPage = () => {
                 <input
                   type="checkbox"
                   checked={filterTipoComida.asiatico}
-                  onChange={(e) => setFilterTipoComida({ ...filterTipoComida, asiatico: e.target.checked })}
+                  onChange={(e) => setFilterTipoComida({...filterTipoComida, asiatico: e.target.checked})}
                 />
                 Asiático
               </label>
@@ -130,7 +128,7 @@ const ShopPage = () => {
                 <input
                   type="checkbox"
                   checked={filterTipoComida.italiano}
-                  onChange={(e) => setFilterTipoComida({ ...filterTipoComida, italiano: e.target.checked })}
+                  onChange={(e) => setFilterTipoComida({...filterTipoComida, italiano: e.target.checked})}
                 />
                 Italiano
               </label>
@@ -138,7 +136,7 @@ const ShopPage = () => {
                 <input
                   type="checkbox"
                   checked={filterTipoComida.fast_food}
-                  onChange={(e) => setFilterTipoComida({ ...filterTipoComida, fast_food: e.target.checked })}
+                  onChange={(e) => setFilterTipoComida({...filterTipoComida, fast_food: e.target.checked})}
                 />
                 Fast Food
               </label>
@@ -146,7 +144,7 @@ const ShopPage = () => {
                 <input
                   type="checkbox"
                   checked={filterTipoComida.asador}
-                  onChange={(e) => setFilterTipoComida({ ...filterTipoComida, asador: e.target.checked })}
+                  onChange={(e) => setFilterTipoComida({...filterTipoComida, asador: e.target.checked})}
                 />
                 Asador
               </label>
@@ -154,7 +152,7 @@ const ShopPage = () => {
                 <input
                   type="checkbox"
                   checked={filterTipoComida.griego}
-                  onChange={(e) => setFilterTipoComida({ ...filterTipoComida, griego: e.target.checked })}
+                  onChange={(e) => setFilterTipoComida({...filterTipoComida, griego: e.target.checked})}
                 />
                 Griego
               </label>
@@ -162,7 +160,7 @@ const ShopPage = () => {
                 <input
                   type="checkbox"
                   checked={filterTipoComida.indio}
-                  onChange={(e) => setFilterTipoComida({ ...filterTipoComida, indio: e.target.checked })}
+                  onChange={(e) => setFilterTipoComida({...filterTipoComida, indio: e.target.checked})}
                 />
                 Indio
               </label>
@@ -176,7 +174,7 @@ const ShopPage = () => {
               <div className="search-wrapper">
                 <input
                   type="text"
-                  className="search-input"
+                  className="search-input-ShopPage"
                   placeholder="Buscar"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -184,18 +182,10 @@ const ShopPage = () => {
                 <button className="search-button">🔍</button>
               </div>
 
-              <button className="sort-button active">
-                ✓ Nuevo
-              </button>
-              <button className="sort-button">
-                Precio ascendente
-              </button>
-              <button className="sort-button">
-                Precio descendente
-              </button>
-              <button className="sort-button rating-button">
-                ⭐ Valoración
-              </button>
+              <button className="sort-button active">✓ Nuevo</button>
+              <button className="sort-button">Precio ascendente</button>
+              <button className="sort-button">Precio descendente</button>
+              <button className="sort-button rating-button">⭐ Valoración</button>
             </div>
 
             {/* Mensajes de estado */}
@@ -220,12 +210,16 @@ const ShopPage = () => {
                           alt={restaurant.name}
                           onError={(e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant.name)}`;
+                            e.currentTarget.src = `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
+                              restaurant.name
+                            )}`;
                           }}
                         />
                       ) : (
                         <img
-                          src={`https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(restaurant.name)}`}
+                          src={`https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
+                            restaurant.name
+                          )}`}
                           alt={restaurant.name}
                         />
                       )}
@@ -233,7 +227,9 @@ const ShopPage = () => {
                     <div className="restaurant-info">
                       <div className="restaurant-rating">
                         <span className="star">⭐</span>
-                        <span className="rating-value">{restaurant.rating > 0 ? restaurant.rating : "-"}</span>
+                        <span className="rating-value">
+                          {restaurant.rating > 0 ? restaurant.rating : "-"}
+                        </span>
                       </div>
                       <p className="restaurant-label">Restaurante</p>
                       <h3 className="restaurant-name">{restaurant.name}</h3>
