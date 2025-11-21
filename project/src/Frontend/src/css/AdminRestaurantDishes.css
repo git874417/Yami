@@ -486,7 +486,7 @@
 .dish-info {
   flex: 0 0 auto;
   min-width: 160px;
-  max-width: 250px;
+  max-width: 350px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
