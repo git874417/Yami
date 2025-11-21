@@ -1011,12 +1011,12 @@ def get_admin_stats():
             date_str = date.strftime("%d/%m")
             gmv_by_date[date_str] = 0
         
-        # Acumular GMV real por fecha de created_at
+        # Acumular GMV real por fecha de order_date
         for order in all_orders:
-            if order.created_at:
+            if order.order_date:
                 try:
-                    # Parsear la fecha del pedido (formato ISO: 2025-11-21T10:30:00)
-                    order_date = datetime.fromisoformat(order.created_at.replace('Z', '+00:00'))
+                    # Parsear la fecha del pedido (formato ISO: 2025-11-21T10:30:00 o 2025-11-21)
+                    order_date = datetime.fromisoformat(order.order_date.replace('Z', '+00:00'))
                     date_str = order_date.strftime("%d/%m")
                     
                     # Si la fecha está en nuestro rango de 30 días, sumar los créditos
@@ -1095,6 +1095,40 @@ def get_admin_stats():
         bottom_restaurants = restaurants_stats[-5:] if len(restaurants_stats) > 5 else []
         bottom_restaurants.reverse()  # Mostrar el peor primero
         
+        # Estadísticas por tipo de plato
+        dish_dao = dishDAO()
+        ordered_dish_dao = orderedDishDAO()
+        
+        dish_type_counts = {
+            "Entrante": 0,
+            "Principal": 0,
+            "Postre": 0,
+            "Bebida": 0
+        }
+        
+        # Contar platos por tipo en todos los pedidos
+        try:
+            for order in all_orders:
+                try:
+                    ordered_dishes = ordered_dish_dao.get_by_order_id(order.id)
+                    for ordered_dish in ordered_dishes:
+                        try:
+                            # Obtener el plato para conocer su tipo
+                            dish = dish_dao.get_by_id(ordered_dish.dish_id)
+                            if dish and dish.dish_type in dish_type_counts:
+                                dish_type_counts[dish.dish_type] += 1
+                        except Exception as e:
+                            # Si falla obtener un plato específico, continuar con el siguiente
+                            print(f"Error obteniendo plato {ordered_dish.dish_id}: {e}")
+                            continue
+                except Exception as e:
+                    # Si falla obtener ordered_dishes de un pedido, continuar
+                    print(f"Error obteniendo ordered_dishes del pedido {order.id}: {e}")
+                    continue
+        except Exception as e:
+            # Si falla todo el proceso, usar conteos en 0
+            print(f"Error general contando tipos de platos: {e}")
+        
         return {
             "total_gmv": total_gmv,
             "gmv_timeline": gmv_timeline,
@@ -1107,7 +1141,8 @@ def get_admin_stats():
             },
             "funnel": funnel,
             "top_restaurants": top_restaurants,
-            "bottom_restaurants": bottom_restaurants
+            "bottom_restaurants": bottom_restaurants,
+            "dish_types": dish_type_counts
         }
         
     except Exception as e:

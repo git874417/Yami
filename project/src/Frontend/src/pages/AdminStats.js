@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Line, Doughnut, Bar } from "react-chartjs-2";
+import { Line, Doughnut, Bar, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -270,6 +270,46 @@ const AdminStats = () => {
     100
   ).toFixed(2);
 
+  // Datos para Tipos de Platos (Pie Chart)
+  const dishTypesData = {
+    labels: ["Entrantes", "Principales", "Postres", "Bebidas"],
+    datasets: [
+      {
+        data: [
+          stats.dish_types.Entrante,
+          stats.dish_types.Principal,
+          stats.dish_types.Postre,
+          stats.dish_types.Bebida,
+        ],
+        backgroundColor: [
+          "rgba(255, 140, 0, 0.8)",
+          "rgba(30, 58, 95, 0.8)",
+          "rgba(34, 197, 94, 0.8)",
+          "rgba(147, 51, 234, 0.8)",
+        ],
+        borderWidth: 2,
+        borderColor: "#fff",
+      },
+    ],
+  };
+
+  const dishTypesOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "bottom",
+      },
+      title: {
+        display: true,
+        text: "Distribución de Tipos de Platos Pedidos",
+        font: {
+          size: 16,
+        },
+      },
+    },
+  };
+
   return (
     <div className="admin-stats-page">
       <Modal
@@ -385,6 +425,19 @@ const AdminStats = () => {
               <p>
                 Si las cancelaciones superan el 3-5%, existe un problema grave de operativa o técnico que debe
                 resolverse inmediatamente.
+              </p>
+            </div>
+          </div>
+
+          {/* Distribución de Tipos de Platos */}
+          <div className="chart-card">
+            <div className="chart-wrapper chart-donut">
+              <Pie data={dishTypesData} options={dishTypesOptions} />
+            </div>
+            <div className="chart-info">
+              <p>
+                Muestra qué tipo de alimentos prefieren los clientes. Ayuda a identificar tendencias de
+                consumo y optimizar el menú de los restaurantes en la plataforma.
               </p>
             </div>
           </div>
