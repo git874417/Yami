@@ -91,6 +91,7 @@
 /* Instrucciones */
 .instructions-section {
   display: flex;
+  width: 90%;
   flex-direction: column;
   gap: 0.5rem;
 }
