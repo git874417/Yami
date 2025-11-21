@@ -226,7 +226,7 @@ const RestaurantMain = () => {
                 <span>📍 {restaurant?.address || "Ubicacion"}</span>
               </div>
               <p style={{ marginTop: '8px', fontSize: '0.9rem', color: '#666' }}>
-                {restaurant?.phone || "Número de teléfono"}
+                {restaurant?.phone_number || "Número de teléfono"}
               </p>
               <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
                 <button 
@@ -376,10 +376,6 @@ const RestaurantMain = () => {
                       )}
                     </div>
                     <div className="restaurant-info">
-                      <div className="restaurant-rating">
-                        <span className="star">⭐</span>
-                        <span className="rating-value">{dish.rating || "5"}</span>
-                      </div>
                       <h3 className="restaurant-name">{dish.name}</h3>
                       <p className="restaurant-category">{dish.dish_type || "Tipo de plato"}</p>
                       <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
