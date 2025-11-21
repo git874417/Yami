@@ -1003,14 +1003,36 @@ def get_admin_stats():
         # GMV Timeline (últimos 30 días)
         gmv_timeline = []
         today = datetime.now()
+        
+        # Crear diccionario para acumular GMV por día
+        gmv_by_date = {}
         for i in range(29, -1, -1):
             date = today - timedelta(days=i)
             date_str = date.strftime("%d/%m")
-            # Filtrar pedidos de ese día (simulado, ya que no tenemos timestamps en el modelo)
-            # En producción, deberías filtrar por created_at
+            gmv_by_date[date_str] = 0
+        
+        # Acumular GMV real por fecha de created_at
+        for order in all_orders:
+            if order.created_at:
+                try:
+                    # Parsear la fecha del pedido (formato ISO: 2025-11-21T10:30:00)
+                    order_date = datetime.fromisoformat(order.created_at.replace('Z', '+00:00'))
+                    date_str = order_date.strftime("%d/%m")
+                    
+                    # Si la fecha está en nuestro rango de 30 días, sumar los créditos
+                    if date_str in gmv_by_date:
+                        gmv_by_date[date_str] += order.order_credits
+                except (ValueError, AttributeError):
+                    # Si hay error parseando la fecha, ignorar este pedido
+                    pass
+        
+        # Convertir el diccionario a lista para el frontend
+        for i in range(29, -1, -1):
+            date = today - timedelta(days=i)
+            date_str = date.strftime("%d/%m")
             gmv_timeline.append({
                 "date": date_str,
-                "value": total_gmv / 30  # Simplificación: distribuir uniformemente
+                "value": gmv_by_date.get(date_str, 0)
             })
         
         # Estado de pedidos
