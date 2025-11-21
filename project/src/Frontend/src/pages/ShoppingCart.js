@@ -26,10 +26,10 @@ const ShoppingCart = () => {
     }
   }, []);
 
-  const handleRemoveDish = (dishId) => {
+  const handleRemoveDish = (index) => {
     if (!cartData) return;
 
-    const updatedDishes = cartData.dishes.filter((d) => d.dishId !== dishId);
+    const updatedDishes = cartData.dishes.filter((_, i) => i !== index);
 
     if (updatedDishes.length === 0) {
       sessionStorage.removeItem("carrito");
@@ -182,7 +182,7 @@ const ShoppingCart = () => {
         <div className="cart-items">
           <h3>Platos en tu pedido:</h3>
           {cartData.dishes.map((dish, index) => (
-            <div key={dish.dishId} className="cart-item">
+            <div key={`${dish.dishId}-${index}`} className="cart-item">
               <div className="item-header">
                 <div className="item-image">
                   <img
@@ -200,7 +200,7 @@ const ShoppingCart = () => {
                 </div>
                 <button
                   className="btn-remove"
-                  onClick={() => handleRemoveDish(dish.dishId)}
+                  onClick={() => handleRemoveDish(index)}
                   title="Eliminar del carrito"
                 >
                   ✕

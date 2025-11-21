@@ -193,20 +193,7 @@ const OrderDish = () => {
         dishes: carritoActual.dishes || [],
       };
 
-      // Verificar si el plato ya existe en el carrito
-      const indiceExistente = nuevoCarrito.dishes.findIndex((p) => p.dishId === orderData.dishId);
-
-      if (indiceExistente >= 0) {
-        // Si existe, actualizar instrucciones
-        nuevoCarrito.dishes[indiceExistente].instructions = orderData.instructions;
-        setModalState({
-          isOpen: true,
-          title: "Éxito",
-          message: `✓ ${orderData.dishName} actualizado en el carrito`
-        });
-      } else {
-        // Si no existe, añadir nuevo
-        nuevoCarrito.dishes.push({
+      nuevoCarrito.dishes.push({
           dishId: orderData.dishId,
           dishName: orderData.dishName,
           dishDescription: orderData.dishDescription,
@@ -214,13 +201,12 @@ const OrderDish = () => {
           instructions: orderData.instructions,
           dishImage: orderData.dishImage,
           allergens: orderData.allergens,
-        });
-        setModalState({
-          isOpen: true,
-          title: "Éxito",
-          message: `✓ ${orderData.dishName} añadido al carrito`
-        });
-      }
+      });
+      setModalState({
+        isOpen: true,
+        title: "Éxito",
+        message: `✓ ${orderData.dishName} añadido al carrito`
+      });
 
       sessionStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
 
