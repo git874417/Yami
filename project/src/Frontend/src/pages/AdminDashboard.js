@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import Modal from "../components/Modal";
+import LoadingScreen from "../components/LoadingScreen";
 import "../css/AdminDashboard.css";
 
 const AdminDashboard = () => {
@@ -41,7 +42,23 @@ const AdminDashboard = () => {
       setAdminName("Admin");
     }
 
-    fetchData();
+    // Intentar cargar desde caché primero
+    const cachedClients = sessionStorage.getItem("admin_cached_clients");
+    const cachedRestaurants = sessionStorage.getItem("admin_cached_restaurants");
+    
+    if (cachedClients && cachedRestaurants) {
+      const clientsList = JSON.parse(cachedClients);
+      const restaurantsList = JSON.parse(cachedRestaurants);
+      setClientes(clientsList);
+      setClientesOriginales(clientsList);
+      setRestaurantes(restaurantsList);
+      setRestaurantesOriginales(restaurantsList);
+      setLoading(false);
+      // Actualizar en segundo plano
+      fetchDataInBackground();
+    } else {
+      fetchData();
+    }
   }, [navigate]);
 
   const fetchData = async () => {
@@ -57,6 +74,8 @@ const AdminDashboard = () => {
         const clientsList = clientsData.clients || [];
         setClientes(clientsList);
         setClientesOriginales(clientsList);
+        // Guardar en caché
+        sessionStorage.setItem("admin_cached_clients", JSON.stringify(clientsList));
       }
 
       if (restaurantsRes.ok) {
@@ -64,6 +83,8 @@ const AdminDashboard = () => {
         const restaurantsList = restaurantsData.restaurants || [];
         setRestaurantes(restaurantsList);
         setRestaurantesOriginales(restaurantsList);
+        // Guardar en caché
+        sessionStorage.setItem("admin_cached_restaurants", JSON.stringify(restaurantsList));
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -74,6 +95,33 @@ const AdminDashboard = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDataInBackground = async () => {
+    try {
+      const [clientsRes, restaurantsRes] = await Promise.all([
+        fetch(`${API_BASE}/api/clients/full_info`),
+        fetch(`${API_BASE}/api/restaurants/full_info`),
+      ]);
+
+      if (clientsRes.ok) {
+        const clientsData = await clientsRes.json();
+        const clientsList = clientsData.clients || [];
+        setClientes(clientsList);
+        setClientesOriginales(clientsList);
+        sessionStorage.setItem("admin_cached_clients", JSON.stringify(clientsList));
+      }
+
+      if (restaurantsRes.ok) {
+        const restaurantsData = await restaurantsRes.json();
+        const restaurantsList = restaurantsData.restaurants || [];
+        setRestaurantes(restaurantsList);
+        setRestaurantesOriginales(restaurantsList);
+        sessionStorage.setItem("admin_cached_restaurants", JSON.stringify(restaurantsList));
+      }
+    } catch (error) {
+      console.error("Error fetching data in background:", error);
     }
   };
 
@@ -191,13 +239,7 @@ const AdminDashboard = () => {
   };
 
   if (loading) {
-    return (
-      <div className="admin-page">
-        <div className="admin-container">
-          <p className="loading-message">Cargando datos...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
