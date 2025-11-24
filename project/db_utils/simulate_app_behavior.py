@@ -25,7 +25,7 @@ def simulate_app_behavior():
     """
     Simula comportamiento realista de la aplicación creando pedidos y avanzando estados.
     """
-    print("🍽️  Simulando comportamiento de Foodflix...")
+    print("🍽️  Simulando comportamiento de Yami...")
     print("=" * 80)
 
     try:
