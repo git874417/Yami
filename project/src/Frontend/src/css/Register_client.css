@@ -122,21 +122,110 @@ body{
   font-size:15px;
   cursor:pointer;
   box-shadow: 0 6px 18px rgba(15,75,99,0.12);
+  transition: all 0.3s ease;
 }
 
-.register-container button[type="submit"]:hover{
+.register-container button[type="submit"]:hover:not(:disabled){
   background:var(--accent-hover);
+}
+
+.register-container button[type="submit"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .register-container p{margin:12px 0 0 0;color:var(--danger);font-size:14px}
 
+/* Plan Selection Styles */
+.plan-selection-container {
+  width: 100%;
+  margin: 20px 0 16px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.plans-row {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 8px;
+  flex-wrap: nowrap;
+}
+
+.plan-card {
+  flex: 1;
+  aspect-ratio: 1 / 1;
+  padding: 12px;
+  border: 2px solid #e6e6e6;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.plan-card:hover {
+  border-color: #ff9500;
+  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.plan-card.selected {
+  border-color: #ff9500;
+  border-width: 3px;
+  background: #fff8f0;
+  box-shadow: 0 6px 16px rgba(255, 149, 0, 0.2);
+}
+
+.plan-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 10px;
+}
+
+.plan-price {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ff9500;
+  margin-bottom: 8px;
+}
+
+.plan-price-period {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+.plan-credits {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.plan-error {
+  display: block;
+  color: #d9534f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
 /* Close X at top-right (imitated in screenshot) */
 .register-container:before{
   content: '';
-}
-
-@media (max-width: 980px){
-  .register-container form{ width:92%; padding:28px; }
 }
 
 @media (max-width: 420px){

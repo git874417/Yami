@@ -17,6 +17,7 @@ const Register_client = () => {
   const [password, setPassword] = useState("");
   const [passwordRepeat, setPasswordRepeat] = useState("");
   const [tipoPlan, setTipoPlan] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -27,6 +28,9 @@ const Register_client = () => {
       setMensaje("Las contraseñas no coinciden");
       return;
     }
+
+    setIsLoading(true);
+    setMensaje("");
 
     const nuevoCliente = {
       email,
@@ -48,6 +52,7 @@ const Register_client = () => {
 
       if (!data || !data.client_id) {
         setMensaje("No se ha podido crear el usuario");
+        setIsLoading(false);
         return;
       }
 
@@ -62,6 +67,7 @@ const Register_client = () => {
     } catch (error) {
       console.error("Error al crear el cliente", error);
       setMensaje("No se ha podido crear el usuario");
+      setIsLoading(false);
     }
   };
 
@@ -125,6 +131,43 @@ const Register_client = () => {
           onChange={(e) => setMetodoPago(e.target.value)}
           required
         />
+
+        {/* Plan Selection - 3 parallel boxes */}
+        <div className="plan-selection-container">
+          <label className="plan-label">Selecciona tu plan *</label>
+          <div className="plans-row">
+            {/* Basic Plan */}
+            <div
+              className={`plan-card ${tipoPlan === "Basic" ? "selected" : ""}`}
+              onClick={() => setTipoPlan("Basic")}
+            >
+              <div className="plan-name">Basic</div>
+              <div className="plan-price">63,99€<span className="plan-price-period">/mes</span></div>
+              <div className="plan-credits">30 Yameats</div>
+            </div>
+
+            {/* Plus Plan */}
+            <div
+              className={`plan-card ${tipoPlan === "Plus" ? "selected" : ""}`}
+              onClick={() => setTipoPlan("Plus")}
+            >
+              <div className="plan-name">Plus</div>
+              <div className="plan-price">129,99€<span className="plan-price-period">/mes</span></div>
+              <div className="plan-credits">60 Yameats</div>
+            </div>
+
+            {/* Deluxe Plan */}
+            <div
+              className={`plan-card ${tipoPlan === "Deluxe" ? "selected" : ""}`}
+              onClick={() => setTipoPlan("Deluxe")}
+            >
+              <div className="plan-name">Deluxe</div>
+              <div className="plan-price">209,99€<span className="plan-price-period">/mes</span></div>
+              <div className="plan-credits">100 Yameats</div>
+            </div>
+          </div>
+        </div>
+
         <input
           type="email"
           placeholder="Email"
@@ -132,13 +175,6 @@ const Register_client = () => {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        {/*Select para desplegable con varias opciones */}
-        <select value={tipoPlan} onChange={(e) => setTipoPlan(e.target.value)} required>
-          <option value="">Tipo de plan</option>
-          <option value="Basic">Basic</option>
-          <option value="Plus">Plus</option>
-          <option value="Deluxe">Deluxe</option>
-        </select>
         <input
           type="password"
           placeholder="Contraseña"
@@ -153,7 +189,9 @@ const Register_client = () => {
           onChange={(e) => setPasswordRepeat(e.target.value)}
           required
         />
-        <button type="submit">Registrarse</button>
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? "Creando Cliente..." : "Registrarse"}
+        </button>
         {mensaje && <p>{mensaje}</p>}
       </form>
       <Link to="/" className="register-volver-inicio">

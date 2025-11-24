@@ -307,3 +307,74 @@ textarea.edit-input {
     padding: 0 20px 30px;
   }
 }
+
+/* Plan Selection Styles */
+.plan-selection-container.plan-edit {
+  width: 100%;
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-edit .plans-row {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 8px;
+  flex-wrap: nowrap;
+}
+
+.plan-edit .plan-card {
+  flex: 1;
+  aspect-ratio: 1 / 1;
+  padding: 12px;
+  border: 2px solid #e6e6e6;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.plan-edit .plan-card:hover {
+  border-color: #ff9500;
+  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.plan-edit .plan-card.selected {
+  border-color: #ff9500;
+  border-width: 3px;
+  background: #fff8f0;
+  box-shadow: 0 6px 16px rgba(255, 149, 0, 0.2);
+}
+
+.plan-edit .plan-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 10px;
+}
+
+.plan-edit .plan-price {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ff9500;
+  margin-bottom: 8px;
+}
+
+.plan-edit .plan-price-period {
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+}
+
+.plan-edit .plan-credits {
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}

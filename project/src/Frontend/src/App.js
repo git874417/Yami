@@ -1,6 +1,7 @@
 import React from "react";
 import {BrowserRouter as Router, Route, Routes, useLocation} from "react-router-dom";
 import Home from "./pages/Home.js";
+import Services from "./pages/Services.js";
 import OrderDish from "./pages/OrderDish.js";
 import RestaurantDishes from "./pages/Restaurant_Dishes.js";
 import ShopPage from "./pages/ShopPage.js";
@@ -39,6 +40,7 @@ function AppContent() {
       <div className="main-page">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/servicios" element={<Services />} />
           <Route path="/inicio-sesion" element={<Login />} />
           <Route path="/registerClient" element={<Register_Client />} />
           <Route path="/registerRestaurant" element={<Register_Restaurant />} />

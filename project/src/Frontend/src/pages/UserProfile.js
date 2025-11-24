@@ -415,16 +415,39 @@ const UserProfile = () => {
                 <div className="info-item">
                   <label>Plan de Suscripción:</label>
                   {isEditing ? (
-                    <select
-                      className="edit-input edit-select"
-                      value={editedData?.sub_plan || ""}
-                      onChange={(e) => handleInputChange("sub_plan", e.target.value)}
-                    >
-                      <option value="">Selecciona un plan</option>
-                      <option value="Basic">Basic</option>
-                      <option value="Plus">Plus</option>
-                      <option value="Deluxe">Deluxe</option>
-                    </select>
+                    <div className="plan-selection-container plan-edit">
+                      <div className="plans-row">
+                        {/* Basic Plan */}
+                        <div
+                          className={`plan-card ${editedData?.sub_plan === "Basic" ? "selected" : ""}`}
+                          onClick={() => handleInputChange("sub_plan", "Basic")}
+                        >
+                          <div className="plan-name">Basic</div>
+                          <div className="plan-price">63,99€<span className="plan-price-period">/mes</span></div>
+                          <div className="plan-credits">30 Yameats</div>
+                        </div>
+
+                        {/* Plus Plan */}
+                        <div
+                          className={`plan-card ${editedData?.sub_plan === "Plus" ? "selected" : ""}`}
+                          onClick={() => handleInputChange("sub_plan", "Plus")}
+                        >
+                          <div className="plan-name">Plus</div>
+                          <div className="plan-price">129,99€<span className="plan-price-period">/mes</span></div>
+                          <div className="plan-credits">60 Yameats</div>
+                        </div>
+
+                        {/* Deluxe Plan */}
+                        <div
+                          className={`plan-card ${editedData?.sub_plan === "Deluxe" ? "selected" : ""}`}
+                          onClick={() => handleInputChange("sub_plan", "Deluxe")}
+                        >
+                          <div className="plan-name">Deluxe</div>
+                          <div className="plan-price">209,99€<span className="plan-price-period">/mes</span></div>
+                          <div className="plan-credits">100 Yameats</div>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     <span>{user?.sub_plan || "No disponible"}</span>
                   )}
