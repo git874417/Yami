@@ -41,11 +41,19 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="hero-image">
-        <img
-          src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=60"
-          alt="Comida"
-        />
+      <div className="hero-images">
+        <div className="hero-image">
+          <img
+            src="/images/yami-bag.png"
+            alt="Bolsa de pedido Yami"
+          />
+        </div>
+        <div className="hero-image">
+          <img
+            src="/images/yami-client.png"
+            alt="Cliente Yami"
+          />
+        </div>
       </div>
 
       <div className="cards">
