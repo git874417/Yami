@@ -65,10 +65,11 @@ const Services = () => {
       {/* Hero Section */}
       <section className="services-hero">
         <div className="hero-content">
-          <h1>Descubre nuestro sistema</h1>
+          <h1>Descubre Yami!</h1>
           <p>
             Mediante nuestro sencillo sistema de suscripción, no tendrás que
-            preocuparte por el precio de cada plato.
+            preocuparte por el precio de cada plato y podras disfrutar de los mejores
+            restaurantes de tu ciudad.
           </p>
         </div>
       </section>
@@ -130,7 +131,7 @@ const Services = () => {
           <h3>¿Qué son los <span className="yameats-highlight">Yameats</span>?</h3>
           <div className="credits-content">
             <p className="credits-intro">
-              Los Yameats son el <strong>corazón del sistema de Foodflix</strong>. Se trata de créditos virtuales que funcionan como moneda dentro de nuestra plataforma. <em>Cada mes</em>, según el plan que hayas elegido, recibirás una cantidad de Yameats que podrás utilizar libremente para adquirir cualquier plato de nuestros restaurantes colaboradores.
+              Los Yameats son el <strong>corazón del sistema de Yami</strong>. Se trata de créditos virtuales que funcionan como moneda dentro de nuestra plataforma. <em>Cada mes</em>, según el plan que hayas elegido, recibirás una cantidad de Yameats que podrás utilizar libremente para adquirir cualquier plato de nuestros restaurantes colaboradores.
             </p>
             <p className="credits-intro">
               El costo de cada plato varía en función de su tipo: los <strong>entrantes y bebidas son más económicos</strong>, mientras que los <strong>platos principales</strong> tienen un valor superior. De esta forma, tienes <strong>total libertad para elegir</strong> exactamente lo que deseas comer cada mes, sin sorpresas en los precios.
