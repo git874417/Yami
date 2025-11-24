@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import axios from "axios";
 import {Link, Links, useNavigate} from "react-router-dom";
 import "../css/Register_client.css";
@@ -20,6 +20,14 @@ const Register_client = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const selectedPlan = localStorage.getItem("selectedPlan");
+    if (selectedPlan && ["Basic", "Plus", "Deluxe"].includes(selectedPlan)) {
+      setTipoPlan(selectedPlan);
+      localStorage.removeItem("selectedPlan");
+    }
+  }, []);
 
   const handleRegister = async (e) => {
     e.preventDefault();

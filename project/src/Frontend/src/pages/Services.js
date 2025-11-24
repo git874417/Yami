@@ -111,6 +111,12 @@ const Services = () => {
                   className={`plan-button ${
                     selectedPlan === plan.id ? "selected" : ""
                   }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const planMap = { basic: "Basic", plus: "Plus", deluxe: "Deluxe" };
+                    localStorage.setItem("selectedPlan", planMap[plan.id]);
+                    navigate("/registerClient");
+                  }}
                 >
                   {selectedPlan === plan.id ? "Seleccionado" : "Seleccionar"}
                 </button>
