@@ -76,9 +76,11 @@ const Home = () => {
               </article>
             </Link>
 
-            <Link to="/registro" className="card-link">
+            <Link to="/" className="card-link">
               <article className="card">
-                <div className="placeholder-box" />
+                <div className="placeholder-box">
+                  <p>Disponible muy pronto</p>
+                </div>
                 <h3>Reparte con Yami</h3>
                 <p>Únete a nuestro equipo de repartidores.</p>
               </article>
