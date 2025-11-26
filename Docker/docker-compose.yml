@@ -1,0 +1,37 @@
+#Fichero docker-compose (siguiendo el anexo). Se usa nginx.
+services:
+  backend:
+    build:
+      # El contexto es el directorio actual 
+      context: .
+      # Ruta del dichero dockerfile del backend
+      dockerfile: src/Backend/Dockerfile
+    # ports: NO EXPOSEAMOS PUERTOS. Se hace mediante nginx, para que solo pueda 
+    #        accederse al backend desde el frontend, pasando por nginx
+    #   # Mapea puerto 8000 del contenedor al 8000 de la maquina
+    #   - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # Monta el código del backend para reflejar cambios en tiempo real
+      - ./src/Backend:/app
+    networks:
+      - sisinf-network
+  frontend:
+    build:
+      # El contexto para el frontend es su propia carpeta
+      context: ./src/Frontend
+      dockerfile: Dockerfile
+    ports:
+      # Mapea el puerto 80 del contenedor al 3000 de tu máquina
+      - "3000:80"
+    depends_on:
+      # Asegura que el backend se inicie antes que el frontend
+      - backend
+    networks:
+      - sisinf-network
+  
+#Definimos la network
+networks:
+  sisinf-network:
+    driver: bridge

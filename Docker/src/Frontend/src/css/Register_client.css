@@ -1,0 +1,420 @@
+/* Register_client.css - styled to match Login.css */
+:root{
+  --bg: #fafafa;
+  --modal-bg: #ffffff;
+  --muted: #8b8b8b;
+  --accent: #0f4b63; /* dark teal/blue for CTA */
+  --accent-hover: #0b3a4d;
+  --danger: #d9534f;
+}
+
+html,body,#root{
+  height:100%;
+}
+
+body{
+  margin:0;
+  font-family: Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+.register-container{
+  max-width:840px;
+  margin:40px auto;
+  background: transparent;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+
+.register-container > h2{
+  display:none; /* header is inside modal */
+}
+
+.register-container form{
+  width:900px;
+  background: var(--modal-bg);
+  border-radius:10px;
+  padding:42px 48px;
+  box-shadow: 0 12px 30px rgba(7,10,25,0.08), 0 2px 6px rgba(7,10,25,0.04);
+  position:relative;
+}
+
+.register-container .register-volver-inicio{
+  display:block;
+  text-align:center;
+  margin-top:18px;
+  color:var(--muted);
+  text-decoration:none;
+  font-size:14px;
+}
+
+.register-container h2{
+  font-size:20px;
+  margin:0 0 18px 0;
+  color:#222;
+  text-align:left;
+}
+
+/* Inputs */
+.register-container input[type="text"],
+.register-container input[type="email"],
+.register-container input[type="password"],
+.register-container input[type="tel"],
+.register-container select{
+  width:100%;
+  box-sizing:border-box;
+  display:block;
+  padding:10px 14px;
+  margin:10px 0 16px 0;
+  border:1px solid #e6e6e6;
+  border-radius:6px;
+  background: #fff;
+  font-size:14px;
+  color:#222;
+  outline:none;
+  transition:box-shadow .15s ease,border-color .15s ease;
+}
+
+.register-container input[type="text"]::placeholder,
+.register-container input[type="email"]::placeholder,
+.register-container input[type="password"]::placeholder,
+.register-container input[type="tel"]::placeholder{
+  color:#bfbfbf;
+}
+
+.register-container input[type="text"]:focus,
+.register-container input[type="email"]:focus,
+.register-container input[type="password"]:focus,
+.register-container input[type="tel"]:focus,
+.register-container select:focus{
+  border-color:#cfd8dc;
+  box-shadow:0 6px 18px rgba(15,75,99,0.06);
+}
+
+.register-container select{
+  cursor:pointer;
+  appearance:none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.register-container select option{
+  padding:10px;
+}
+
+/* Button */
+.register-container button[type="submit"]{
+  width:100%;
+  display:block;
+  margin-top:8px;
+  padding:12px 18px;
+  background:var(--accent);
+  color:#fff;
+  border:0;
+  border-radius:8px;
+  font-weight:600;
+  font-size:15px;
+  cursor:pointer;
+  box-shadow: 0 6px 18px rgba(15,75,99,0.12);
+  transition: all 0.3s ease;
+}
+
+.register-container button[type="submit"]:hover:not(:disabled){
+  background:var(--accent-hover);
+}
+
+.register-container button[type="submit"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.register-container p{margin:12px 0 0 0;color:var(--danger);font-size:14px}
+
+/* Plan Selection Styles */
+.plan-selection-container {
+  width: 100%;
+  margin: 20px 0 16px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.plans-row {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 8px;
+  flex-wrap: nowrap;
+}
+
+.plan-card {
+  flex: 1;
+  aspect-ratio: 1 / 1;
+  padding: 12px;
+  border: 2px solid #e6e6e6;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.plan-card:hover {
+  border-color: #ff9500;
+  box-shadow: 0 4px 12px rgba(255, 149, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.plan-card.selected {
+  border-color: #ff9500;
+  border-width: 3px;
+  background: #fff8f0;
+  box-shadow: 0 6px 16px rgba(255, 149, 0, 0.2);
+}
+
+.plan-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 10px;
+}
+
+.plan-price {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ff9500;
+  margin-bottom: 8px;
+}
+
+.plan-price-period {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+.plan-credits {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.plan-error {
+  display: block;
+  color: #d9534f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Close X at top-right (imitated in screenshot) */
+.register-container:before{
+  content: '';
+}
+
+@media (max-width: 1024px) {
+  .register-container form {
+    width: 95%;
+    padding: 35px 30px;
+  }
+
+  .plan-edit .plans-row {
+    gap: 30px;
+  }
+
+  .plan-edit .plan-name {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .plan-edit .plan-price {
+    font-size: 24px;
+    margin-bottom: 4px;
+  }
+
+  .plan-edit .plan-price-period,
+  .plan-edit .plan-credits {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 768px) {
+  .register-container form {
+    width: 90%;
+    padding: 28px 20px;
+  }
+
+  .plan-selection-container {
+    margin: 15px 0 12px 0;
+  }
+
+  .plans-row {
+    gap: 20px;
+  }
+
+  .plan-card {
+    aspect-ratio: 1 / 1;
+  }
+
+  .plan-name {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .plan-price {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  .plan-price-period,
+  .plan-credits {
+    font-size: 10px;
+  }
+
+  .plan-edit .plan-name {
+    font-size: 13px;
+  }
+
+  .plan-edit .plan-price {
+    font-size: 18px;
+  }
+
+  .plan-edit .plan-price-period,
+  .plan-edit .plan-credits {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-container form {
+    width: 95%;
+    padding: 20px 15px;
+  }
+
+  .register-container h2 {
+    font-size: 16px;
+    margin: 0 0 12px 0;
+  }
+
+  .register-container input[type="text"],
+  .register-container input[type="email"],
+  .register-container input[type="password"],
+  .register-container input[type="tel"] {
+    padding: 8px 10px;
+    margin: 8px 0 12px 0;
+    font-size: 13px;
+  }
+
+  .plan-selection-container {
+    margin: 12px 0 10px 0;
+  }
+
+  .plan-label {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .plans-row {
+    gap: 12px;
+  }
+
+  .plan-card {
+    aspect-ratio: 1 / 1;
+  }
+
+  .plan-name {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+
+  .plan-price {
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .plan-price-period,
+  .plan-credits {
+    font-size: 8px;
+  }
+
+  .register-container button[type="submit"] {
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-top: 6px;
+  }
+
+  .register-container .register-volver-inicio {
+    font-size: 12px;
+    margin-top: 12px;
+  }
+
+  .plan-edit .plans-row {
+    gap: 12px;
+  }
+
+  .plan-edit .plan-card {
+    aspect-ratio: 1 / 1;
+  }
+
+  .plan-edit .plan-name {
+    font-size: 10px;
+  }
+
+  .plan-edit .plan-price {
+    font-size: 14px;
+  }
+
+  .plan-edit .plan-price-period,
+  .plan-edit .plan-credits {
+    font-size: 7px;
+  }
+}
+
+@media (max-width: 420px){
+  .register-container form{ padding:18px; }
+  .register-container input[type="text"],
+  .register-container input[type="email"], 
+  .register-container input[type="password"],
+  .register-container input[type="tel"],
+  .register-container select{ padding:10px }
+  .register-container button[type="submit"]{ padding:10px }
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.register-container {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+}

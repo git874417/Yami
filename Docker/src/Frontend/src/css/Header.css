@@ -1,0 +1,126 @@
+/* Header.css */
+:root {
+  --accent: #0f4b63;
+  --accent-hover: #0b3a4d;
+}
+
+.Header {
+  background-color: #ffffff;
+  color: #1a1a1a;
+  text-align: center;
+  padding: 1.5rem 2rem;
+  box-sizing: border-box;
+  display: flex;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  font-family: Inter, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.header-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.logo-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  transition: all 0.3s ease;
+}
+
+.logo-button:hover .logo-img {
+  transform: scale(1.08);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 0;
+  letter-spacing: -0.5px;
+  transition: color 0.2s ease, font-size 0.2s ease;
+}
+
+.logo-button:hover .logo h1 {
+  color: var(--accent-hover);
+  font-size: 1.95rem;
+}
+
+.logo-img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+}
+
+.header-spacer {
+  width: 100%;
+  margin: 0;
+}
+
+.hero-divider {
+  width: 100vw;
+  height: 64px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-hover) 100%);
+  border-radius: 0;
+  margin: 0;
+  transform: translateY(0);
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  box-shadow: 0 2px 4px rgba(15, 75, 99, 0.15);
+}
+
+@media (max-width: 768px) {
+  .Header {
+    padding: 1rem;
+  }
+
+  .header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .logo-button {
+    width: 100%;
+  }
+
+  .logo h1 {
+    font-size: 1.5rem;
+    transition: color 0.2s ease, font-size 0.2s ease;
+  }
+
+  .logo-button:hover .logo h1 {
+    font-size: 1.65rem;
+  }
+
+  .logo-img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .hero-divider {
+    height: 3px;
+  }
+}
