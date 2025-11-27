@@ -23,6 +23,11 @@ const ShopPage = () => {
     asador: false,
     griego: false,
     indio: false,
+    turco: false,
+    bocateria: false,
+    saludable: false,
+    vegana: false,
+    heladeria: false,
   });
 
   const fetchRestaurantes = async () => {
@@ -77,10 +82,15 @@ const ShopPage = () => {
     mexicano: ["Mexicano", "Mexican"],
     asiatico: ["Asiático", "Asiatico", "Asian", "Chino", "Japonés", "Japonesa", "Tailandés"],
     italiano: ["Italiano", "Italian", "Pizza", "Pasta"],
-    fast_food: ["Fast Food", "FastFood", "Hamburguesería", "Hamburguesas"],
+    fast_food: ["Fast Food", "FastFood", "Hamburguesería", "Hamburguesas", "Comida Rapida"],
     asador: ["Asador", "Carne", "Parrilla", "Steakhouse"],
     griego: ["Griego", "Greek"],
     indio: ["Indio", "Indian", "Hindú"],
+    turco: ["Turco", "Turkish"],
+    bocateria: ["Bocatería", "Bocatas", "Sandwiches"],
+    saludable: ["Saludable", "Healthy", "Bio"],
+    vegana: ["Vegana", "Vegan", "Vegetariana"],
+    heladeria: ["Heladería", "Ice Cream", "Helado"],
   };
 
   // Función para filtrar restaurantes
@@ -195,6 +205,46 @@ const ShopPage = () => {
                   onChange={(e) => setFilterTipoComida({...filterTipoComida, indio: e.target.checked})}
                 />
                 Indio
+              </label>
+              <label className="filter-checkbox">
+                <input
+                  type="checkbox"
+                  checked={filterTipoComida.turco}
+                  onChange={(e) => setFilterTipoComida({...filterTipoComida, turco: e.target.checked})}
+                />
+                Turco
+              </label>
+              <label className="filter-checkbox">
+                <input
+                  type="checkbox"
+                  checked={filterTipoComida.bocateria}
+                  onChange={(e) => setFilterTipoComida({...filterTipoComida, bocateria: e.target.checked})}
+                />
+                Bocatería
+              </label>
+              <label className="filter-checkbox">
+                <input
+                  type="checkbox"
+                  checked={filterTipoComida.saludable}
+                  onChange={(e) => setFilterTipoComida({...filterTipoComida, saludable: e.target.checked})}
+                />
+                Saludable
+              </label>
+              <label className="filter-checkbox">
+                <input
+                  type="checkbox"
+                  checked={filterTipoComida.vegana}
+                  onChange={(e) => setFilterTipoComida({...filterTipoComida, vegana: e.target.checked})}
+                />
+                Vegana
+              </label>
+              <label className="filter-checkbox">
+                <input
+                  type="checkbox"
+                  checked={filterTipoComida.heladeria}
+                  onChange={(e) => setFilterTipoComida({...filterTipoComida, heladeria: e.target.checked})}
+                />
+                Heladería
               </label>
             </div>
           </aside>
