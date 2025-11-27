@@ -344,7 +344,7 @@ const AdminDashboard = () => {
                           <strong>Ciudad:</strong> {item.client.city}
                         </p>
                         <p>
-                          <strong>Créditos:</strong> {item.client.available_credits}
+                          <strong>Yameats:</strong> {item.client.available_credits}
                         </p>
                       </div>
                       <div className="card-actions">

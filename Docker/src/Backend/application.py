@@ -174,13 +174,6 @@ def create_order_endpoint(client_id: int, restaurant_id: int, order: OrderCreate
     - Postre: Z créditos
     """
 
-    print("--- INICIO: Payload de Pedido Recibido ---")
-    print(f"Cliente ID: {client_id}, Restaurante ID: {restaurant_id}")
-    print("Cuerpo del pedido (JSON):")
-    # Usamos model_dump_json para una impresión bonita del modelo Pydantic
-    print(order.model_dump_json(indent=2))
-    print("--- FIN: Payload de Pedido Recibido ---")
-
     try:
         # Validar que la lista de platos no esté vacía
         if not order.dishes or len(order.dishes) == 0:
@@ -200,6 +193,9 @@ def create_order_endpoint(client_id: int, restaurant_id: int, order: OrderCreate
     except ValueError as ve:
         # Errores de validación (ej. créditos insuficientes)
         raise HTTPException(status_code=400, detail=str(ve))
+    except HTTPException:
+        # Re-lanzar HTTPException tal cual
+        raise
     except Exception as e:
         # Otros errores
         raise HTTPException(

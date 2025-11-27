@@ -285,9 +285,12 @@ def create_order(client_id: int, restaurant_id: int, dishes: list[dict]):
             _, _ = ordered_dish_dao.insert(ordered_dish_vo)
         print(f"Order created with ID: {order_id}") 
         return order_id
+    except ValueError as ve:
+        # Re-lanzar excepciones de validación (ej. créditos insuficientes)
+        raise ve
     except Exception as e:
         print(f"Error creating order: {e}")
-    return     
+        raise     
 
 def update_order_status(order_id: int):
     try:

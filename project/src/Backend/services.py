@@ -594,11 +594,17 @@ def create_new_order(client_id: int, restaurant_id:int, order_data: OrderCreate)
             })
 
         # Crear el pedido usando db_utils
-        order_id = db_utils.create_order(
-            client_id=client_id,
-            restaurant_id=restaurant_id,
-            dishes=dishes_dict
-        )
+        try:
+            order_id = db_utils.create_order(
+                client_id=client_id,
+                restaurant_id=restaurant_id,
+                dishes=dishes_dict
+            )
+        except ValueError as ve:
+            # Capturar y relanzar errores de validación (ej. créditos insuficientes)
+            if "Insufficient credits" in str(ve) or "insuficientes" in str(ve).lower():
+                raise ValueError(f"No tienes suficientes créditos. Necesitas {total_credits} Yameats para completar este pedido.")
+            raise
 
         if order_id is None:
             raise ValueError("No se pudo crear el pedido. Verifica los datos.")
