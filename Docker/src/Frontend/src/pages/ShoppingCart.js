@@ -8,6 +8,7 @@ const ShoppingCart = () => {
   const [cartData, setCartData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [modalState, setModalState] = useState({isOpen: false, title: "", message: ""});
+  const [clientCredits, setClientCredits] = useState(0);
   const navigate = useNavigate();
 
   const API_BASE = "";
@@ -24,7 +25,23 @@ const ShoppingCart = () => {
         setCartData(null);
       }
     }
+
+    // Cargar créditos disponibles del cliente
+    const clientId = sessionStorage.getItem("role_id");
+    if (clientId) {
+      fetchClientCredits(clientId);
+    }
   }, []);
+
+  const fetchClientCredits = async (clientId) => {
+    try {
+      const response = await axios.get(`/api/client/${clientId}`);
+      setClientCredits(response.data.available_credits || 0);
+    } catch (error) {
+      console.error("Error fetching client credits:", error);
+      setClientCredits(0);
+    }
+  };
 
   const handleRemoveDish = (index) => {
     if (!cartData) return;
@@ -267,6 +284,12 @@ const ShoppingCart = () => {
           <div className="summary-row total">
             <span>Total a pagar:</span>
             <span>{total} Yameats</span>
+          </div>
+          <div className="summary-row remaining-credits">
+            <span>Yameats restantes después del pedido:</span>
+            <span className={clientCredits - total >= 0 ? "positive" : "negative"}>
+              {clientCredits - total} Yameats
+            </span>
           </div>
         </div>
 

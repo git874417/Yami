@@ -217,6 +217,24 @@
   color: #ff6b35;
 }
 
+.summary-row.remaining-credits {
+  border-top: 2px solid #ddd;
+  padding-top: 15px;
+  margin-top: 15px;
+  font-size: 16px;
+  color: #333;
+}
+
+.summary-row.remaining-credits .positive {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.summary-row.remaining-credits .negative {
+  color: #f44336;
+  font-weight: bold;
+}
+
 .cart-actions {
   display: flex;
   gap: 15px;
