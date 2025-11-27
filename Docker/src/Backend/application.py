@@ -26,6 +26,7 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json"
 )
 
 # --- CORS Middleware ---
@@ -53,6 +54,11 @@ async def redirect_docs():
 async def redirect_redoc():
     """Redirecciona a /api/redoc"""
     return RedirectResponse(url="/api/redoc")
+
+@app.get("/openapi.json", include_in_schema=False)
+async def redirect_openapi():
+    """Redirecciona a /api/openapi.json"""
+    return RedirectResponse(url="/api/openapi.json")
 
 # --- Endpoints de la API ---
 
