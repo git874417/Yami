@@ -10,16 +10,16 @@ echo -e "${CYAN}=== INICIANDO DESPLIEGUE ===${NC}"
 # Create network if it doesn't exist
 docker network create sisinf-network 2>/dev/null || true
 
-# 1. Detener y eliminar contenedores existentes
+# Detener y eliminar contenedores existentes
 echo -e "${YELLOW}1. Deteniendo y eliminando contenedores antiguos...${NC}"
 docker-compose down
 
-# 2. Construir las imágenes
+# Construir las imágenes
 # Usamos --no-cache para asegurar que los cambios de código se apliquen
 echo -e "${YELLOW}2. Construyendo imágenes (sin caché)...${NC}"
 docker-compose build --no-cache
 
-# 3. Iniciar los contenedores
+# Iniciar los contenedores
 # El orden de arranque lo gestiona docker-compose gracias a 'depends_on'
 echo -e "${YELLOW}3. Iniciando contenedores...${NC}"
 docker-compose up -d
