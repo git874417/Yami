@@ -22,6 +22,7 @@ const RestaurantDishes = () => {
     entrante: false,
     principal: false,
     postre: false,
+    bebida: false,
   });
 
   // Filtros de alérgenos
@@ -73,6 +74,7 @@ const RestaurantDishes = () => {
     entrante: ["entrante", "entrada", "starter", "aperitivo", "appetizer"],
     principal: ["principal", "main", "plato principal", "segundo"],
     postre: ["postre", "dessert", "dulce"],
+    bebida: ["bebida", "drink", "beverage", "jugo", "jugo", "refresco"],
   };
 
   // Mapeo de alérgenos
@@ -398,6 +400,14 @@ const RestaurantDishes = () => {
                 onChange={(e) => setFilterPlato({...filterPlato, postre: e.target.checked})}
               />
               Postre
+            </label>
+            <label className="filter-checkbox">
+              <input
+                type="checkbox"
+                checked={filterPlato.bebida}
+                onChange={(e) => setFilterPlato({...filterPlato, bebida: e.target.checked})}
+              />
+              Bebida
             </label>
           </div>
 
