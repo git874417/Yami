@@ -22,6 +22,7 @@ import Header from "./components/Header.js";
 import Login from "./pages/Login.js";
 import Register_Client from "./pages/Register_Client.js";
 import Register_Restaurant from "./pages/Register_Restaurant.js";
+import RestaurantRegulations from "./pages/RestaurantRegulations.js";
 import Footer from "./components/Footer.js";
 import { ModalProvider } from "./context/ModalContext";
 import { RestaurantCacheProvider } from "./context/RestaurantCacheContext";
@@ -44,6 +45,7 @@ function AppContent() {
           <Route path="/inicio-sesion" element={<Login />} />
           <Route path="/registerClient" element={<Register_Client />} />
           <Route path="/registerRestaurant" element={<Register_Restaurant />} />
+          <Route path="/normativa-restaurantes" element={<RestaurantRegulations />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/restaurants" element={<ShopPage />} />
           <Route path="/carrito" element={<ShoppingCart />} />

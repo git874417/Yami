@@ -7,6 +7,7 @@ import os
 from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 
 from db_utils.restaurantDAO import restaurantDAO
 from db_utils.userDAO import userDAO
@@ -22,7 +23,9 @@ import uvicorn
 app = FastAPI(
     title="Yami API",
     description="La API para la aplicación Yami.",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
 )
 
 # --- CORS Middleware ---
@@ -39,6 +42,17 @@ app.add_middleware(
 # Monta la carpeta ProfileImages para servir las imágenes de perfil
 profile_images_path = os.path.join(os.path.dirname(__file__), "ProfileImages")
 app.mount("/ProfileImages", StaticFiles(directory=profile_images_path), name="profile_images")
+
+# --- Redirecciones de documentación ---
+@app.get("/docs", include_in_schema=False)
+async def redirect_docs():
+    """Redirecciona a /api/docs"""
+    return RedirectResponse(url="/api/docs")
+
+@app.get("/redoc", include_in_schema=False)
+async def redirect_redoc():
+    """Redirecciona a /api/redoc"""
+    return RedirectResponse(url="/api/redoc")
 
 # --- Endpoints de la API ---
 
