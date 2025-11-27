@@ -122,12 +122,38 @@ const ShoppingCart = () => {
         navigate(`/restaurants/${encodeURIComponent(cartData.restaurantName)}`);
       }, 1500);
     } catch (error) {
-      console.error("Error al crear el pedido:", error.response?.data || error.message);
-      setModalState({
-        isOpen: true,
-        title: "Error",
-        message: "Hubo un error al procesar tu pedido. Inténtalo de nuevo.",
-      });
+      console.error("Error al crear el pedido:", error);
+      
+      // Obtener el mensaje de error del servidor
+      const errorDetail = error.response?.data?.detail || error.message || "Hubo un error al procesar tu pedido";
+      const statusCode = error.response?.status || 0;
+      
+      // Verificar si el error es por creditos insuficientes
+      const isInsufficientCredits = errorDetail.toLowerCase().includes("creditos") || 
+                                   errorDetail.toLowerCase().includes("insufficient") ||
+                                   errorDetail.toLowerCase().includes("credito") ||
+                                   errorDetail.toLowerCase().includes("yameats");
+      
+      if (isInsufficientCredits) {
+        setModalState({
+          isOpen: true,
+          title: "⚠️ Créditos Insuficientes",
+          message: errorDetail || "No tienes suficientes créditos para realizar este pedido. Por favor, recarga tu cuenta.",
+        });
+      } else if (statusCode === 400) {
+        // Errores de validacion (400)
+        setModalState({
+          isOpen: true,
+          title: "Error en la validación",
+          message: errorDetail,
+        });
+      } else {
+        setModalState({
+          isOpen: true,
+          title: "Error",
+          message: errorDetail,
+        });
+      }
     } finally {
       setLoading(false);
     }
