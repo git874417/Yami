@@ -172,6 +172,17 @@ const AdminDashboard = () => {
       message: `¿Estás seguro de que deseas eliminar al cliente ${clientName}? Esta acción no se puede deshacer.`,
       onConfirm: async () => {
         setConfirmState({isOpen: false, title: "", message: "", onConfirm: null});
+        
+        // Eliminar de ambas listas inmediatamente
+        setClientesOriginales((prevClientes) => {
+          // Guardar el cliente por si hay error
+          const clienteABorrar = prevClientes.find((c) => c.id === clientId);
+          window.__deletedClient = clienteABorrar;
+          return prevClientes.filter((c) => c.id !== clientId);
+        });
+        
+        setClientes((prevClientes) => prevClientes.filter((c) => c.id !== clientId));
+        
         try {
           const response = await fetch(`${API_BASE}/api/delete_client/${clientId}`, {
             method: "DELETE",
@@ -181,7 +192,6 @@ const AdminDashboard = () => {
             throw new Error("Error al eliminar cliente");
           }
 
-          setClientes(clientes.filter((c) => c.id !== clientId));
           setModalState({
             isOpen: true,
             title: "Éxito",
@@ -189,10 +199,20 @@ const AdminDashboard = () => {
           });
         } catch (error) {
           console.error("Error:", error);
+          // Restaurar el cliente a la vista si hay error
+          const clienteParaRestaurar = window.__deletedClient;
+          setClientesOriginales((prevClientes) => {
+            const updated = [...prevClientes, clienteParaRestaurar];
+            return updated.sort((a, b) => a.id - b.id);
+          });
+          setClientes((prevClientes) => {
+            const updated = [...prevClientes, clienteParaRestaurar];
+            return updated.sort((a, b) => a.id - b.id);
+          });
           setModalState({
             isOpen: true,
             title: "Error",
-            message: "Error al eliminar el cliente",
+            message: "Error al eliminar el cliente. Se ha restaurado a la vista.",
           });
         }
       },
@@ -206,6 +226,17 @@ const AdminDashboard = () => {
       message: `¿Estás seguro de que deseas eliminar el restaurante ${restaurantName}? Esta acción no se puede deshacer.`,
       onConfirm: async () => {
         setConfirmState({isOpen: false, title: "", message: "", onConfirm: null});
+        
+        // Eliminar de ambas listas inmediatamente
+        setRestaurantesOriginales((prevRestaurantes) => {
+          // Guardar el restaurante por si hay error
+          const restauranteABorrar = prevRestaurantes.find((r) => r.id === restaurantId);
+          window.__deletedRestaurant = restauranteABorrar;
+          return prevRestaurantes.filter((r) => r.id !== restaurantId);
+        });
+        
+        setRestaurantes((prevRestaurantes) => prevRestaurantes.filter((r) => r.id !== restaurantId));
+        
         try {
           const response = await fetch(`${API_BASE}/api/delete_restaurant/${restaurantId}`, {
             method: "DELETE",
@@ -215,7 +246,6 @@ const AdminDashboard = () => {
             throw new Error("Error al eliminar restaurante");
           }
 
-          setRestaurantes(restaurantes.filter((r) => r.id !== restaurantId));
           setModalState({
             isOpen: true,
             title: "Éxito",
@@ -223,10 +253,20 @@ const AdminDashboard = () => {
           });
         } catch (error) {
           console.error("Error:", error);
+          // Restaurar el restaurante a la vista si hay error
+          const restauranteParaRestaurar = window.__deletedRestaurant;
+          setRestaurantesOriginales((prevRestaurantes) => {
+            const updated = [...prevRestaurantes, restauranteParaRestaurar];
+            return updated.sort((a, b) => a.id - b.id);
+          });
+          setRestaurantes((prevRestaurantes) => {
+            const updated = [...prevRestaurantes, restauranteParaRestaurar];
+            return updated.sort((a, b) => a.id - b.id);
+          });
           setModalState({
             isOpen: true,
             title: "Error",
-            message: "Error al eliminar el restaurante",
+            message: "Error al eliminar el restaurante. Se ha restaurado a la vista.",
           });
         }
       },

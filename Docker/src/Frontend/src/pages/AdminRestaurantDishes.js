@@ -120,31 +120,37 @@ const AdminRestaurantDishes = () => {
   }, []);
 
   const confirmDeleteDish = async (dishId) => {
+    // Almacenar el plato eliminado por si hay que restaurarlo
+    const eliminatedDish = dishes.find((d) => d.id === dishId);
+    
+    // Eliminar de la vista inmediatamente
+    setDishes((prevDishes) => prevDishes.filter((d) => d.id !== dishId));
+    
     try {
       const response = await fetch(`${API_BASE}/api/delete_dish/${dishId}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
-        setDishes(dishes.filter((dish) => dish.id !== dishId));
         setModalState({
           isOpen: true,
           title: "Éxito",
           message: "Plato eliminado correctamente",
         });
       } else {
-        setModalState({
-          isOpen: true,
-          title: "Error",
-          message: "Error al eliminar el plato",
-        });
+        throw new Error("Error al eliminar el plato");
       }
     } catch (error) {
       console.error("Error deleting dish:", error);
+      // Restaurar el plato a la vista si hay error
+      setDishes((prevDishes) => {
+        const updated = [...prevDishes, eliminatedDish];
+        return updated.sort((a, b) => a.id - b.id);
+      });
       setModalState({
         isOpen: true,
         title: "Error",
-        message: "Error al eliminar el plato",
+        message: "Error al eliminar el plato. Se ha restaurado a la vista.",
       });
     }
     setConfirmState({isOpen: false, title: "", message: "", onConfirm: null});
