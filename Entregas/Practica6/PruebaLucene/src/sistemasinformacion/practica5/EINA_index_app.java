@@ -38,7 +38,7 @@ import java.io.BufferedReader;
  * @author sisinf
  *
  */
-public class IndexadorYBuscador {
+public class EINA_index_app {
 
 	/**
 	 * Relación de ficheros a indexar / buscar
@@ -61,7 +61,7 @@ public class IndexadorYBuscador {
 	 * @param ficherosAIndexar Colección de ficheros a indexar
 	 * @param queries          Colección de palabras a buscar
 	 */
-	public IndexadorYBuscador(Collection<String> ficherosAIndexar, Collection<String> queries) {
+	public EINA_index_app(Collection<String> ficherosAIndexar, Collection<String> queries) {
 		this.ficherosAIndexar = ficherosAIndexar;
 		this.queries = queries;
 
@@ -190,23 +190,11 @@ public class IndexadorYBuscador {
 	public static void main(String[] args) throws IOException {
 		// Establecemos la lista de ficheros a indexar
 		Collection<String> ficheros = new ArrayList<String>();
-		ficheros.add("./ficheros/uno.txt");
-		ficheros.add("./ficheros/dos.txt");
-		ficheros.add("./ficheros/tres.txt");
-		ficheros.add("./ficheros/cuatro.txt");
 
 		// Establecemos las palabras clave a utilizar en la búsqueda
 		Collection<String> queries = new ArrayList<String>();
-		queries.add("contaminación");
-		queries.add("cambio climatico");
-		queries.add("cambio climático");
-		queries.add("cambio");
-		queries.add("climatico");
-		queries.add("por");
-		queries.add("Aeropuerto");
-		queries.add("contaminacion");
 		// Creamos el idexador / buscador
-		IndexadorYBuscador ejemplo = new IndexadorYBuscador(ficheros, queries);
+		EINA_index_app ejemplo = new EINA_index_app(ficheros, queries);
 
 		// Indexamos los ficheros
 		Directory directorioDelIndiceCreado = ejemplo.crearIndiceEnUnDirectorio();
@@ -215,8 +203,38 @@ public class IndexadorYBuscador {
 		// Directory directorioDelIndiceCreado =
 		// MMapDirectory.open(Paths.get(INDEXDIR));
 
-		// Ejecutamos la búsqueda de las palabras clave
-		ejemplo.buscarQueries(directorioDelIndiceCreado, ficheros.size(), 1);
-	}
 
+		while (true) {
+			System.out.println("Aplicacion EINA Index. Sleccione una opcion:");
+			System.out.println("1. Indexar un directorio");
+			System.out.println("2. Añadir un documento al indice");
+			System.out.println("3. Buscar una query");
+			System.out.println("4. Exit");
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+			String input = br.readLine();
+			
+			if (input.equals("1")) {
+				System.out.println("Introduzca el directorio a indexar:");
+				String dir = br.readLine();
+
+				directorioDelIndiceCreado = ejemplo.crearIndiceEnUnDirectorio();
+				System.out.println("Indice creado.");
+			} else if (input.equals("2")) {
+				System.out.println("Introduzca la ruta del documento a añadir:");
+				String path = br.readLine();
+				IndexWriter indice = null;
+				IndexWriterConfig configuracionIndice = new IndexWriterConfig(ejemplo.analizador);
+				indice = new IndexWriter(directorioDelIndiceCreado, configuracionIndice);
+				ejemplo.anhadirFichero(indice, path);
+				indice.close();
+				System.out.println("Documento añadido al indice.");
+			} else if (input.equals("3")) {
+				System.out.println("Introduzca la query a buscar:");
+				String query = br.readLine();
+				ejemplo.buscarQueryEnIndice(directorioDelIndiceCreado, ficheros.size(), 10, query);
+			} else if (input.equals("4")) {
+				break;
+			}
+		}
+	}
 }
