@@ -1,3 +1,36 @@
+# ─────────────────────────────────────────
+# Project-specific ignores
+# ─────────────────────────────────────────
+
+# Secrets — never commit credentials
+.env
+.env.local
+Docker/.env
+
+# Deliverables & archives
+Entregas/
+*.zip
+
+# Node
+node_modules/
+package-lock.json
+
+# Java binaries
+*.class
+bin/
+
+# Lucene generated index
+ficheros/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─────────────────────────────────────────
+# Python standard ignores
+# ─────────────────────────────────────────
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
