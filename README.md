@@ -155,9 +155,9 @@ Utility scripts in `project/db_utils/` include:
 
 | Name | GitHub |
 |------|--------|
-| Daniel Blanchard Lobaco | [@git870373](https://github.com/git870373) |
+| Daniel Blanchard Lobaco | [@dbl04](https://github.com/dbl04) |
 | Enrique Cardiel Gascón | [@git874417](https://github.com/git874417) |
-| Víctor Sierra Vicén | [@git869244](https://github.com/git869244) |
+| Víctor Sierra Vicén | [@Torch56](https://github.com/Torch56) |
 
 ---
 
