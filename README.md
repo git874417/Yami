@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 # 🍱 YAMI
 
@@ -11,7 +11,7 @@
 [![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)](./Docker/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 
-*Developed as part of the Information Systems course at the University of Zaragoza (2024–2025)*
+*Developed as part of the Information Systems course at the University of Zaragoza (2025–2026)*
 
 </div>
 
