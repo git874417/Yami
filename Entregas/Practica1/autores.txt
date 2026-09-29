@@ -1,5 +1,0 @@
-NIA		Surnames		Name
---------------------------------------------------
-870373		Blanchard Lobaco	Daniel
-874417		Cardiel Gascón		Enrique
-869244		Sierra Vicén		Víctor
